@@ -1,0 +1,288 @@
+/* ── Streak chip ───────────────────────────────── */
+.streak-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 160, 50, 0.1);
+  border: 1px solid rgba(255, 160, 50, 0.3);
+  border-radius: 20px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.8rem;
+  color: #e8822a;
+  font-weight: 600;
+}
+
+/* ── Filter tabs ───────────────────────────────── */
+.filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-tab {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+
+.filter-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.filter-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Rewards list ──────────────────────────────── */
+.rewards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* ── Reward item ───────────────────────────────── */
+.reward-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  animation: fadeSlideIn 0.25s ease forwards;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reward-item:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.reward-item.unlocked {
+  border-color: rgba(99, 85, 232, 0.3);
+  background: rgba(99, 85, 232, 0.03);
+}
+
+.reward-item.locked {
+  opacity: 0.85;
+}
+
+.reward-item.custom-reward {
+  border-color: rgba(232, 130, 42, 0.3);
+  background: rgba(232, 130, 42, 0.03);
+}
+
+/* ── Reward icon ───────────────────────────────── */
+.reward-icon-wrap {
+  flex-shrink: 0;
+}
+
+.reward-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  border: 1.5px solid var(--border);
+}
+
+.reward-icon.muted {
+  filter: grayscale(60%);
+  opacity: 0.6;
+}
+
+/* ── Reward body ───────────────────────────────── */
+.reward-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.reward-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 0.2rem;
+}
+
+.reward-desc {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}
+
+.reward-condition {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ── Condition badges ──────────────────────────── */
+.condition-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+}
+
+.points-badge {
+  background: rgba(99, 85, 232, 0.1);
+  border: 1px solid rgba(99, 85, 232, 0.25);
+  color: var(--accent);
+}
+
+.streak-badge {
+  background: rgba(232, 130, 42, 0.1);
+  border: 1px solid rgba(232, 130, 42, 0.25);
+  color: #e8822a;
+}
+
+/* ── Progress bar ──────────────────────────────── */
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.progress-bar-custom {
+  flex: 1;
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 99px;
+  overflow: hidden;
+  max-width: 200px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.streak-fill {
+  background: #e8822a;
+}
+
+.progress-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ── Reward status ─────────────────────────────── */
+.reward-status {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.status-unlocked {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--success);
+  white-space: nowrap;
+}
+
+.status-locked {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Custom tag ────────────────────────────────── */
+.custom-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  background: rgba(232, 130, 42, 0.12);
+  border: 1px solid rgba(232, 130, 42, 0.3);
+  color: #e8822a;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+/* ── Delete button ─────────────────────────────── */
+.btn-delete {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.btn-delete:hover {
+  background: #fce8e8;
+  border-color: #e05c5c;
+  color: #e05c5c;
+}
+
+/* ── Textarea ──────────────────────────────────── */
+textarea.form-control-custom {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* ── Empty state ───────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.empty-state .empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Mobile tweaks ─────────────────────────────── */
+@media (max-width: 576px) {
+  .reward-item {
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+
+  .reward-status {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .progress-bar-custom {
+    max-width: 120px;
+  }
+}
