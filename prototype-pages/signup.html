@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HomeHub - Sign Up</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7ff 0%, #eefdf6 100%);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .card-custom {
+      border: 0;
+      border-radius: 1.5rem;
+      box-shadow: 0 1rem 2rem rgba(19, 41, 61, 0.12);
+      overflow: hidden;
+    }
+
+    .hero-panel {
+      background: linear-gradient(160deg, #198754 0%, #0d6efd 100%);
+      color: white;
+      padding: 3rem;
+      height: 100%;
+    }
+
+    .feature-pill {
+      display: inline-block;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      margin: 0.25rem 0.4rem 0 0;
+      font-size: 0.92rem;
+    }
+
+    .form-panel {
+      padding: 2.5rem;
+      background: white;
+    }
+
+    .avatar-option {
+      border: 2px solid #dee2e6;
+      border-radius: 1rem;
+      padding: 0.85rem;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-size: 1.5rem;
+      background: #fff;
+    }
+
+    .avatar-option:hover,
+    .avatar-option.active {
+      border-color: #0d6efd;
+      background: #eef5ff;
+    }
+
+    .section-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6c757d;
+    }
+
+    .mini-card {
+      border: 1px solid #e9ecef;
+      border-radius: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      height: 100%;
+    }
+
+    @media (max-width: 991.98px) {
+      .hero-panel,
+      .form-panel {
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <div class="text-center mb-4">
+      <span class="badge text-bg-success rounded-pill px-3 py-2">CITS3403 Checkpoint 2 Prototype</span>
+      <h1 class="brand-title display-6 mt-3 mb-2">HomeHub</h1>
+      <p class="text-secondary mb-0">Create your profile and join the fun side of household management.</p>
+    </div>
+
+    <div class="card card-custom">
+      <div class="row g-0">
+        <div class="col-lg-5">
+          <div class="hero-panel d-flex flex-column justify-content-between">
+            <div>
+              <p class="section-label text-white-50 mb-3">Sign-up page</p>
+              <h2 class="fw-bold mb-3">Turn chores into teamwork.</h2>
+              <p class="lead mb-4">New users can create an account, choose a display name and avatar, then join or create a household.</p>
+
+              <div class="mb-4">
+                <span class="feature-pill">Track points</span>
+                <span class="feature-pill">Build streaks</span>
+                <span class="feature-pill">Join households</span>
+                <span class="feature-pill">Compete fairly</span>
+              </div>
+            </div>
+
+            <div class="row g-3 mt-2">
+              <div class="col-sm-6">
+                <div class="mini-card bg-transparent border border-light text-white">
+                  <h3 class="h6 fw-bold">Why this page matters</h3>
+                  <p class="mb-0 small">It handles onboarding, identity, and the first link between a user and a household.</p>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="mini-card bg-transparent border border-light text-white">
+                  <h3 class="h6 fw-bold">Future backend</h3>
+                  <p class="mb-0 small">Store hashed passwords, user profiles, and household membership in SQLite via Flask.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <div class="form-panel">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+              <div>
+                <p class="section-label mb-2">Create profile</p>
+                <h2 class="h3 fw-bold mb-1">Sign up</h2>
+                <p class="text-secondary mb-0">Prototype only for Checkpoint 2. Buttons do not need to work yet.</p>
+              </div>
+              <a href="#" class="btn btn-outline-secondary rounded-pill">Already have an account?</a>
+            </div>
+
+            <form>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">First name</label>
+                  <input type="text" class="form-control form-control-lg" placeholder="Alex">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Last name</label>
+                  <input type="text" class="form-control form-control-lg" placeholder="Tan">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Display name</label>
+                  <input type="text" class="form-control form-control-lg" placeholder="ChoreChampion">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Email</label>
+                  <input type="email" class="form-control form-control-lg" placeholder="name@example.com">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Password</label>
+                  <input type="password" class="form-control form-control-lg" placeholder="••••••••">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Confirm password</label>
+                  <input type="password" class="form-control form-control-lg" placeholder="••••••••">
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold d-block">Choose an avatar</label>
+                <div class="row g-2">
+                  <div class="col-3 col-sm-2"><div class="avatar-option active">🏠</div></div>
+                  <div class="col-3 col-sm-2"><div class="avatar-option">🧹</div></div>
+                  <div class="col-3 col-sm-2"><div class="avatar-option">🛒</div></div>
+                  <div class="col-3 col-sm-2"><div class="avatar-option">⭐</div></div>
+                  <div class="col-3 col-sm-2"><div class="avatar-option">🔥</div></div>
+                  <div class="col-3 col-sm-2"><div class="avatar-option">🎯</div></div>
+                </div>
+              </div>
+
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Household option</label>
+                  <select class="form-select form-select-lg">
+                    <option selected>Create a new household</option>
+                    <option>Join an existing household</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Invite / join code</label>
+                  <input type="text" class="form-control form-control-lg" placeholder="HH-4P7K-92">
+                </div>
+              </div>
+
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Household name</label>
+                  <input type="text" class="form-control form-control-lg" placeholder="The Clean Machine">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Role</label>
+                  <select class="form-select form-select-lg">
+                    <option selected>Member</option>
+                    <option>Admin</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" id="termsCheck" checked>
+                <label class="form-check-label" for="termsCheck">
+                  I agree to the household rules, privacy policy, and fair-play guidelines.
+                </label>
+              </div>
+
+              <div class="d-grid d-md-flex gap-3 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg px-4">Create account</button>
+                <button type="button" class="btn btn-light border btn-lg px-4">Preview household</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
