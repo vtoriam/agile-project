@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="../Edit Profile/edit-profile.css" />
     <link rel="stylesheet" href="rewards.css" />
   </head>
@@ -45,24 +46,24 @@
         <div class="sidebar-logo"><span class="dot"></span> HomeQuest</div>
 
         <a class="nav-item-custom" href="#">
-          <span class="icon">⌂</span> Dashboard
+          <span class="icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
         </a>
         <a class="nav-item-custom" href="#">
-          <span class="icon">✓</span> Add Tasks
+          <span class="icon"><i data-lucide="circle-check"></i></span> Add Tasks
         </a>
         <a class="nav-item-custom active" href="#">
-          <span class="icon">💸</span> Rewards
+          <span class="icon"><i data-lucide="gift"></i></span> Rewards
         </a>
         <a class="nav-item-custom" href="#">
-          <span class="icon">🏆</span> Leaderboard
+          <span class="icon"><i data-lucide="trophy"></i></span> Leaderboard
         </a>
 
         <div class="nav-section-label">Account</div>
         <a class="nav-item-custom" href="#">
-          <span class="icon">👤</span> Profile
+          <span class="icon"><i data-lucide="user"></i></span> Profile
         </a>
         <a class="nav-item-custom" href="#">
-          <span class="icon">⚙</span> Settings
+          <span class="icon"><i data-lucide="settings"></i></span> Settings
         </a>
       </nav>
 
@@ -75,9 +76,9 @@
 
         <!-- Stats row -->
         <div class="d-flex gap-3 mb-4 flex-wrap">
-          <span class="points-chip">⚡ 1,240 pts</span>
-          <span class="rank-chip">🥈 Rank #2 in household</span>
-          <span class="streak-chip">🔥 4 day streak</span>
+          <span class="points-chip"><i data-lucide="zap"></i> 1,240 pts</span>
+          <span class="rank-chip"><i data-lucide="medal"></i> Rank #2 in household</span>
+          <span class="streak-chip"><i data-lucide="flame"></i> 4 day streak</span>
         </div>
 
         <!-- Filter tabs -->
@@ -91,10 +92,11 @@
 
         <!-- Rewards List -->
         <div class="rewards-list" id="rewardsList">
+
           <!-- Unlocked reward -->
           <div class="reward-item unlocked" data-type="points">
             <div class="reward-icon-wrap">
-              <div class="reward-icon">🛋️</div>
+              <div class="reward-icon"><i data-lucide="sofa"></i></div>
             </div>
             <div class="reward-body">
               <div class="reward-title">Skip Your Chore for the Week</div>
@@ -103,18 +105,18 @@
                 questions asked.
               </p>
               <div class="reward-condition">
-                <span class="condition-badge points-badge">⚡ 1,000 pts</span>
+                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 1,000 pts</span>
               </div>
             </div>
             <div class="reward-status">
-              <div class="status-unlocked">✓ Unlocked</div>
+              <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
             </div>
           </div>
 
           <!-- Locked reward -->
           <div class="reward-item locked" data-type="points">
             <div class="reward-icon-wrap">
-              <div class="reward-icon muted">🍕</div>
+              <div class="reward-icon muted"><i data-lucide="pizza"></i></div>
             </div>
             <div class="reward-body">
               <div class="reward-title">Choose Tonight's Takeaway</div>
@@ -123,7 +125,7 @@
                 tonight.
               </p>
               <div class="reward-condition">
-                <span class="condition-badge points-badge">⚡ 1,500 pts</span>
+                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 1,500 pts</span>
               </div>
               <div class="progress-wrap">
                 <div class="progress-bar-custom">
@@ -133,14 +135,14 @@
               </div>
             </div>
             <div class="reward-status">
-              <div class="status-locked">🔒 260 pts away</div>
+              <div class="status-locked"><i data-lucide="lock"></i> 260 pts away</div>
             </div>
           </div>
 
           <!-- Locked reward -->
           <div class="reward-item locked" data-type="points">
             <div class="reward-icon-wrap">
-              <div class="reward-icon muted">📺</div>
+              <div class="reward-icon muted"><i data-lucide="tv"></i></div>
             </div>
             <div class="reward-body">
               <div class="reward-title">TV Remote for the Evening</div>
@@ -149,7 +151,7 @@
                 compromises.
               </p>
               <div class="reward-condition">
-                <span class="condition-badge points-badge">⚡ 2,000 pts</span>
+                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 2,000 pts</span>
               </div>
               <div class="progress-wrap">
                 <div class="progress-bar-custom">
@@ -159,14 +161,14 @@
               </div>
             </div>
             <div class="reward-status">
-              <div class="status-locked">🔒 760 pts away</div>
+              <div class="status-locked"><i data-lucide="lock"></i> 760 pts away</div>
             </div>
           </div>
 
           <!-- Streak reward - unlocked -->
           <div class="reward-item unlocked" data-type="streak">
             <div class="reward-icon-wrap">
-              <div class="reward-icon">🧹</div>
+              <div class="reward-icon"><i data-lucide="brush"></i></div>
             </div>
             <div class="reward-body">
               <div class="reward-title">Assign a Chore to Someone Else</div>
@@ -175,20 +177,18 @@
                 of your choice.
               </p>
               <div class="reward-condition">
-                <span class="condition-badge streak-badge"
-                  >🔥 3 day streak at #1</span
-                >
+                <span class="condition-badge streak-badge"><i data-lucide="flame"></i> 3 day streak at #1</span>
               </div>
             </div>
             <div class="reward-status">
-              <div class="status-unlocked">✓ Unlocked</div>
+              <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
             </div>
           </div>
 
           <!-- Streak reward - locked -->
           <div class="reward-item locked" data-type="streak">
             <div class="reward-icon-wrap">
-              <div class="reward-icon muted">👑</div>
+              <div class="reward-icon muted"><i data-lucide="crown"></i></div>
             </div>
             <div class="reward-body">
               <div class="reward-title">Household MVP Badge</div>
@@ -197,29 +197,24 @@
                 leaderboard for a full week.
               </p>
               <div class="reward-condition">
-                <span class="condition-badge streak-badge"
-                  >🔥 7 day streak at #1</span
-                >
+                <span class="condition-badge streak-badge"><i data-lucide="flame"></i> 7 day streak at #1</span>
               </div>
               <div class="progress-wrap">
                 <div class="progress-bar-custom streak-bar">
-                  <div
-                    class="progress-fill streak-fill"
-                    style="width: 57%"
-                  ></div>
+                  <div class="progress-fill streak-fill" style="width: 57%"></div>
                 </div>
                 <span class="progress-label">4 / 7 days</span>
               </div>
             </div>
             <div class="reward-status">
-              <div class="status-locked">🔒 3 days away</div>
+              <div class="status-locked"><i data-lucide="lock"></i> 3 days away</div>
             </div>
           </div>
 
           <!-- Locked reward -->
           <div class="reward-item locked" data-type="points">
             <div class="reward-icon-wrap">
-              <div class="reward-icon muted">🛁</div>
+              <div class="reward-icon muted"><i data-lucide="bath"></i></div>
             </div>
             <div class="reward-body">
               <div class="reward-title">First Shower Rights for a Week</div>
@@ -228,7 +223,7 @@
                 cold showers.
               </p>
               <div class="reward-condition">
-                <span class="condition-badge points-badge">⚡ 3,000 pts</span>
+                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 3,000 pts</span>
               </div>
               <div class="progress-wrap">
                 <div class="progress-bar-custom">
@@ -238,14 +233,14 @@
               </div>
             </div>
             <div class="reward-status">
-              <div class="status-locked">🔒 1,760 pts away</div>
+              <div class="status-locked"><i data-lucide="lock"></i> 1,760 pts away</div>
             </div>
           </div>
 
           <!-- Custom reward -->
           <div class="reward-item custom-reward unlocked" data-type="custom">
             <div class="reward-icon-wrap">
-              <div class="reward-icon">🎮</div>
+              <div class="reward-icon"><i data-lucide="gamepad-2"></i></div>
             </div>
             <div class="reward-body">
               <div class="d-flex align-items-center gap-2">
@@ -257,19 +252,20 @@
                 household game night.
               </p>
               <div class="reward-condition">
-                <span class="condition-badge points-badge">⚡ 800 pts</span>
+                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 800 pts</span>
               </div>
             </div>
             <div class="reward-status">
-              <div class="status-unlocked">✓ Unlocked</div>
-              <button class="btn-delete" title="Delete reward">✕</button>
+              <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
+              <button class="btn-delete" title="Delete reward"><i data-lucide="x"></i></button>
             </div>
           </div>
+
         </div>
 
         <!-- Add Custom Reward -->
         <div class="card-custom mt-4" id="addRewardCard">
-          <h6>➕ Add Custom Reward</h6>
+          <h6><i data-lucide="circle-plus"></i> Add Custom Reward</h6>
           <p class="field-hint mb-3">
             Create a reward specific to your household.
           </p>
@@ -278,7 +274,7 @@
             <div class="col-12">
               <label class="form-label-custom">Reward Title</label>
               <div class="input-with-icon">
-                <span class="input-icon">🏅</span>
+                <span class="input-icon"><i data-lucide="medal"></i></span>
                 <input
                   class="form-control-custom"
                   type="text"
@@ -301,17 +297,15 @@
             <div class="col-sm-6">
               <label class="form-label-custom">Reward Type</label>
               <select class="form-control-custom" id="rewardType">
-                <option value="points">⚡ Points threshold</option>
-                <option value="streak">🔥 Leaderboard streak</option>
+                <option value="points">Points threshold</option>
+                <option value="streak">Leaderboard streak</option>
               </select>
             </div>
 
             <div class="col-sm-6">
-              <label class="form-label-custom" id="thresholdLabel"
-                >Points Required</label
-              >
+              <label class="form-label-custom" id="thresholdLabel">Points Required</label>
               <div class="input-with-icon">
-                <span class="input-icon" id="thresholdIcon">⚡</span>
+                <span class="input-icon" id="thresholdIcon"><i data-lucide="zap"></i></span>
                 <input
                   class="form-control-custom"
                   type="number"
@@ -346,5 +340,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
     <script src="rewards.js"></script>
+    <script>lucide.createIcons();</script>
   </body>
 </html>
