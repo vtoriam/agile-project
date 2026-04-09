@@ -1,0 +1,44 @@
+.task-body, .task-side {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-task {
+    display: flex;
+    flex-direction: row;
+}
+
+.task-body {
+    flex: 1;
+}
+.task-side {
+    justify-content: space-between;
+}
+
+.subtask-collapse {
+    text-align: start;
+}
+
+.subtasks label:has(> [type="checkbox"]) {
+    display: grid;
+    grid-template-columns: 1em auto;
+    gap: 0.5em
+}
+
+.subtasks {
+    padding: 0.5em;
+}
+
+.claimed-task > [type="checkbox"] {
+  width: 3em;
+  height: 3em;
+}
+
+.claimed-task {
+    aspect-ratio: 1 / 1; 
+    overflow: hidden;
+}
+
+.points {
+    display:flex;
+}
