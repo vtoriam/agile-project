@@ -1,21 +1,25 @@
 :root {
-  --bg:        #f4f4f8;
-  --surface:   #ffffff;
-  --surface2:  #f0f0f5;
-  --border:    #dcdce8;
-  --accent:    #6355e8;
-  --accent2:   #e8822a;
-  --text:      #1a1a2e;
-  --muted:     #8888a8;
-  --success:   #2dbd6e;
-  --radius:    14px;
+  --bg: #f4f4f8;
+  --surface: #ffffff;
+  --surface2: #f0f0f5;
+  --border: #dcdce8;
+  --accent: #6355e8;
+  --accent2: #e8822a;
+  --text: #1a1a2e;
+  --muted: #8888a8;
+  --success: #2dbd6e;
+  --radius: 14px;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 body {
   background: var(--bg);
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: var(--text);
   min-height: 100vh;
 }
@@ -24,7 +28,9 @@ body {
 .mobile-topbar {
   display: none;
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 56px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -35,7 +41,7 @@ body {
 }
 
 .mobile-topbar .topbar-logo {
-  font-family: 'Syne', sans-serif;
+  font-family: "Syne", sans-serif;
   font-weight: 800;
   font-size: 1.1rem;
   color: var(--text);
@@ -68,11 +74,13 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   z-index: 299;
 }
 
-.sidebar-overlay.active { display: block; }
+.sidebar-overlay.active {
+  display: block;
+}
 
 /* ── Sidebar ───────────────────────────────────── */
 .sidebar {
@@ -84,22 +92,27 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 300;
 }
 
 @media (max-width: 767px) {
-  .mobile-topbar { display: flex; }
+  .mobile-topbar {
+    display: flex;
+  }
 
   .sidebar {
     position: fixed;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     height: 100vh;
     transform: translateX(-100%);
-    box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
   }
 
-  .sidebar.open { transform: translateX(0); }
+  .sidebar.open {
+    transform: translateX(0);
+  }
 
   .main-content {
     padding: 1.25rem 1.1rem !important;
@@ -109,7 +122,7 @@ body {
 }
 
 .sidebar-logo {
-  font-family: 'Syne', sans-serif;
+  font-family: "Syne", sans-serif;
   font-weight: 800;
   font-size: 1.3rem;
   color: var(--text);
@@ -120,7 +133,8 @@ body {
 }
 
 .sidebar-logo .dot {
-  width: 10px; height: 10px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--accent);
   display: inline-block;
@@ -136,12 +150,20 @@ body {
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   text-decoration: none;
 }
 
-.nav-item-custom:hover { background: var(--surface2); color: var(--text); }
-.nav-item-custom.active { background: var(--accent); color: #fff; }
+.nav-item-custom:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+.nav-item-custom.active {
+  background: var(--accent);
+  color: #fff;
+}
 
 .nav-item-custom .icon {
   width: 20px;
@@ -167,7 +189,7 @@ body {
 }
 
 .page-title {
-  font-family: 'Syne', sans-serif;
+  font-family: "Syne", sans-serif;
   font-weight: 800;
   font-size: 1.75rem;
   margin-bottom: 0.25rem;
@@ -189,7 +211,7 @@ body {
 }
 
 .card-custom h6 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Syne", sans-serif;
   font-weight: 700;
   font-size: 0.95rem;
   letter-spacing: 0.03em;
@@ -219,12 +241,16 @@ body {
 
 .avatar-badge {
   position: absolute;
-  bottom: 2px; right: 2px;
-  width: 24px; height: 24px;
+  bottom: 2px;
+  right: 2px;
+  width: 24px;
+  height: 24px;
   background: var(--accent);
   border: 2px solid var(--surface);
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.65rem;
 }
 
@@ -257,11 +283,19 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--surface2);
-  transition: border-color 0.15s, transform 0.15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
 }
 
-.avatar-option:hover { border-color: var(--accent); transform: scale(1.07); }
-.avatar-option.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,106,247,0.25); }
+.avatar-option:hover {
+  border-color: var(--accent);
+  transform: scale(1.07);
+}
+.avatar-option.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124, 106, 247, 0.25);
+}
 
 .upload-btn {
   display: flex;
@@ -274,11 +308,16 @@ body {
   color: var(--muted);
   font-size: 0.82rem;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-  font-family: 'DM Sans', sans-serif;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+  font-family: "DM Sans", sans-serif;
 }
 
-.upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+.upload-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 /* ── Form ──────────────────────────────────────── */
 .form-label-custom {
@@ -297,7 +336,7 @@ body {
   border-radius: 10px;
   color: var(--text);
   padding: 0.65rem 1rem;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 0.92rem;
   width: 100%;
   transition: border-color 0.15s;
@@ -306,7 +345,7 @@ body {
 
 .form-control-custom:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(124,106,247,0.15);
+  box-shadow: 0 0 0 3px rgba(124, 106, 247, 0.15);
 }
 
 .form-control-custom.readonly {
@@ -353,20 +392,27 @@ body {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   transition: all 0.15s;
 }
 
-.vis-pill:hover { border-color: var(--accent); color: var(--accent); }
-.vis-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.vis-pill:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.vis-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 
 /* ── Points chip ───────────────────────────────── */
 .points-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(124,106,247,0.12);
-  border: 1px solid rgba(124,106,247,0.3);
+  background: rgba(124, 106, 247, 0.12);
+  border: 1px solid rgba(124, 106, 247, 0.3);
   border-radius: 20px;
   padding: 0.3rem 0.85rem;
   font-size: 0.8rem;
@@ -378,8 +424,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(247,162,106,0.1);
-  border: 1px solid rgba(247,162,106,0.3);
+  background: rgba(247, 162, 106, 0.1);
+  border: 1px solid rgba(247, 162, 106, 0.3);
   border-radius: 20px;
   padding: 0.3rem 0.85rem;
   font-size: 0.8rem;
@@ -394,14 +440,19 @@ body {
   border: none;
   border-radius: 10px;
   padding: 0.65rem 1.75rem;
-  font-family: 'Syne', sans-serif;
+  font-family: "Syne", sans-serif;
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: opacity 0.15s, transform 0.1s;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
 }
 
-.btn-primary-custom:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary-custom:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
 
 .btn-ghost {
   background: transparent;
@@ -409,14 +460,19 @@ body {
   border: 1.5px solid var(--border);
   border-radius: 10px;
   padding: 0.65rem 1.5rem;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 
-.btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+.btn-ghost:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
 
 /* ── Danger zone ───────────────────────────────── */
 .danger-link {
@@ -426,8 +482,11 @@ body {
   text-decoration: underline;
   background: none;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 /* ── Divider ───────────────────────────────────── */
-.divider { border-color: var(--border); margin: 1.25rem 0; }
+.divider {
+  border-color: var(--border);
+  margin: 1.25rem 0;
+}
