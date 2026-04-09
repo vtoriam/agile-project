@@ -46,20 +46,9 @@ function createTask(exampleTaskName, exampleTaskPoints, exampleSubtasks) {
     points.classList.add("points", "card");
     points.textContent = exampleTaskPoints + " Pts";
 
-    // let checkboxContainer = document.createElement("div");
-    // checkboxContainer.classList.add("checkbox-container");
     let claimedTask = document.createElement("label");
     claimedTask.classList.add("claimed-task");
     claimedTask.innerHTML = "<input type='checkbox'>";
-
-    // let newCheckbox = document.createElement("span");
-    // newCheckbox.classList.add("new-checkbox");
-
-
-    // checkboxContainer.appendChild(claimedTask);
-    // checkboxContainer.appendChild(newCheckbox);
-    
-
 
     taskSide.appendChild(claim);
     taskSide.appendChild(points);
@@ -87,7 +76,6 @@ function createTask(exampleTaskName, exampleTaskPoints, exampleSubtasks) {
         subtaskLabel.appendChild(subtaskDescription);
 
         subtasks.appendChild(subtaskLabel);
-        // subtasks.appendChild(document.createElement("br"));
     }
 
     task.appendChild(mainTask);

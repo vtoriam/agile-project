@@ -40,7 +40,5 @@
 }
 
 .points {
-    /* padding-block-end: 9px;
-    padding-block-start: 9px; */
     display:flex;
 }
