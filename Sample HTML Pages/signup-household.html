@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homely - Household setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg nav-homely sticky-top">
+    <div class="container page-shell py-2">
+      <a class="brand" href="#">
+        <span class="brand-badge"><i data-lucide="house"></i></span>
+        homely
+      </a>
+      <div class="d-flex align-items-center gap-2">
+        <span class="step-chip"><i data-lucide="badge-check"></i> Step 2 of 2</span>
+        <a href="signup.html" class="btn btn-outline-homely btn-sm">Back</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container page-shell py-4 py-lg-5">
+    <div class="row g-4 align-items-stretch">
+      <div class="col-lg-7 order-2 order-lg-1">
+        <section class="form-card p-4 p-lg-5 h-100">
+          <div class="mb-4">
+            <div class="section-kicker mb-2">Household setup</div>
+            <h1 class="card-title mb-2">Create or join a household</h1>
+            <p class="muted-copy mb-0">This second page handles the shared-home details separately from the personal account information.</p>
+          </div>
+
+          <form>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Choose an option</label>
+                <select class="form-select">
+                  <option selected>Create a new household</option>
+                  <option>Join an existing household</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Role</label>
+                <select class="form-select">
+                  <option selected>Member</option>
+                  <option>Admin</option>
+                </select>
+              </div>
+              <div class="col-md-7">
+                <label class="form-label form-label-small mb-2">Household name</label>
+                <input type="text" class="form-control" placeholder="The Clean Machine">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label form-label-small mb-2">Join code</label>
+                <input type="text" class="form-control" placeholder="HM-72QA">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Default rewards style</label>
+                <select class="form-select">
+                  <option selected>Balanced</option>
+                  <option>Competitive</option>
+                  <option>Collaborative</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Task reminders</label>
+                <select class="form-select">
+                  <option selected>Weekly</option>
+                  <option>Daily</option>
+                  <option>Off</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="hr-soft my-4">
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="content-card p-3 h-100 side-panel">
+                  <div class="helper-label mb-2">Permissions preview</div>
+                  <ul class="small mb-0 ps-3">
+                    <li>Admins can edit members and house rules.</li>
+                    <li>Members can view tasks, rewards, and the leaderboard.</li>
+                    <li>Join codes can be regenerated later in settings.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="content-card p-3 h-100">
+                  <div class="helper-label mb-2">Future backend notes</div>
+                  <ul class="small mb-0 ps-3">
+                    <li>Store household membership in the database.</li>
+                    <li>Validate unique join codes on the server.</li>
+                    <li>Restrict admin-only actions with authentication rules.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+              <button type="button" class="btn btn-homely">Create profile</button>
+              <a href="manage-household.html" class="btn btn-outline-homely">Preview household settings</a>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div class="col-lg-5 order-1 order-lg-2">
+        <section class="hero-card h-100 p-4 p-lg-5">
+          <div class="section-kicker mb-2">Why this page exists</div>
+          <h2 class="page-title mb-3">Shared-home details deserve their own step.</h2>
+          <p class="muted-copy mb-4">Breaking sign-up into two pages matches the design feedback you were given and makes the user flow easier to understand in the checkpoint demo.</p>
+
+          <div class="d-grid gap-3">
+            <div class="icon-tile text-start">
+              <div class="info-chip mb-2"><i data-lucide="users-round"></i> Join flow</div>
+              <div class="fw-bold">Join an existing house with a code</div>
+            </div>
+            <div class="icon-tile text-start">
+              <div class="info-chip mb-2"><i data-lucide="settings-2"></i> Setup flow</div>
+              <div class="fw-bold">Create a new house and choose default settings</div>
+            </div>
+            <div class="icon-tile text-start">
+              <div class="info-chip mb-2"><i data-lucide="shield-check"></i> Later in Flask</div>
+              <div class="fw-bold">Validate codes, store roles, and enforce permissions</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
