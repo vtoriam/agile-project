@@ -17,12 +17,60 @@ let tasks = [
 
 // Map category → Lucide icon name
 const catIcon = {
-  cleaning: 'sparkles',
-  kitchen:  'utensils',
-  garden:   'leaf',
-  other:    'clipboard-list',
-};
+  // ── Existing ──────────────────────────────
+  cleaning:     'sparkles',
+  kitchen:      'utensils',
+  garden:       'leaf',
+  other:        'clipboard-list',
 
+  // ── Maintenance & Repairs ─────────────────
+  maintenance:  'wrench',
+  plumbing:     'droplets',
+  electrical:   'zap',
+  hvac:         'thermometer',
+  painting:     'paint-roller',
+  tools:        'hammer',
+
+  // ── Rooms ─────────────────────────────────
+  bedroom:      'bed',
+  bathroom:     'bath',
+  laundry:      'washing-machine',   // lucide: 'shirt' if unavailable
+  garage:       'car',
+  basement:     'archive',
+  attic:        'box',
+
+  // ── Outdoor ───────────────────────────────
+  lawn:         'scissors',
+  pool:         'waves',
+  outdoor:      'sun',
+  fencing:      'fence',
+  driveway:     'road',
+
+  // ── Household Management ──────────────────
+  shopping:     'shopping-cart',
+  inventory:    'package',
+  documents:    'file-text',
+  budget:       'wallet',
+  insurance:    'shield',
+  utilities:    'plug',
+
+  // ── Safety & Security ─────────────────────
+  security:     'lock',
+  fire_safety:  'flame',
+  first_aid:    'heart-pulse',
+  smoke_detector: 'bell-ring',
+
+  // ── People & Pets ─────────────────────────
+  pets:         'paw-print',
+  childcare:    'baby',
+  guests:       'users',
+
+  // ── Seasonal ──────────────────────────────
+  seasonal:     'calendar',
+  winter_prep:  'snowflake',
+  spring_clean: 'flower-2',
+  pest_control: 'bug',
+};
 // ════════════════════════════
 // UTILITIES
 // ════════════════════════════
