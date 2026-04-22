@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homely - Sign up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg nav-homely sticky-top">
+    <div class="container page-shell py-2">
+      <a class="brand" href="#">
+        <span class="brand-badge"><i data-lucide="house"></i></span>
+        homely
+      </a>
+      <div class="d-flex align-items-center gap-2">
+        <span class="step-chip"><i data-lucide="badge-check"></i> Step 1 of 2</span>
+        <a href="#" class="btn btn-outline-homely btn-sm">Log in</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container page-shell py-4 py-lg-5">
+    <div class="row g-4 align-items-stretch">
+      <div class="col-lg-5">
+        <section class="hero-card h-100 p-4 p-lg-5">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="logo-mark"><i data-lucide="home"></i></div>
+            <div>
+              <div class="section-kicker mb-1">Create profile</div>
+              <h1 class="page-title mb-0">Make shared living feel fair.</h1>
+            </div>
+          </div>
+
+          <p class="muted-copy mb-4">
+            This first sign-up page focuses on account details. It creates the user profile before the user chooses whether to create a household or join one.
+          </p>
+
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <div class="icon-tile h-100 text-start">
+                <div class="info-chip mb-2"><i data-lucide="trophy"></i> Gamified</div>
+                <h2 class="h6 fw-bold mb-2">Points and streaks</h2>
+                <p class="mb-0 small muted-copy">Users see progress immediately after joining the app.</p>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="icon-tile h-100 text-start">
+                <div class="info-chip mb-2"><i data-lucide="users"></i> Shared</div>
+                <h2 class="h6 fw-bold mb-2">Household-first design</h2>
+                <p class="mb-0 small muted-copy">Profiles are built with collaboration and visibility in mind.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card p-4 side-panel">
+            <div class="section-kicker mb-2">Why split sign-up?</div>
+            <ul class="mb-0 ps-3 small">
+              <li>Keeps the first page short and less overwhelming.</li>
+              <li>Separates personal account details from household setup.</li>
+              <li>Makes the future Flask form flow easier to validate.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-lg-7">
+        <section class="form-card p-4 p-lg-5 h-100">
+          <div class="mb-4">
+            <div class="section-kicker mb-2">Profile details</div>
+            <h2 class="card-title mb-2">Create your account</h2>
+            <p class="muted-copy mb-0">Front-end prototype for Checkpoint 2 using the shared Homely palette and typography.</p>
+          </div>
+
+          <form>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">First name</label>
+                <input type="text" class="form-control" placeholder="FirstName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Last name</label>
+                <input type="text" class="form-control" placeholder="LastName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Display name</label>
+                <input type="text" class="form-control" placeholder="TaskTactician">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Email</label>
+                <input type="email" class="form-control" placeholder="name@example.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Password</label>
+                <input type="password" class="form-control" placeholder="Enter password">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-small mb-2">Confirm password</label>
+                <input type="password" class="form-control" placeholder="Confirm password">
+              </div>
+            </div>
+
+            <hr class="hr-soft my-4">
+
+            <div class="mb-3">
+              <label class="form-label form-label-small mb-2">Choose a profile icon</label>
+              <div class="row g-3">
+                <div class="col-6 col-md-4">
+                  <div class="avatar-tile active">
+                    <div class="avatar-circle mx-auto mb-2"><i data-lucide="home"></i></div>
+                    <div class="small fw-bold">Home</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-4">
+                  <div class="avatar-tile">
+                    <div class="avatar-circle mx-auto mb-2"><i data-lucide="sparkles"></i></div>
+                    <div class="small fw-bold">Cleaning</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-4">
+                  <div class="avatar-tile">
+                    <div class="avatar-circle mx-auto mb-2"><i data-lucide="utensils"></i></div>
+                    <div class="small fw-bold">Kitchen</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="termsCheck" checked>
+              <label class="form-check-label small" for="termsCheck">
+                I agree to the privacy policy, house rules, and fair-play guidelines.
+              </label>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+              <a href="signup-household.html" class="btn btn-homely">Continue to household setup <i data-lucide="arrow-right"></i></a>
+              <button type="button" class="btn btn-outline-homely">Save as draft</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
