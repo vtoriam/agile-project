@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/homely-styles.css') }}"/>
+{% endblock %}
+
+{% block content %}
+<div class="greeting">
+  <div class="greeting-sub" id="time-greeting">Good morning</div>
+  <div class="greeting-title">What needs doing, <span id="display-user"></span>?</div>
+</div>
+
+<div class="add-row">
+  <input type="text" id="task-input" placeholder="Add a household task…" onkeydown="if(event.key==='Enter') addTask()"/>
+  <button class="btn-add" onclick="addTask()">
+    <i data-lucide="plus"></i>
+  </button>
+</div>
+
+<div class="cat-row">
+  <button class="cat-btn active" onclick="setFilter('all', this)">
+    <i data-lucide="layout-grid"></i> All
+  </button>
+  <button class="cat-btn" onclick="setFilter('cleaning', this)">
+    <i data-lucide="sparkles"></i> Cleaning
+  </button>
+  <button class="cat-btn" onclick="setFilter('kitchen', this)">
+    <i data-lucide="utensils"></i> Kitchen
+  </button>
+  <button class="cat-btn" onclick="setFilter('garden', this)">
+    <i data-lucide="leaf"></i> Garden
+  </button>
+  <button class="cat-btn" onclick="setFilter('done', this)">
+    <i data-lucide="check-circle"></i> Done
+  </button>
+</div>
+
+<div class="task-list" id="task-list"></div>
+<div class="empty-state" id="empty-state">
+  <div class="empty-icon"><i data-lucide="sofa"></i></div>
+  All clear — nothing to do here!
+</div>
+
+<div class="stats">
+  <div class="stat"><i data-lucide="list"></i> Tasks: <span id="stat-total">0</span></div>
+  <div class="stat"><i data-lucide="check"></i> Done: <span id="stat-done">0</span></div>
+  <div class="stat"><i data-lucide="clock"></i> To do: <span id="stat-rem">0</span></div>
+</div>
+
+<script src="{{ url_for('static', filename='js/homely-tasks.js') }}"></script>
+
+{% endblock %}
