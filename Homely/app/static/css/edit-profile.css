@@ -121,6 +121,7 @@ body {
 .avatar-option {
   width: 54px;
   height: 54px;
+  padding: 0;
   border-radius: 50%;
   border: 2.5px solid var(--border);
   cursor: pointer;
@@ -129,6 +130,7 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--surface2);
+  appearance: none;
   transition:
     border-color 0.15s,
     transform 0.15s;

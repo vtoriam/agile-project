@@ -29,7 +29,9 @@
 
           <div class="d-flex align-items-center gap-4 mb-4">
             <div class="current-avatar-wrap">
-              <div class="current-avatar"><i data-lucide="user-round"></i></div>
+              <div class="current-avatar" data-user-avatar-slot>
+                <i data-lucide="user-round"></i>
+              </div>
               <div class="avatar-badge">
                 <i data-lucide="pencil" style="width: 12px; height: 12px"></i>
               </div>
@@ -47,18 +49,18 @@
 
           <div class="form-label-custom mb-2">Default Avatars</div>
           <div class="default-avatars">
-            <div class="avatar-option selected">
+            <button class="avatar-option selected" type="button" data-avatar-option="user-round" aria-pressed="true">
               <i data-lucide="user-round"></i>
-            </div>
-            <div class="avatar-option"><i data-lucide="cat"></i></div>
-            <div class="avatar-option"><i data-lucide="dog"></i></div>
-            <div class="avatar-option"><i data-lucide="bird"></i></div>
-            <div class="avatar-option"><i data-lucide="fish"></i></div>
-            <div class="avatar-option"><i data-lucide="rabbit"></i></div>
-            <div class="avatar-option"><i data-lucide="bug"></i></div>
-            <div class="avatar-option"><i data-lucide="turtle"></i></div>
-            <div class="avatar-option"><i data-lucide="squirrel"></i></div>
-            <div class="avatar-option"><i data-lucide="snail"></i></div>
+            </button>
+            <button class="avatar-option" type="button" data-avatar-option="cat" aria-pressed="false"><i data-lucide="cat"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="dog" aria-pressed="false"><i data-lucide="dog"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="bird" aria-pressed="false"><i data-lucide="bird"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="fish" aria-pressed="false"><i data-lucide="fish"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="rabbit" aria-pressed="false"><i data-lucide="rabbit"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="bug" aria-pressed="false"><i data-lucide="bug"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="turtle" aria-pressed="false"><i data-lucide="turtle"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="squirrel" aria-pressed="false"><i data-lucide="squirrel"></i></button>
+            <button class="avatar-option" type="button" data-avatar-option="snail" aria-pressed="false"><i data-lucide="snail"></i></button>
           </div>
         </div>
 
