@@ -29,7 +29,7 @@
 
     <a
       class="nav-item-custom {% if active_page == 'dashboard' %}active{% endif %}"
-      href="{{ url_for('index') }}"
+      href="{{ url_for('home') }}"
     >
       <i data-lucide="layout-dashboard"></i> Dashboard
     </a>
@@ -47,7 +47,7 @@
     </a>
     <a
       class="nav-item-custom {% if active_page == 'leaderboard' %}active{% endif %}"
-      href="#"
+      href="{{ url_for('leaderboard') }}"
     >
       <i data-lucide="trophy"></i> Leaderboard
     </a>
@@ -67,3 +67,4 @@
     </a>
   </nav>
   {% endmacro %}
+</div>
