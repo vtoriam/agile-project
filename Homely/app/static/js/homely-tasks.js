@@ -3,21 +3,23 @@
 // ════════════════════════════
 
 let currentUser = null;
-let filter = 'all';
-let nextId = 5;
+let filter = 'pending';
+let nextId = 1;
 
-let tasks = [
-  { id: 1, text: 'Vacuum the living room', done: false, cat: 'cleaning' },
-  { id: 2, text: 'Meal prep for the week',  done: false, cat: 'kitchen'  },
-  { id: 3, text: 'Water the herb garden',   done: false, cat: 'garden'   },
-  { id: 4, text: 'Wipe down the benchtops', done: true,  cat: 'cleaning' },
-];
+let tasks = [];
 
 // Map category → Lucide icon name
 const catIcon = {
   cleaning: 'sparkles',
   kitchen:  'utensils',
   garden:   'leaf',
+  laundry:  'shirt',
+  shopping: 'shopping-cart',
+  trash:    'trash-2',
+  pets:     'paw-print',
+  repairs:  'wrench',
+  bathroom: 'bath',
+  storage:  'package',
   other:    'clipboard-list',
 };
 
@@ -89,14 +91,15 @@ function closeModal() {
   document.getElementById('modal-points').value = '';
   document.getElementById('modal-due').value = 'Today';
   document.getElementById('modal-error').textContent = '';
-  document.querySelectorAll('.modal-cat').forEach(b => b.classList.remove('active'));
-  document.querySelector('.modal-cat[data-cat="cleaning"]').classList.add('active');
+  document.getElementById('modal-cat-select').value = 'cleaning';
+  updateCatPreview();
   refreshIcons();
 }
 
-function selectCat(btn) {
-  document.querySelectorAll('.modal-cat').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function updateCatPreview() {
+  const sel  = document.getElementById('modal-cat-select');
+  const icon = sel.options[sel.selectedIndex].dataset.icon || 'clipboard-list';
+  document.getElementById('catIconPreview').innerHTML = `<i data-lucide="${icon}"></i>`;
   refreshIcons();
 }
 
@@ -105,8 +108,7 @@ function submitTask() {
   const assigned = document.getElementById('modal-assigned').value;
   const points   = document.getElementById('modal-points').value;
   const due      = document.getElementById('modal-due').value;
-  const catBtn   = document.querySelector('.modal-cat.active');
-  const cat      = catBtn ? catBtn.dataset.cat : 'other';
+  const cat      = document.getElementById('modal-cat-select').value || 'other';
   const errEl    = document.getElementById('modal-error');
 
   if (!name) {
@@ -145,20 +147,57 @@ function deleteTask(id) {
   renderTasks();
 }
 
-function setFilter(f, btn) {
+function setFilter(f) {
   filter = f;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
   renderTasks();
 }
 
+function renderFilters() {
+  const row = document.getElementById('cat-row');
+
+  const catLabel = {
+    cleaning: 'Cleaning', kitchen: 'Kitchen', garden: 'Garden',
+    laundry: 'Laundry',   shopping: 'Shopping', trash: 'Bins & Trash',
+    pets: 'Pets',         repairs: 'Repairs',   bathroom: 'Bathroom',
+    storage: 'Storage',   other: 'Other',
+  };
+
+  // Only show category tabs for categories that still have incomplete tasks
+  const activeCats = [...new Set(tasks.filter(t => !t.done).map(t => t.cat))];
+
+  let html = `<button class="cat-btn ${filter === 'all' ? 'active' : ''}" onclick="setFilter('all')">
+    <i data-lucide="layout-grid"></i> All
+  </button>
+  <button class="cat-btn ${filter === 'pending' ? 'active' : ''}" onclick="setFilter('pending')">
+    <i data-lucide="clock"></i> Pending
+  </button>`;
+
+  activeCats.forEach(cat => {
+    const icon  = catIcon[cat] || 'clipboard-list';
+    const label = catLabel[cat] || cat;
+    html += `<button class="cat-btn ${filter === cat ? 'active' : ''}" onclick="setFilter('${cat}')">
+      <i data-lucide="${icon}"></i> ${label}
+    </button>`;
+  });
+
+  html += `<button class="cat-btn ${filter === 'done' ? 'active' : ''}" onclick="setFilter('done')">
+    <i data-lucide="check-circle"></i> Done
+  </button>`;
+
+  row.innerHTML = html;
+  refreshIcons();
+}
+
 function renderTasks() {
+  renderFilters();
+
   const list  = document.getElementById('task-list');
   const empty = document.getElementById('empty-state');
 
   const visible = tasks.filter(t => {
-    if (filter === 'all')  return !t.done;
-    if (filter === 'done') return t.done;
+    if (filter === 'all')     return true;
+    if (filter === 'pending') return !t.done;
+    if (filter === 'done')    return t.done;
     return t.cat === filter && !t.done;
   });
 
@@ -215,5 +254,6 @@ function renderTasks() {
 // INIT
 // ════════════════════════════
 
-// Initial Lucide icon render (for static HTML icons)
 refreshIcons();
+setGreeting();
+renderTasks();

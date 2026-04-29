@@ -587,6 +587,35 @@ svg[data-lucide] {
   gap: 12px;
 }
 
+.cat-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cat-select-wrap select {
+  flex: 1;
+}
+
+.cat-icon-preview {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: background 0.2s;
+}
+
+.cat-icon-preview svg[data-lucide] {
+  width: 20px;
+  height: 20px;
+}
+
 .modal-cats {
   display: flex;
   gap: 8px;
