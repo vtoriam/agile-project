@@ -14,34 +14,84 @@ household_nav %} {% block page_styles %}
 </div>
 
 <div class="add-row">
-  <input
-    type="text"
-    id="task-input"
-    placeholder="Add a household task…"
-    onkeydown="if (event.key === 'Enter') addTask();"
-  />
-  <button class="btn-add" onclick="addTask()">
-    <i data-lucide="plus"></i>
+  <button class="btn-add-task" onclick="openModal()">
+    <i data-lucide="plus"></i> Add Task
   </button>
 </div>
 
-<div class="cat-row">
-  <button class="cat-btn active" onclick="setFilter('all', this)">
-    <i data-lucide="layout-grid"></i> All
-  </button>
-  <button class="cat-btn" onclick="setFilter('cleaning', this)">
-    <i data-lucide="sparkles"></i> Cleaning
-  </button>
-  <button class="cat-btn" onclick="setFilter('kitchen', this)">
-    <i data-lucide="utensils"></i> Kitchen
-  </button>
-  <button class="cat-btn" onclick="setFilter('garden', this)">
-    <i data-lucide="leaf"></i> Garden
-  </button>
-  <button class="cat-btn" onclick="setFilter('done', this)">
-    <i data-lucide="check-circle"></i> Done
-  </button>
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+<div class="modal" id="taskModal">
+  <div class="modal-header">
+    <div class="modal-title">New Task</div>
+    <button class="modal-close" onclick="closeModal()">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="modal-field">
+      <label>Task Name</label>
+      <input type="text" id="modal-task-name" placeholder="e.g. Vacuum the living room" />
+    </div>
+    <div class="modal-field">
+      <label>Assigned To</label>
+      <select id="modal-assigned">
+        <option value="">Select a housemate…</option>
+        <option value="Bob">Bob</option>
+        <option value="Marcus">Marcus</option>
+        <option value="Jamie">Jamie</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Points</label>
+        <input type="number" id="modal-points" placeholder="e.g. 20" min="1" max="999" />
+      </div>
+      <div class="modal-field">
+        <label>Done By</label>
+        <select id="modal-due">
+          <option value="Today">Today</option>
+          <option value="Tomorrow">Tomorrow</option>
+          <option value="This week">This week</option>
+          <option value="This month">This month</option>
+          <option value="No rush">No rush</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Category</label>
+      <div class="cat-select-wrap">
+        <div class="cat-icon-preview" id="catIconPreview">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <select id="modal-cat-select" onchange="updateCatPreview()">
+          <option value="cleaning"  data-icon="sparkles">Cleaning</option>
+          <option value="kitchen"   data-icon="utensils">Kitchen</option>
+          <option value="garden"    data-icon="leaf">Garden</option>
+          <option value="laundry"   data-icon="shirt">Laundry</option>
+          <option value="shopping"  data-icon="shopping-cart">Shopping</option>
+          <option value="trash"     data-icon="trash-2">Bins &amp; Trash</option>
+          <option value="pets"      data-icon="paw-print">Pets</option>
+          <option value="repairs"   data-icon="wrench">Repairs</option>
+          <option value="bathroom"  data-icon="bath">Bathroom</option>
+          <option value="storage"   data-icon="package">Storage</option>
+          <option value="other"     data-icon="clipboard-list">Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="modal-error" id="modal-error"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn-add" onclick="submitTask()">
+        <i data-lucide="plus"></i> Add Task
+      </button>
+    </div>
+  </div>
 </div>
+
+<div class="cat-row" id="cat-row"></div>
 
 <div class="task-list" id="task-list"></div>
 <div class="empty-state" id="empty-state">

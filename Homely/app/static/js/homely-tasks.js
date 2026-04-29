@@ -3,21 +3,23 @@
 // ════════════════════════════
 
 let currentUser = null;
-let filter = 'all';
-let nextId = 5;
+let filter = 'pending';
+let nextId = 1;
 
-let tasks = [
-  { id: 1, text: 'Vacuum the living room', done: false, cat: 'cleaning' },
-  { id: 2, text: 'Meal prep for the week',  done: false, cat: 'kitchen'  },
-  { id: 3, text: 'Water the herb garden',   done: false, cat: 'garden'   },
-  { id: 4, text: 'Wipe down the benchtops', done: true,  cat: 'cleaning' },
-];
+let tasks = [];
 
 // Map category → Lucide icon name
 const catIcon = {
   cleaning: 'sparkles',
   kitchen:  'utensils',
   garden:   'leaf',
+  laundry:  'shirt',
+  shopping: 'shopping-cart',
+  trash:    'trash-2',
+  pets:     'paw-print',
+  repairs:  'wrench',
+  bathroom: 'bath',
+  storage:  'package',
   other:    'clipboard-list',
 };
 
@@ -74,13 +76,63 @@ function showHome() {
 // TASKS
 // ════════════════════════════
 
-function addTask() {
-  const input = document.getElementById('task-input');
-  const text  = input.value.trim();
-  if (!text) return;
+function openModal() {
+  document.getElementById('taskModal').classList.add('open');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modal-task-name').focus();
+  refreshIcons();
+}
 
-  tasks.unshift({ id: nextId++, text, done: false, cat: guessCategory(text) });
-  input.value = '';
+function closeModal() {
+  document.getElementById('taskModal').classList.remove('open');
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('modal-task-name').value = '';
+  document.getElementById('modal-assigned').value = '';
+  document.getElementById('modal-points').value = '';
+  document.getElementById('modal-due').value = 'Today';
+  document.getElementById('modal-error').textContent = '';
+  document.getElementById('modal-cat-select').value = 'cleaning';
+  updateCatPreview();
+  refreshIcons();
+}
+
+function updateCatPreview() {
+  const sel  = document.getElementById('modal-cat-select');
+  const icon = sel.options[sel.selectedIndex].dataset.icon || 'clipboard-list';
+  document.getElementById('catIconPreview').innerHTML = `<i data-lucide="${icon}"></i>`;
+  refreshIcons();
+}
+
+function submitTask() {
+  const name     = document.getElementById('modal-task-name').value.trim();
+  const assigned = document.getElementById('modal-assigned').value;
+  const points   = document.getElementById('modal-points').value;
+  const due      = document.getElementById('modal-due').value;
+  const cat      = document.getElementById('modal-cat-select').value || 'other';
+  const errEl    = document.getElementById('modal-error');
+
+  if (!name) {
+    errEl.textContent = 'Please enter a task name.';
+    document.getElementById('modal-task-name').focus();
+    return;
+  }
+  if (!assigned) {
+    errEl.textContent = 'Please select who this is assigned to.';
+    return;
+  }
+
+  errEl.textContent = '';
+  tasks.unshift({
+    id: nextId++,
+    text: name,
+    done: false,
+    cat,
+    assignedTo: assigned,
+    points: points ? parseInt(points) : null,
+    due,
+  });
+
+  closeModal();
   renderTasks();
 }
 
@@ -95,20 +147,57 @@ function deleteTask(id) {
   renderTasks();
 }
 
-function setFilter(f, btn) {
+function setFilter(f) {
   filter = f;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
   renderTasks();
 }
 
+function renderFilters() {
+  const row = document.getElementById('cat-row');
+
+  const catLabel = {
+    cleaning: 'Cleaning', kitchen: 'Kitchen', garden: 'Garden',
+    laundry: 'Laundry',   shopping: 'Shopping', trash: 'Bins & Trash',
+    pets: 'Pets',         repairs: 'Repairs',   bathroom: 'Bathroom',
+    storage: 'Storage',   other: 'Other',
+  };
+
+  // Only show category tabs for categories that still have incomplete tasks
+  const activeCats = [...new Set(tasks.filter(t => !t.done).map(t => t.cat))];
+
+  let html = `<button class="cat-btn ${filter === 'all' ? 'active' : ''}" onclick="setFilter('all')">
+    <i data-lucide="layout-grid"></i> All
+  </button>
+  <button class="cat-btn ${filter === 'pending' ? 'active' : ''}" onclick="setFilter('pending')">
+    <i data-lucide="clock"></i> Pending
+  </button>`;
+
+  activeCats.forEach(cat => {
+    const icon  = catIcon[cat] || 'clipboard-list';
+    const label = catLabel[cat] || cat;
+    html += `<button class="cat-btn ${filter === cat ? 'active' : ''}" onclick="setFilter('${cat}')">
+      <i data-lucide="${icon}"></i> ${label}
+    </button>`;
+  });
+
+  html += `<button class="cat-btn ${filter === 'done' ? 'active' : ''}" onclick="setFilter('done')">
+    <i data-lucide="check-circle"></i> Done
+  </button>`;
+
+  row.innerHTML = html;
+  refreshIcons();
+}
+
 function renderTasks() {
+  renderFilters();
+
   const list  = document.getElementById('task-list');
   const empty = document.getElementById('empty-state');
 
   const visible = tasks.filter(t => {
-    if (filter === 'all')  return !t.done;
-    if (filter === 'done') return t.done;
+    if (filter === 'all')     return true;
+    if (filter === 'pending') return !t.done;
+    if (filter === 'done')    return t.done;
     return t.cat === filter && !t.done;
   });
 
@@ -130,7 +219,14 @@ function renderTasks() {
         <div class="task-icon">
           <i data-lucide="${icon}"></i>
         </div>
-        <div class="task-text">${t.text}</div>
+        <div class="task-body">
+          <div class="task-text">${t.text}</div>
+          <div class="task-meta">
+            ${t.assignedTo ? `<span class="task-meta-item"><i data-lucide="user"></i> ${t.assignedTo}</span>` : ''}
+            ${t.points     ? `<span class="task-meta-item"><i data-lucide="zap"></i> ${t.points} pts</span>` : ''}
+            ${t.due        ? `<span class="task-meta-item"><i data-lucide="clock"></i> ${t.due}</span>` : ''}
+          </div>
+        </div>
         <div class="task-cat">${t.cat}</div>
         <button class="task-del" onclick="deleteTask(${t.id})">
           <i data-lucide="x"></i>
@@ -158,5 +254,6 @@ function renderTasks() {
 // INIT
 // ════════════════════════════
 
-// Initial Lucide icon render (for static HTML icons)
 refreshIcons();
+setGreeting();
+renderTasks();

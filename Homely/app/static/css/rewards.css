@@ -482,6 +482,49 @@ body {
   color: var(--danger);
 }
 
+/* ── Icon picker ───────────────────────────────── */
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.icon-option {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--muted);
+  padding: 0;
+}
+
+.icon-option:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.icon-option.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.icon-option svg[data-lucide] {
+  width: 18px;
+  height: 18px;
+}
+
+.reward-icon svg[data-lucide] {
+  width: 24px;
+  height: 24px;
+}
+
 /* ── Textarea ──────────────────────────────────── */
 textarea.form-control-custom {
   resize: vertical;
