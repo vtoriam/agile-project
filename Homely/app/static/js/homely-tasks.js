@@ -74,13 +74,63 @@ function showHome() {
 // TASKS
 // ════════════════════════════
 
-function addTask() {
-  const input = document.getElementById('task-input');
-  const text  = input.value.trim();
-  if (!text) return;
+function openModal() {
+  document.getElementById('taskModal').classList.add('open');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modal-task-name').focus();
+  refreshIcons();
+}
 
-  tasks.unshift({ id: nextId++, text, done: false, cat: guessCategory(text) });
-  input.value = '';
+function closeModal() {
+  document.getElementById('taskModal').classList.remove('open');
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('modal-task-name').value = '';
+  document.getElementById('modal-assigned').value = '';
+  document.getElementById('modal-points').value = '';
+  document.getElementById('modal-due').value = 'Today';
+  document.getElementById('modal-error').textContent = '';
+  document.querySelectorAll('.modal-cat').forEach(b => b.classList.remove('active'));
+  document.querySelector('.modal-cat[data-cat="cleaning"]').classList.add('active');
+  refreshIcons();
+}
+
+function selectCat(btn) {
+  document.querySelectorAll('.modal-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  refreshIcons();
+}
+
+function submitTask() {
+  const name     = document.getElementById('modal-task-name').value.trim();
+  const assigned = document.getElementById('modal-assigned').value;
+  const points   = document.getElementById('modal-points').value;
+  const due      = document.getElementById('modal-due').value;
+  const catBtn   = document.querySelector('.modal-cat.active');
+  const cat      = catBtn ? catBtn.dataset.cat : 'other';
+  const errEl    = document.getElementById('modal-error');
+
+  if (!name) {
+    errEl.textContent = 'Please enter a task name.';
+    document.getElementById('modal-task-name').focus();
+    return;
+  }
+  if (!assigned) {
+    errEl.textContent = 'Please select who this is assigned to.';
+    return;
+  }
+
+  errEl.textContent = '';
+  tasks.unshift({
+    id: nextId++,
+    text: name,
+    done: false,
+    cat,
+    assignedTo: assigned,
+    points: points ? parseInt(points) : null,
+    due,
+  });
+
+  closeModal();
   renderTasks();
 }
 
@@ -130,7 +180,14 @@ function renderTasks() {
         <div class="task-icon">
           <i data-lucide="${icon}"></i>
         </div>
-        <div class="task-text">${t.text}</div>
+        <div class="task-body">
+          <div class="task-text">${t.text}</div>
+          <div class="task-meta">
+            ${t.assignedTo ? `<span class="task-meta-item"><i data-lucide="user"></i> ${t.assignedTo}</span>` : ''}
+            ${t.points     ? `<span class="task-meta-item"><i data-lucide="zap"></i> ${t.points} pts</span>` : ''}
+            ${t.due        ? `<span class="task-meta-item"><i data-lucide="clock"></i> ${t.due}</span>` : ''}
+          </div>
+        </div>
         <div class="task-cat">${t.cat}</div>
         <button class="task-del" onclick="deleteTask(${t.id})">
           <i data-lucide="x"></i>
