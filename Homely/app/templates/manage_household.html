@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Manage household | Homely{% endblock %}
+{% block content %}
+<section class="panel dashboard-panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Household settings</span>
+            <h1>See who is in the household.</h1>
+            <p>This is Mohammad’s household-settings page turned into a real Jinja roster loaded from SQLite.</p>
+        </div>
+        <div class="action-row">
+            <span class="join-code-pill">Join code: {{ household.join_code }}</span>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to dashboard</a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ household.name }}</h3>
+            <p>Household name</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ members|length }}</h3>
+            <p>Members</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ household.reward_style }}</h3>
+            <p>Reward style</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ household.reminder_frequency }}</h3>
+            <p>Reminder cycle</p>
+        </div>
+    </div>
+
+    <div class="member-grid">
+        {% for member in members %}
+            <article class="member-card">
+                <div class="member-top">
+                    <div>
+                        <h2>{{ member.user.display_name }}</h2>
+                        <p>{{ member.role }}</p>
+                    </div>
+                    {% if member.user_id == current_membership.user_id %}
+                        <span class="badge badge-success">You</span>
+                    {% endif %}
+                </div>
+                <p>{{ member.bio }}</p>
+                <div class="member-metrics">
+                    <span>{{ member.points }} pts</span>
+                    <span>{{ member.streak }}-day streak</span>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

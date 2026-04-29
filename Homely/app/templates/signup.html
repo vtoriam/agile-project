@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Sign up | Homely{% endblock %}
+{% block content %}
+<section class="two-column">
+    <div class="panel hero-panel">
+        <span class="eyebrow">Step 1 of 2</span>
+        <h1>Create profile</h1>
+        <p>This is Mohammad’s sign-up flow turned into a real Jinja template. Step 1 stores personal details before the user chooses whether to create a household or join one.</p>
+        <ul class="feature-list">
+            <li>Keeps the form shorter and clearer</li>
+            <li>Makes household logic easier to validate</li>
+            <li>Matches the checkpoint prototype flow</li>
+        </ul>
+    </div>
+
+    <div class="panel form-panel">
+        <span class="eyebrow">Profile details</span>
+        <h2>Create your account</h2>
+        <form method="post" class="stack-form">
+            <label>First name
+                <input type="text" name="first_name" value="{{ form_data.get('first_name', '') }}" required>
+            </label>
+            <label>Last name
+                <input type="text" name="last_name" value="{{ form_data.get('last_name', '') }}" required>
+            </label>
+            <label>Display name
+                <input type="text" name="display_name" value="{{ form_data.get('display_name', '') }}" required>
+            </label>
+            <label>Email
+                <input type="email" name="email" value="{{ form_data.get('email', '') }}" required>
+            </label>
+            <label>Password
+                <input type="password" name="password" required>
+            </label>
+            <label>Confirm password
+                <input type="password" name="confirm_password" required>
+            </label>
+            <label>Choose a profile icon
+                <select name="profile_icon">
+                    {% set current_icon = form_data.get('profile_icon', 'home') %}
+                    <option value="home" {% if current_icon == 'home' %}selected{% endif %}>Home</option>
+                    <option value="sparkles" {% if current_icon == 'sparkles' %}selected{% endif %}>Cleaning</option>
+                    <option value="utensils" {% if current_icon == 'utensils' %}selected{% endif %}>Kitchen</option>
+                </select>
+            </label>
+            <label class="checkbox-row">
+                <input type="checkbox" name="accepted_rules" {% if form_data.get('accepted_rules') %}checked{% endif %}>
+                <span>I agree to the privacy policy, house rules, and fair-play guidelines.</span>
+            </label>
+            <button type="submit" class="btn btn-primary">Continue to household setup</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
