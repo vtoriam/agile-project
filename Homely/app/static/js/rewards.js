@@ -63,13 +63,23 @@ rewardTypeSelect.addEventListener('change', () => {
   }
 });
 
+// Icon picker selection
+document.getElementById('rewardIconPicker').addEventListener('click', e => {
+  const btn = e.target.closest('.icon-option');
+  if (!btn) return;
+  document.querySelectorAll('#rewardIconPicker .icon-option').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rewardIcon').value = btn.dataset.icon;
+  lucide.createIcons();
+});
+
 // Add custom reward
 document.getElementById('addRewardBtn').addEventListener('click', () => {
   const title = document.getElementById('rewardTitle').value.trim();
   const desc = document.getElementById('rewardDesc').value.trim();
   const type = document.getElementById('rewardType').value;
   const threshold = parseInt(document.getElementById('thresholdValue').value);
-  const emoji = document.getElementById('rewardEmoji').value.trim() || '🎁';
+  const icon = document.getElementById('rewardIcon').value || 'star';
 
   // Basic validation
   if (!title) {
@@ -126,7 +136,7 @@ document.getElementById('addRewardBtn').addEventListener('click', () => {
   newItem.dataset.type = 'custom';
   newItem.innerHTML = `
     <div class="reward-icon-wrap">
-      <div class="reward-icon ${isUnlocked ? '' : 'muted'}">${emoji}</div>
+      <div class="reward-icon ${isUnlocked ? '' : 'muted'}"><i data-lucide="${icon}"></i></div>
     </div>
     <div class="reward-body">
       <div class="d-flex align-items-center gap-2">
@@ -154,12 +164,15 @@ document.getElementById('addRewardBtn').addEventListener('click', () => {
   });
 
   document.getElementById('rewardsList').appendChild(newItem);
+  lucide.createIcons();
 
   // Reset form
   document.getElementById('rewardTitle').value = '';
   document.getElementById('rewardDesc').value = '';
-  document.getElementById('rewardEmoji').value = '';
   document.getElementById('thresholdValue').value = '';
+  document.querySelectorAll('#rewardIconPicker .icon-option').forEach(b => b.classList.remove('active'));
+  document.querySelector('#rewardIconPicker .icon-option[data-icon="star"]').classList.add('active');
+  document.getElementById('rewardIcon').value = 'star';
 
   // Scroll to new item
   newItem.scrollIntoView({ behavior: 'smooth', block: 'center' });

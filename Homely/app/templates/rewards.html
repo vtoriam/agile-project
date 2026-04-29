@@ -258,15 +258,21 @@
               </div>
             </div>
 
-            <div class="col-sm-4">
-              <label class="form-label-custom">Icon (emoji)</label>
-              <input
-                class="form-control-custom text-center"
-                type="text"
-                id="rewardEmoji"
-                placeholder="🎁"
-                maxlength="2"
-              />
+            <div class="col-12">
+              <label class="form-label-custom">Icon</label>
+              <div class="icon-picker" id="rewardIconPicker">
+                <button type="button" class="icon-option active" data-icon="star"><i data-lucide="star"></i></button>
+                <button type="button" class="icon-option" data-icon="trophy"><i data-lucide="trophy"></i></button>
+                <button type="button" class="icon-option" data-icon="zap"><i data-lucide="zap"></i></button>
+                <button type="button" class="icon-option" data-icon="heart"><i data-lucide="heart"></i></button>
+                <button type="button" class="icon-option" data-icon="gift"><i data-lucide="gift"></i></button>
+                <button type="button" class="icon-option" data-icon="pizza"><i data-lucide="pizza"></i></button>
+                <button type="button" class="icon-option" data-icon="gamepad-2"><i data-lucide="gamepad-2"></i></button>
+                <button type="button" class="icon-option" data-icon="crown"><i data-lucide="crown"></i></button>
+                <button type="button" class="icon-option" data-icon="sofa"><i data-lucide="sofa"></i></button>
+                <button type="button" class="icon-option" data-icon="tv"><i data-lucide="tv"></i></button>
+              </div>
+              <input type="hidden" id="rewardIcon" value="star" />
             </div>
           </div>
 
