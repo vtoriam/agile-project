@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Log in | Homely{% endblock %}
+{% block content %}
+<section class="two-column">
+    <div class="panel hero-panel">
+        <span class="eyebrow">Checkpoint 3</span>
+        <h1>Welcome home.</h1>
+        <p>Sign in to manage your household with real Flask routes, Jinja templates, and SQLite-backed data.</p>
+        <ul class="feature-list">
+            <li>Persistent users and households</li>
+            <li>Shared roster view</li>
+            <li>Two-step sign-up flow</li>
+        </ul>
+    </div>
+
+    <div class="panel form-panel">
+        <span class="eyebrow">Log in</span>
+        <h2>Come on in</h2>
+        <form method="post" class="stack-form">
+            <label>Email
+                <input type="email" name="email" placeholder="aisha@example.com" required>
+            </label>
+            <label>Password
+                <input type="password" name="password" placeholder="password123" required>
+            </label>
+            <button type="submit" class="btn btn-primary">Log in</button>
+        </form>
+        <p class="muted-copy">Demo login: aisha@example.com / password123</p>
+        <p class="helper-links">No account yet? <a href="{{ url_for('signup') }}">Create one now</a>.</p>
+    </div>
+</section>
+{% endblock %}
