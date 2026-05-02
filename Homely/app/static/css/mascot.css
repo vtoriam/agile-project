@@ -10,7 +10,7 @@
   margin: 0;
   bottom: 16px;
   right: -40px;
-  z-index: 999;
+  z-index: 199;
 }
 
 .Character_spritesheet {
@@ -33,5 +33,49 @@
   }
   to {
     transform: translate3d(-100%, 0, 0);
+  }
+}
+
+/* ════════════════════════════
+   MASCOT — RESPONSIVE
+════════════════════════════ */
+
+/* The sprite is 100px * --pixel-size (4) = 400px wide, offset -40px = ~360px from right edge */
+/* We reserve that space in the stats border and shrink it as viewport narrows */
+
+.stats::before {
+  right: 200px;
+  transition: right 0.3s ease;
+}
+
+/* Shrink the reserved space as viewport narrows */
+@media (max-width: 1270px) {
+  .stats::before {
+    right: 250px;
+  }
+}
+
+@media (max-width: 700px) {
+  .stats::before {
+    right: 300px;
+  }
+}
+
+/* Below this breakpoint, mascot moves to bottom of page flow */
+@media (max-width: 560px) {
+  .stats::before {
+    right: 0; /* full-width line, mascot is no longer floating */
+  }
+
+  .Character {
+    position: static; /* leave fixed positioning */
+    display: block;
+    margin: 32px auto 0; /* centred below stats */
+    width: calc(100px * 2); /* scale down: pixel-size 2 on mobile */
+    height: calc(100px * 2);
+  }
+
+  .Character_spritesheet {
+    width: calc(400px * 2); /* match reduced pixel-size */
   }
 }
