@@ -22,6 +22,7 @@
   --success: #8a9e7a;
   --serif: "Playfair Display", serif;
   --sans: "Nunito", sans-serif;
+  --pixel-size: 4;
 }
 
 /* ════════════════════════════
@@ -432,6 +433,16 @@ svg[data-lucide] {
   gap: 16px;
   margin-top: 24px;
   padding-top: 20px;
+  position: relative;
+  border-top: none;
+}
+
+.stats::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 200px; /* increase this to pull the line further away from the right */
   border-top: 1.5px solid var(--border);
 }
 
@@ -464,11 +475,17 @@ svg[data-lucide] {
   font-weight: 700;
   color: #fff;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 
-.btn-add-task:hover { background: #b07248; }
-.btn-add-task:active { transform: scale(0.99); }
+.btn-add-task:hover {
+  background: #b07248;
+}
+.btn-add-task:active {
+  transform: scale(0.99);
+}
 
 /* ════════════════════════════
    MODAL
@@ -481,7 +498,9 @@ svg[data-lucide] {
   z-index: 100;
 }
 
-.modal-overlay.open { display: block; }
+.modal-overlay.open {
+  display: block;
+}
 
 .modal {
   display: none;
@@ -501,11 +520,19 @@ svg[data-lucide] {
   animation: modalIn 0.25s ease;
 }
 
-.modal.open { display: block; }
+.modal.open {
+  display: block;
+}
 
 @keyframes modalIn {
-  from { opacity: 0; transform: translate(-50%, -44%); }
-  to   { opacity: 1; transform: translate(-50%, -48%); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -44%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -48%);
+  }
 }
 
 .modal-header {
@@ -533,10 +560,15 @@ svg[data-lucide] {
   justify-content: center;
   cursor: pointer;
   color: var(--muted);
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 
-.modal-close:hover { border-color: var(--danger); color: var(--danger); }
+.modal-close:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
 
 .modal-body {
   padding: 20px 24px;
@@ -570,7 +602,9 @@ svg[data-lucide] {
   font-size: 14px;
   color: var(--text);
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   width: 100%;
 }
 
@@ -580,7 +614,9 @@ svg[data-lucide] {
   box-shadow: 0 0 0 3px rgba(193, 127, 90, 0.12);
 }
 
-.modal-field input::placeholder { color: #c5b9ae; }
+.modal-field input::placeholder {
+  color: #c5b9ae;
+}
 
 .modal-row {
   display: flex;
@@ -638,8 +674,15 @@ svg[data-lucide] {
   transition: all 0.2s;
 }
 
-.modal-cat:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
-.modal-cat.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.modal-cat:hover:not(.active) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.modal-cat.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 
 .modal-footer {
   padding: 0 24px 22px;
@@ -670,10 +713,15 @@ svg[data-lucide] {
   font-weight: 600;
   color: var(--muted);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 
-.modal-btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+.modal-btn-cancel:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
 
 .modal-btn-add {
   display: flex;
@@ -691,12 +739,17 @@ svg[data-lucide] {
   transition: background 0.2s;
 }
 
-.modal-btn-add:hover { background: #b07248; }
+.modal-btn-add:hover {
+  background: #b07248;
+}
 
 /* ════════════════════════════
    TASK META
 ════════════════════════════ */
-.task-body { flex: 1; min-width: 0; }
+.task-body {
+  flex: 1;
+  min-width: 0;
+}
 
 .task-meta {
   display: flex;
@@ -714,8 +767,13 @@ svg[data-lucide] {
   color: var(--muted);
 }
 
-.task-meta-item svg[data-lucide] { width: 11px; height: 11px; }
-.task-item.done .task-meta-item { opacity: 0.5; }
+.task-meta-item svg[data-lucide] {
+  width: 11px;
+  height: 11px;
+}
+.task-item.done .task-meta-item {
+  opacity: 0.5;
+}
 
 /* ════════════════════════════
    LEADERBOARD PAGE
