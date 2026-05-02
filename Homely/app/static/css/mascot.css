@@ -61,21 +61,24 @@
   }
 }
 
-/* Below this breakpoint, mascot moves to bottom of page flow */
 @media (max-width: 560px) {
   .stats::before {
-    right: 0; /* full-width line, mascot is no longer floating */
+    right: 0px;
   }
 
   .Character {
-    position: static; /* leave fixed positioning */
+    --pixel-size: 3px !important;
+    position: relative;
     display: block;
-    margin: 32px auto 0; /* centred below stats */
-    width: calc(100px * 2); /* scale down: pixel-size 2 on mobile */
-    height: calc(100px * 2);
+    margin: 0;
+    width: calc(100 * var(--pixel-size));
+    height: calc(100 * var(--pixel-size));
+    overflow: hidden;
+    bottom: -20px;
   }
 
   .Character_spritesheet {
-    width: calc(400px * 2); /* match reduced pixel-size */
+    width: calc(400 * var(--pixel-size));
+    position: absolute;
   }
 }
