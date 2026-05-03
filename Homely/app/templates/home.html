@@ -4,6 +4,10 @@ household_nav %} {% block page_styles %}
   rel="stylesheet"
   href="{{ url_for('static', filename='css/homely-styles.css') }}"
 />
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/mascot.css') }}"
+/>
 {% endblock %} {% block content %} {{ household_nav('dashboard') }}
 <main class="main-content home-main">
 <div class="greeting">
@@ -110,6 +114,15 @@ household_nav %} {% block page_styles %}
     <i data-lucide="clock"></i> To do: <span id="stat-rem">0</span>
   </div>
 </div>
+
+<div class="Character">
+    <img
+      class="Character_spritesheet pixelart"
+      src="{{ url_for('static', filename='sprite_sheet.png') }}"
+      alt="Character"
+      />
+  </div>
+
 </main>
 </div>
 

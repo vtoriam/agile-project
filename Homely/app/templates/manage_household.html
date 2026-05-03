@@ -1,57 +1,197 @@
-{% extends 'base.html' %}
-{% block title %}Manage household | Homely{% endblock %}
-{% block content %}
-<section class="panel dashboard-panel">
+{% extends 'base.html' %} {% block title %}Manage household | Homely {% endblock
+%} {% from 'partials/household_nav.html' import household_nav %} {% block
+page_styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/manage-household.css') }}"
+/>
+{% endblock %} {% block content %} {{ household_nav('settings') }}
+<main class="main-content">
+  <section class="panel dashboard-panel">
+    <!-- Page header -->
     <div class="section-head">
-        <div>
-            <span class="eyebrow">Household settings</span>
-            <h1>See who is in the household.</h1>
-            <p>This is Mohammad’s household-settings page turned into a real Jinja roster loaded from SQLite.</p>
-        </div>
-        <div class="action-row">
-            <span class="join-code-pill">Join code: {{ household.join_code }}</span>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to dashboard</a>
-        </div>
+      <div>
+        <span class="eyebrow">Manage household settings</span>
+        <h1>See who is in the household.</h1>
+        <p class="muted-copy">
+          This page lets members view the household roster, roles, points, and
+          invitation settings.
+        </p>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-homely">
+          <i data-lucide="user-plus"></i> Invite member
+        </button>
+        <button class="btn btn-outline-homely">
+          <i data-lucide="key-round"></i> Generate join code
+        </button>
+      </div>
     </div>
 
+    <!-- Stat cards -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <h3>{{ household.name }}</h3>
-            <p>Household name</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ members|length }}</h3>
-            <p>Members</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ household.reward_style }}</h3>
-            <p>Reward style</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ household.reminder_frequency }}</h3>
-            <p>Reminder cycle</p>
-        </div>
+      <div class="stat-card">
+        <div class="section-kicker">Household</div>
+        <h3>{{ household.name }}</h3>
+        <p class="muted-copy">
+          {{ members|length }} members · {{ household.reward_style }}
+        </p>
+      </div>
+      <div class="stat-card">
+        <div class="section-kicker">Rules</div>
+        <h3>{{ household.reward_style }}</h3>
+        <p class="muted-copy">
+          Recurring chores, bounty boosts, and {{ household.reminder_frequency
+          }} reminders enabled.
+        </p>
+      </div>
+      <div class="stat-card">
+        <div class="section-kicker">Admin controls</div>
+        <h3>Roles and invite access</h3>
+        <p class="muted-copy">
+          Admins can edit members, create codes, and manage household
+          permissions.
+        </p>
+      </div>
     </div>
 
-    <div class="member-grid">
-        {% for member in members %}
+    <div class="settings-layout">
+      <!-- Members roster -->
+      <div class="settings-main">
+        <section class="content-card">
+          <div class="content-card-header">
+            <div>
+              <div class="section-kicker">Members</div>
+              <h2>Current household roster</h2>
+            </div>
+            <select class="form-select">
+              <option selected>Sort by points</option>
+              <option>Sort by role</option>
+              <option>Sort by streak</option>
+            </select>
+          </div>
+
+          <div class="member-grid">
+            {% for member in members %}
             <article class="member-card">
-                <div class="member-top">
-                    <div>
-                        <h2>{{ member.user.display_name }}</h2>
-                        <p>{{ member.role }}</p>
-                    </div>
-                    {% if member.user_id == current_membership.user_id %}
-                        <span class="badge badge-success">You</span>
-                    {% endif %}
+              <div class="member-top">
+                <div class="member-identity">
+                  <div class="avatar-circle">
+                    <i data-lucide="user"></i>
+                  </div>
+                  <div>
+                    <h2>{{ member.user.display_name }}</h2>
+                    <p class="muted-copy">{{ member.role }}</p>
+                  </div>
                 </div>
-                <p>{{ member.bio }}</p>
-                <div class="member-metrics">
-                    <span>{{ member.points }} pts</span>
-                    <span>{{ member.streak }}-day streak</span>
+                <div class="member-badges">
+                  {% if member.user_id == current_membership.user_id %}
+                  <span class="badge badge-success">You</span>
+                  {% endif %} {% if member.role == 'admin' %}
+                  <span class="role-badge"
+                    ><i data-lucide="shield"></i> Admin</span
+                  >
+                  {% else %}
+                  <span class="role-badge"
+                    ><i data-lucide="user"></i> Member</span
+                  >
+                  {% endif %}
                 </div>
+              </div>
+
+              {% if member.bio %}
+              <p class="muted-copy member-bio">{{ member.bio }}</p>
+              {% endif %}
+
+              <div class="member-metrics">
+                <span class="points-badge"
+                  ><i data-lucide="trophy"></i> {{ member.points }} pts</span
+                >
+                <span class="streak-badge"
+                  ><i data-lucide="flame"></i> {{ member.streak }}-day
+                  streak</span
+                >
+              </div>
+
+              {% if current_membership.role == 'admin' and member.user_id !=
+              current_membership.user_id %}
+              <div class="member-actions">
+                <button class="btn btn-outline-homely btn-sm">Edit role</button>
+                <button class="btn btn-outline-homely btn-sm">Remove</button>
+              </div>
+              {% endif %}
             </article>
-        {% endfor %}
+            {% endfor %}
+
+            <!-- Open invite slot -->
+            <article class="member-card member-card--invite">
+              <div class="member-top">
+                <div class="member-identity">
+                  <div class="avatar-circle">
+                    <i data-lucide="user-plus"></i>
+                  </div>
+                  <div>
+                    <h2>Open invite slot</h2>
+                    <p class="muted-copy">Pending member</p>
+                  </div>
+                </div>
+                <span class="role-badge"
+                  ><i data-lucide="mail-plus"></i> Invite ready</span
+                >
+              </div>
+              <p class="muted-copy member-bio">
+                Reserve a spot for a new housemate and share an invite code from
+                this page.
+              </p>
+              <button class="btn btn-homely btn-sm">Send invitation</button>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="settings-sidebar">
+        <!-- Join code panel -->
+        <section class="content-card side-panel">
+          <div class="section-kicker">Join code</div>
+          <h2>Invite new members</h2>
+          <p class="muted-copy">
+            Share a short code so new users can join the household from sign-up.
+          </p>
+          <div class="join-code-display">
+            <span class="fw-bold">{{ household.join_code }}</span>
+            <span class="inline-code-soft">Active</span>
+          </div>
+          <div class="sidebar-actions">
+            <button class="btn btn-homely btn-sm">Copy code</button>
+            <button class="btn btn-outline-homely btn-sm">
+              Regenerate code
+            </button>
+          </div>
+        </section>
+
+        <!-- Permissions panel -->
+        <section class="content-card">
+          <div class="section-kicker">Permissions preview</div>
+          <table class="table table-soft">
+            <tbody>
+              <tr>
+                <th>Admins</th>
+                <td>Edit roles, remove members, manage rewards</td>
+              </tr>
+              <tr>
+                <th>Members</th>
+                <td>View scores, complete tasks, redeem rewards</td>
+              </tr>
+              <tr>
+                <th>Guests</th>
+                <td>Read-only access if added later</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
     </div>
-</section>
+  </section>
+</main>
 {% endblock %}
