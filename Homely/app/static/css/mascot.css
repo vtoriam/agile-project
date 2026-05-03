@@ -9,7 +9,7 @@
   position: fixed;
   margin: 0;
   bottom: 16px;
-  right: -40px;
+  right: -30px;
   z-index: 199;
 }
 
@@ -25,6 +25,10 @@
 
 .sitting-down {
   top: calc(-100px * var(--pixel-size));
+}
+
+.sleeping {
+  top: calc(-200px * var(--pixel-size));
 }
 
 @keyframes moveSpritesheet {
