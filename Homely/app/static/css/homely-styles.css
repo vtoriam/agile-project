@@ -1,39 +1,4 @@
-/* ════════════════════════════
-   RESET & ROOT VARIABLES
-════════════════════════════ */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  --bg: #faf7f2;
-  --surface: #ffffff;
-  --surface2: #f5f0e8;
-  --border: #e8dfd0;
-  --accent: #c17f5a;
-  --accent2: #8a9e7a;
-  --text: #3d342a;
-  --muted: #9e8e7e;
-  --danger: #c0604a;
-  --success: #8a9e7a;
-  --serif: "Playfair Display", serif;
-  --sans: "Nunito", sans-serif;
-  --pixel-size: 4;
-}
-
-/* ════════════════════════════
-   BASE
-════════════════════════════ */
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
-}
+/* RESET & ROOT VARIABLES moved to shared-styles.css */
 
 body::before {
   content: "";
