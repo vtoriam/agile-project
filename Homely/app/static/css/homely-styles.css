@@ -264,6 +264,31 @@ svg[data-lucide] {
   background: #b07248;
 }
 
+/* Task section header */
+.task-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  margin-top: 4px;
+}
+
+.task-section-title {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.task-section-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
 /* Task list */
 .task-list {
   display: flex;

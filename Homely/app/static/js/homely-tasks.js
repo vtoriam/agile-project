@@ -268,6 +268,21 @@ function renderTasks() {
     });
   }
 
+  // Update section heading
+  const sectionTitles = {
+    all:     'All Tasks',
+    pending: 'Pending',
+    done:    'Completed',
+  };
+  const title = sectionTitles[filter] || catLabel[filter] || 'Tasks';
+  const count = visible.length;
+  const countLabel = filter === 'done'
+    ? `${count} completed`
+    : `${count} task${count !== 1 ? 's' : ''} remaining`;
+
+  document.getElementById('task-section-title').textContent = title;
+  document.getElementById('task-section-count').textContent = count > 0 ? countLabel : '';
+
   // Update stats
   const done = tasks.filter(t => t.done).length;
   document.getElementById('stat-total').textContent = tasks.length;
