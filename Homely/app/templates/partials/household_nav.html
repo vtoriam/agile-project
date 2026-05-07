@@ -23,7 +23,8 @@
     </a>
     <a
       class="nav-item-custom {% if active_page == 'tasks' %}active{% endif %}"
-      href="#"
+      href="{{ url_for('home') }}"
+      onclick="if(typeof openModal !== 'undefined'){ event.preventDefault(); openModal(); }"
     >
       <i data-lucide="circle-check"></i> Add Tasks
     </a>

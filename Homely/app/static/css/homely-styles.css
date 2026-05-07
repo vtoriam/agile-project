@@ -843,23 +843,19 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
 
 .lb-title {
   font-family: var(--serif);
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin-bottom: 4px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text);
 }
 
 .lb-title svg[data-lucide] {
   width: 28px;
   height: 28px;
-  color: #c49a2a;
-}
-
-.lb-title span {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .lb-sub {
