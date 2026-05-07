@@ -54,5 +54,9 @@
       <i data-lucide="settings"></i> Settings
     </a>
   </nav>
-  {% endmacro %}
-</div>
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+{% endblock %}
+
+{% endmacro %}
