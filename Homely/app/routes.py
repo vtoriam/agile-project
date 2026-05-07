@@ -112,3 +112,8 @@ def manage_household():
         members=members,
         current_membership=current_membership
     )
+
+
+@app.route("/household/leave", methods=["POST"])
+def leave_household():
+    return redirect(url_for("home"))
