@@ -255,7 +255,7 @@ span {
 
 .settings-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr;
   gap: 24px;
   margin-top: 24px;
 }
@@ -300,7 +300,7 @@ span {
 
 .section-head h1 {
   font-family: "Playfair Display", serif;
-  font-size: 36px;
+  font-size: 1.75rem;
   font-weight: 700;
   margin: 6px 0 8px;
   line-height: 1.15;
@@ -426,16 +426,6 @@ span {
   border-style: dashed;
 }
 
-/* ════════════════════════════
-   SIDEBAR
-════════════════════════════ */
-
-.settings-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .side-panel {
   padding: 24px;
 }
@@ -495,6 +485,33 @@ span {
   color: var(--muted);
 }
 
+.danger-zone {
+  background: linear-gradient(180deg, #fff8f5 0%, #fffdfb 100%);
+  border: 1px solid rgba(190, 83, 58, 0.18);
+}
+
+.danger-zone h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 6px 0 8px;
+}
+
+.danger-zone form {
+  margin: 0;
+}
+
+.danger-link {
+  color: var(--danger);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  font-family: "Nunito", sans-serif;
+  padding: 0;
+}
+
 /* ════════════════════════════
    RESPONSIVE
 ════════════════════════════ */
@@ -511,14 +528,10 @@ span {
   .member-grid {
     grid-template-columns: 1fr;
   }
-
-  .settings-sidebar {
-    order: -1;
-  }
 }
 
 .manage-household-page {
-  padding: 2.5rem 3rem;
+  padding: 2.5rem 2.75rem;
 }
 
 .panel.dashboard-panel {

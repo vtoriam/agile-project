@@ -14,48 +14,28 @@ page_styles %}
         <span class="eyebrow">Manage household settings</span>
         <h1>See who is in the household.</h1>
         <p class="muted-copy">
-          This page lets members view the household roster, roles, points, and
-          invitation settings.
-        </p>
-      </div>
-      <div class="action-row">
-        <button class="btn btn-homely">
-          <i data-lucide="user-plus"></i> Invite member
-        </button>
-        <button class="btn btn-outline-homely">
-          <i data-lucide="key-round"></i> Generate join code
-        </button>
-      </div>
-    </div>
-
-    <!-- Stat cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="section-kicker">Household</div>
-        <h3>{{ household.name }}</h3>
-        <p class="muted-copy">
-          {{ members|length }} members · {{ household.reward_style }}
-        </p>
-      </div>
-      <div class="stat-card">
-        <div class="section-kicker">Rules</div>
-        <h3>{{ household.reward_style }}</h3>
-        <p class="muted-copy">
-          Recurring chores, bounty boosts, and {{ household.reminder_frequency
-          }} reminders enabled.
-        </p>
-      </div>
-      <div class="stat-card">
-        <div class="section-kicker">Admin controls</div>
-        <h3>Roles and invite access</h3>
-        <p class="muted-copy">
-          Admins can edit members, create codes, and manage household
-          permissions.
+          Manage household members, view join codes, and adjust settings.
         </p>
       </div>
     </div>
 
     <div class="settings-layout">
+      <section class="content-card side-panel">
+        <div class="section-kicker">Join code</div>
+        <h2>Invite new members</h2>
+        <p class="muted-copy">
+          Share a short code so new users can join the household from sign-up.
+        </p>
+        <div class="join-code-display">
+          <span class="fw-bold">{{ household.join_code }}</span>
+          <span class="inline-code-soft">Active</span>
+        </div>
+        <div class="sidebar-actions">
+          <button class="btn btn-homely btn-sm">Copy code</button>
+          <button class="btn btn-outline-homely btn-sm">Regenerate code</button>
+        </div>
+      </section>
+
       <!-- Members roster -->
       <div class="settings-main">
         <section class="content-card">
@@ -149,48 +129,40 @@ page_styles %}
         </section>
       </div>
 
-      <!-- Sidebar -->
-      <div class="settings-sidebar">
-        <!-- Join code panel -->
-        <section class="content-card side-panel">
-          <div class="section-kicker">Join code</div>
-          <h2>Invite new members</h2>
-          <p class="muted-copy">
-            Share a short code so new users can join the household from sign-up.
-          </p>
-          <div class="join-code-display">
-            <span class="fw-bold">{{ household.join_code }}</span>
-            <span class="inline-code-soft">Active</span>
-          </div>
-          <div class="sidebar-actions">
-            <button class="btn btn-homely btn-sm">Copy code</button>
-            <button class="btn btn-outline-homely btn-sm">
-              Regenerate code
-            </button>
-          </div>
-        </section>
+      <section class="content-card">
+        <div class="section-kicker">Permissions preview</div>
+        <table class="table table-soft">
+          <tbody>
+            <tr>
+              <th>Admins</th>
+              <td>Edit roles, remove members, manage rewards</td>
+            </tr>
+            <tr>
+              <th>Members</th>
+              <td>View scores, complete tasks, redeem rewards</td>
+            </tr>
+            <tr>
+              <th>Guests</th>
+              <td>Read-only access if added later</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-        <!-- Permissions panel -->
-        <section class="content-card">
-          <div class="section-kicker">Permissions preview</div>
-          <table class="table table-soft">
-            <tbody>
-              <tr>
-                <th>Admins</th>
-                <td>Edit roles, remove members, manage rewards</td>
-              </tr>
-              <tr>
-                <th>Members</th>
-                <td>View scores, complete tasks, redeem rewards</td>
-              </tr>
-              <tr>
-                <th>Guests</th>
-                <td>Read-only access if added later</td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-      </div>
+      <section class="content-card danger-zone">
+        <div class="section-kicker">Leave household</div>
+        <h2>Remove yourself from this household</h2>
+        <p class="muted-copy">
+          You will lose access to this household's tasks, rewards, and member list.
+        </p>
+        <form
+          method="post"
+          action="{{ url_for('leave_household') }}"
+          onsubmit="return confirm('Are you sure you want to leave this household?');"
+        >
+          <button type="submit" class="danger-link">Leave household</button>
+        </form>
+      </section>
     </div>
   </section>
 </main>
