@@ -1,31 +1,4 @@
-:root {
-  --bg: #faf7f2;
-  --surface: #ffffff;
-  --surface2: #f5f0e8;
-  --border: #e8dfd0;
-  --accent: #c17f5a;
-  --accent2: #8a9e7a;
-  --text: #3d342a;
-  --muted: #9e8e7e;
-  --danger: #c0604a;
-  --success: #8a9e7a;
-  --radius: 14px;
-  --serif: "Playfair Display", serif;
-  --sans: "Nunito", sans-serif;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  background: var(--bg);
-  font-family: var(--sans);
-  color: var(--text);
-  min-height: 100vh;
-}
+/* Variables and base reset moved to shared-styles.css */
 
 /* ── Main ──────────────────────────────────────── */
 .main-content {
