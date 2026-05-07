@@ -13,7 +13,7 @@ household_nav %} {% block page_styles %}
 <div class="greeting">
   <div class="greeting-sub" id="time-greeting">Good morning</div>
   <div class="greeting-title">
-    What needs doing, <span id="display-user"></span>?
+    What needs doing?
   </div>
 </div>
 
@@ -53,13 +53,7 @@ household_nav %} {% block page_styles %}
       </div>
       <div class="modal-field">
         <label>Done By</label>
-        <select id="modal-due">
-          <option value="Today">Today</option>
-          <option value="Tomorrow">Tomorrow</option>
-          <option value="This week">This week</option>
-          <option value="This month">This month</option>
-          <option value="No rush">No rush</option>
-        </select>
+        <input type="datetime-local" id="modal-due" />
       </div>
     </div>
     <div class="modal-field">

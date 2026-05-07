@@ -41,6 +41,12 @@ function guessCategory(text) {
   return 'other';
 }
 
+function formatDue(val) {
+  if (!val) return '';
+  const d = new Date(val);
+  return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+}
+
 // Re-render all Lucide icons after DOM changes
 function refreshIcons() {
   lucide.createIcons();
@@ -89,7 +95,7 @@ function closeModal() {
   document.getElementById('modal-task-name').value = '';
   document.getElementById('modal-assigned').value = '';
   document.getElementById('modal-points').value = '';
-  document.getElementById('modal-due').value = 'Today';
+  document.getElementById('modal-due').value = '';
   document.getElementById('modal-error').textContent = '';
   document.getElementById('modal-cat-select').value = 'cleaning';
   updateCatPreview();
@@ -118,6 +124,12 @@ function submitTask() {
   }
   if (!assigned) {
     errEl.textContent = 'Please select who this is assigned to.';
+    return;
+  }
+
+  if (points !== '' && (isNaN(parseInt(points)) || parseInt(points) < 1)) {
+    errEl.textContent = 'Points must be a positive number.';
+    document.getElementById('modal-points').focus();
     return;
   }
 
@@ -224,7 +236,8 @@ function renderTasks() {
           <div class="task-meta">
             ${t.assignedTo ? `<span class="task-meta-item"><i data-lucide="user"></i> ${t.assignedTo}</span>` : ''}
             ${t.points     ? `<span class="task-meta-item"><i data-lucide="zap"></i> ${t.points} pts</span>` : ''}
-            ${t.due        ? `<span class="task-meta-item"><i data-lucide="clock"></i> ${t.due}</span>` : ''}
+            ${t.due        ? `<span class="task-meta-item"><i data-lucide="clock"></i> ${formatDue(t.due)}</span>` : ''}
+            ${t.due && !t.done && new Date(t.due) < new Date() ? `<span class="overdue-badge"><i data-lucide="alert-circle"></i> Overdue</span>` : ''}
           </div>
         </div>
         <div class="task-cat">${t.cat}</div>

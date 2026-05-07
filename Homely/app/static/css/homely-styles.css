@@ -159,7 +159,7 @@ svg[data-lucide] {
 }
 
 .greeting-sub {
-  font-size: 13px;
+  font-size: 17px;
   color: var(--muted);
   margin-bottom: 4px;
 }
@@ -596,6 +596,63 @@ svg[data-lucide] {
   gap: 12px;
 }
 
+/* ════════════════════════════
+   DATETIME-LOCAL INPUT
+════════════════════════════ */
+input[type="datetime-local"] {
+  color-scheme: light;
+  color: var(--text);
+  min-width: 220px;
+  width: 100%;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  background-color: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  filter: opacity(0.6);
+  transition: filter 0.2s;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  filter: opacity(1);
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit {
+  color: var(--text);
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
+  background: transparent;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-text {
+  color: var(--muted);
+  padding: 0 2px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: var(--text);
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
+  background: var(--accent);
+  color: #fff;
+  outline: none;
+}
+
 .cat-select-wrap {
   display: flex;
   align-items: center;
@@ -746,6 +803,23 @@ svg[data-lucide] {
 }
 .task-item.done .task-meta-item {
   opacity: 0.5;
+}
+
+.overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--danger);
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+.overdue-badge svg[data-lucide] {
+  width: 11px;
+  height: 11px;
 }
 
 /* ════════════════════════════
