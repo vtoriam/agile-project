@@ -51,9 +51,13 @@ const catLabel = {
 // ════════════════════════════
 
 function setGreeting() {
-  const h = new Date().getHours();
+  const now = new Date();
+  const h = now.getHours();
   const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   document.getElementById('time-greeting').textContent = g;
+  document.getElementById('greeting-date').textContent = now.toLocaleDateString([], {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
 }
 
 function guessCategory(text) {

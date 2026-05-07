@@ -171,6 +171,12 @@ svg[data-lucide] {
   letter-spacing: -0.5px;
 }
 
+.greeting-date {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
 .greeting-title span {
   color: var(--accent);
 }
