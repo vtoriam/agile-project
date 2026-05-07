@@ -1,9 +1,7 @@
 {% macro household_nav(active_page='') %}
 <!-- Mobile topbar -->
 <header class="mobile-topbar">
-  <div class="topbar-logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" class="logo-img" height="45px"/>
-  </div>
+  <img class="topbar-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely"/>
   <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
     <span></span><span></span><span></span>
   </button>
@@ -15,9 +13,7 @@
 <div class="d-flex">
   <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" class="logo-img" width="180px"/>
-    </div>
+    <img class="sidebar-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely"/>
 
     <a
       class="nav-item-custom {% if active_page == 'dashboard' %}active{% endif %}"

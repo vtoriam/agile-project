@@ -67,23 +67,17 @@
   z-index: 300;
 }
 
-.sidebar-logo {
-  font-family: var(--serif);
-  font-weight: 800;
-  font-size: 1.3rem;
-  color: var(--text);
-  margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.topbar-logo, .sidebar-logo{
+  max-height: 100%;
+  max-width: 100%;
 }
 
-.sidebar-logo .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: inline-block;
+.topbar-logo {
+  padding: 5px;
+}
+
+.sidebar-logo {
+  margin-bottom: 2rem;
 }
 
 .nav-item-custom {
