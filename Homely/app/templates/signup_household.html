@@ -1,64 +1,175 @@
-{% extends 'base.html' %}
-{% block title %}Household setup | Homely{% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% block title %}Household setup | Homely{% endblock
+%} {% block page_styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/mohammad-signup-household.css') }}"
+/>
+{% endblock %} {% block content %}
 <section class="two-column">
-    <div class="panel hero-panel">
-        <span class="eyebrow">Step 2 of 2</span>
-        <h1>Create or join a household</h1>
-        <p>This page writes the shared-home part of the sign-up flow to the database. Users can either create a new household or join one using a real invite code.</p>
-        <ul class="feature-list">
-            <li>Stores household settings separately from personal details</li>
-            <li>Supports server-side join code validation</li>
-            <li>Turns the prototype into a real multi-step form</li>
-        </ul>
-    </div>
+  <div class="panel hero-panel">
+    <span class="eyebrow">Step 2 of 2</span>
+    <h1>Create or join a household</h1>
+    <p>
+      This page writes the shared-home part of the sign-up flow to the database.
+      Users can either create a new household or join one using a real invite
+      code.
+    </p>
+    <ul class="feature-list">
+      <li>Stores household settings separately from personal details</li>
+      <li>Supports server-side join code validation</li>
+      <li>Turns the prototype into a real multi-step form</li>
+    </ul>
+  </div>
 
-    <div class="panel form-panel">
-        <span class="eyebrow">Household setup</span>
-        <h2>Finish your sign-up</h2>
-        <form method="post" class="stack-form">
-            {% set action = form_data.get('household_action', 'create') %}
-            <label>Choose an option
-                <select name="household_action">
-                    <option value="create" {% if action == 'create' %}selected{% endif %}>Create a new household</option>
-                    <option value="join" {% if action == 'join' %}selected{% endif %}>Join an existing household</option>
-                </select>
-            </label>
+  <div class="panel form-panel">
+    <span class="eyebrow">Household setup</span>
+    <h2>Finish your sign-up</h2>
+    <form method="post" class="stack-form">
+      {% set action = form_data.get('household_action', 'create') %}
+      <label
+        >Choose an option
+        <select name="household_action">
+          <option
+            value="create"
+            {%
+            if
+            action=""
+            ="create"
+            %}selected{%
+            endif
+            %}
+          >
+            Create a new household
+          </option>
+          <option value="join" {% if action="" ="join" %}selected{% endif %}>
+            Join an existing household
+          </option>
+        </select>
+      </label>
 
-            <label>Role
-                {% set role = form_data.get('role', 'Member') %}
-                <select name="role">
-                    <option value="Member" {% if role == 'Member' %}selected{% endif %}>Member</option>
-                    <option value="Admin" {% if role == 'Admin' %}selected{% endif %}>Admin</option>
-                </select>
-            </label>
+      <label
+        >Role {% set role = form_data.get('role', 'Member') %}
+        <select name="role">
+          <option value="Member" {% if role="" ="Member" %}selected{% endif %}>
+            Member
+          </option>
+          <option value="Admin" {% if role="" ="Admin" %}selected{% endif %}>
+            Admin
+          </option>
+        </select>
+      </label>
 
-            <label>Household name
-                <input type="text" name="household_name" value="{{ form_data.get('household_name', '') }}" placeholder="The Clean Machine">
-            </label>
-            <label>Join code
-                <input type="text" name="join_code" value="{{ form_data.get('join_code', '') }}" placeholder="HM-72QA">
-            </label>
-            <label>Default rewards style
-                {% set reward_style = form_data.get('reward_style', 'Balanced') %}
-                <select name="reward_style">
-                    <option value="Balanced" {% if reward_style == 'Balanced' %}selected{% endif %}>Balanced</option>
-                    <option value="Competitive" {% if reward_style == 'Competitive' %}selected{% endif %}>Competitive</option>
-                    <option value="Collaborative" {% if reward_style == 'Collaborative' %}selected{% endif %}>Collaborative</option>
-                </select>
-            </label>
-            <label>Task reminders
-                {% set reminder_frequency = form_data.get('reminder_frequency', 'Weekly') %}
-                <select name="reminder_frequency">
-                    <option value="Weekly" {% if reminder_frequency == 'Weekly' %}selected{% endif %}>Weekly</option>
-                    <option value="Daily" {% if reminder_frequency == 'Daily' %}selected{% endif %}>Daily</option>
-                    <option value="Off" {% if reminder_frequency == 'Off' %}selected{% endif %}>Off</option>
-                </select>
-            </label>
-            <button type="submit" class="btn btn-primary">Create profile</button>
-        </form>
-        <p class="muted-copy">Tip: use join code <strong>HM-72QA</strong> to join the seeded demo household.</p>
-        <p class="helper-links"><a href="{{ url_for('signup') }}">Back to profile details</a></p>
-    </div>
+      <label
+        >Household name
+        <input
+          type="text"
+          name="household_name"
+          value="{{ form_data.get('household_name', '') }}"
+          placeholder="The Clean Machine"
+        />
+      </label>
+      <label
+        >Join code
+        <input
+          type="text"
+          name="join_code"
+          value="{{ form_data.get('join_code', '') }}"
+          placeholder="HM-72QA"
+        />
+      </label>
+      <label
+        >Default rewards style {% set reward_style =
+        form_data.get('reward_style', 'Balanced') %}
+        <select name="reward_style">
+          <option
+            value="Balanced"
+            {%
+            if
+            reward_style=""
+            ="Balanced"
+            %}selected{%
+            endif
+            %}
+          >
+            Balanced
+          </option>
+          <option
+            value="Competitive"
+            {%
+            if
+            reward_style=""
+            ="Competitive"
+            %}selected{%
+            endif
+            %}
+          >
+            Competitive
+          </option>
+          <option
+            value="Collaborative"
+            {%
+            if
+            reward_style=""
+            ="Collaborative"
+            %}selected{%
+            endif
+            %}
+          >
+            Collaborative
+          </option>
+        </select>
+      </label>
+      <label
+        >Task reminders {% set reminder_frequency =
+        form_data.get('reminder_frequency', 'Weekly') %}
+        <select name="reminder_frequency">
+          <option
+            value="Weekly"
+            {%
+            if
+            reminder_frequency=""
+            ="Weekly"
+            %}selected{%
+            endif
+            %}
+          >
+            Weekly
+          </option>
+          <option
+            value="Daily"
+            {%
+            if
+            reminder_frequency=""
+            ="Daily"
+            %}selected{%
+            endif
+            %}
+          >
+            Daily
+          </option>
+          <option
+            value="Off"
+            {%
+            if
+            reminder_frequency=""
+            ="Off"
+            %}selected{%
+            endif
+            %}
+          >
+            Off
+          </option>
+        </select>
+      </label>
+      <button type="submit" class="btn btn-primary">Create profile</button>
+    </form>
+    <p class="muted-copy">
+      Tip: use join code <strong>HM-72QA</strong> to join the seeded demo
+      household.
+    </p>
+    <p class="helper-links">
+      <a href="{{ url_for('signup') }}">Back to profile details</a>
+    </p>
+  </div>
 </section>
 {% endblock %}
