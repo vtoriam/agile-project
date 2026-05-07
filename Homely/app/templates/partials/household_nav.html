@@ -2,17 +2,7 @@
 <!-- Mobile topbar -->
 <header class="mobile-topbar">
   <div class="topbar-logo">
-    <span
-      class="dot"
-      style="
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--accent);
-        display: inline-block;
-      "
-    ></span>
-    HomeQuest
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" class="logo-img" height="45px"/>
   </div>
   <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
     <span></span><span></span><span></span>
@@ -25,7 +15,9 @@
 <div class="d-flex">
   <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="dot"></span> HomeQuest</div>
+    <div class="sidebar-logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" class="logo-img" width="180px"/>
+    </div>
 
     <a
       class="nav-item-custom {% if active_page == 'dashboard' %}active{% endif %}"
