@@ -112,18 +112,30 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  background: rgba(193, 127, 90, 0.1);
-  border: 1px solid rgba(193, 127, 90, 0.25);
-  color: var(--accent);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.15rem 0.55rem;
   border-radius: 20px;
+  border: 1px solid transparent;
 }
 
 .profile-role-badge svg[data-lucide] {
   width: 11px;
   height: 11px;
+}
+
+/* Admin — brown/accent */
+.profile-role-badge.admin {
+  background: rgba(193, 127, 90, 0.1);
+  border-color: rgba(193, 127, 90, 0.25);
+  color: var(--accent);
+}
+
+/* Member — green */
+.profile-role-badge.member {
+  background: rgba(138, 158, 122, 0.12);
+  border-color: rgba(138, 158, 122, 0.28);
+  color: var(--accent2);
 }
 
 .profile-since {

@@ -48,7 +48,8 @@ body::after {
 }
 
 .home-main {
-  max-width: 980px;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Lucide icon sizing */
@@ -156,6 +157,7 @@ svg[data-lucide] {
 /* Greeting */
 .greeting {
   margin-bottom: 32px;
+  max-width: 860px;
 }
 
 .greeting-sub {
@@ -186,6 +188,7 @@ svg[data-lucide] {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  max-width: 860px;
   margin-bottom: 20px;
 }
 
@@ -275,6 +278,7 @@ svg[data-lucide] {
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: 860px;
   margin-bottom: 12px;
   margin-top: 4px;
 }
@@ -300,6 +304,7 @@ svg[data-lucide] {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-width: 860px;
 }
 
 .task-item {
@@ -447,6 +452,7 @@ svg[data-lucide] {
   padding-top: 20px;
   position: relative;
   border-top: none;
+  max-width: 860px;
 }
 
 .stats::before {
