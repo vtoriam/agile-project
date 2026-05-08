@@ -23,14 +23,41 @@ const catIcon = {
   other:    'clipboard-list',
 };
 
+// Map category → accent colour
+const catColor = {
+  cleaning: '#c17f5a',
+  kitchen:  '#d4834a',
+  garden:   '#6a9e5a',
+  laundry:  '#5a7eb8',
+  shopping: '#9a6ab8',
+  trash:    '#8a9e7a',
+  pets:     '#d4a84a',
+  repairs:  '#6a8eb8',
+  bathroom: '#5ab0a8',
+  storage:  '#b89a5a',
+  other:    '#9e9087',
+};
+
+// Map category → display label
+const catLabel = {
+  cleaning: 'Cleaning', kitchen: 'Kitchen',  garden:   'Garden',
+  laundry:  'Laundry',  shopping: 'Shopping', trash:    'Bins & Trash',
+  pets:     'Pets',     repairs:  'Repairs',  bathroom: 'Bathroom',
+  storage:  'Storage',  other:    'Other',
+};
+
 // ════════════════════════════
 // UTILITIES
 // ════════════════════════════
 
 function setGreeting() {
-  const h = new Date().getHours();
+  const now = new Date();
+  const h = now.getHours();
   const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   document.getElementById('time-greeting').textContent = g;
+  document.getElementById('greeting-date').textContent = now.toLocaleDateString([], {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
 }
 
 function guessCategory(text) {
@@ -39,6 +66,12 @@ function guessCategory(text) {
   if (/cook|meal|dish|kitchen|grocery|groceries|food|bake|dinner|lunch|breakfast/.test(t)) return 'kitchen';
   if (/garden|plant|water|mow|lawn|weed|prune|flower|herb/.test(t)) return 'garden';
   return 'other';
+}
+
+function formatDue(val) {
+  if (!val) return '';
+  const d = new Date(val);
+  return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 // Re-render all Lucide icons after DOM changes
@@ -89,7 +122,7 @@ function closeModal() {
   document.getElementById('modal-task-name').value = '';
   document.getElementById('modal-assigned').value = '';
   document.getElementById('modal-points').value = '';
-  document.getElementById('modal-due').value = 'Today';
+  document.getElementById('modal-due').value = '';
   document.getElementById('modal-error').textContent = '';
   document.getElementById('modal-cat-select').value = 'cleaning';
   updateCatPreview();
@@ -118,6 +151,12 @@ function submitTask() {
   }
   if (!assigned) {
     errEl.textContent = 'Please select who this is assigned to.';
+    return;
+  }
+
+  if (points !== '' && (isNaN(parseInt(points)) || parseInt(points) < 1)) {
+    errEl.textContent = 'Points must be a positive number.';
+    document.getElementById('modal-points').focus();
     return;
   }
 
@@ -154,13 +193,6 @@ function setFilter(f) {
 
 function renderFilters() {
   const row = document.getElementById('cat-row');
-
-  const catLabel = {
-    cleaning: 'Cleaning', kitchen: 'Kitchen', garden: 'Garden',
-    laundry: 'Laundry',   shopping: 'Shopping', trash: 'Bins & Trash',
-    pets: 'Pets',         repairs: 'Repairs',   bathroom: 'Bathroom',
-    storage: 'Storage',   other: 'Other',
-  };
 
   // Only show category tabs for categories that still have incomplete tasks
   const activeCats = [...new Set(tasks.filter(t => !t.done).map(t => t.cat))];
@@ -209,25 +241,29 @@ function renderTasks() {
     empty.classList.remove('show');
 
     visible.forEach(t => {
-      const icon = catIcon[t.cat] || 'clipboard-list';
-      const el   = document.createElement('div');
+      const icon  = catIcon[t.cat]  || 'clipboard-list';
+      const color = catColor[t.cat] || '#9e9087';
+      const label = catLabel[t.cat] || t.cat;
+      const el    = document.createElement('div');
       el.className = 'task-item' + (t.done ? ' done' : '');
+      el.style.borderLeftColor = color;
       el.innerHTML = `
         <div class="task-check" onclick="toggleTask(${t.id})">
           <i data-lucide="check"></i>
         </div>
-        <div class="task-icon">
+        <div class="task-icon-pill" style="background:${color}18; color:${color}">
           <i data-lucide="${icon}"></i>
         </div>
         <div class="task-body">
           <div class="task-text">${t.text}</div>
           <div class="task-meta">
-            ${t.assignedTo ? `<span class="task-meta-item"><i data-lucide="user"></i> ${t.assignedTo}</span>` : ''}
-            ${t.points     ? `<span class="task-meta-item"><i data-lucide="zap"></i> ${t.points} pts</span>` : ''}
-            ${t.due        ? `<span class="task-meta-item"><i data-lucide="clock"></i> ${t.due}</span>` : ''}
+            ${t.assignedTo ? `<span class="task-chip chip-user"><i data-lucide="user"></i> ${t.assignedTo}</span>` : ''}
+            ${t.points     ? `<span class="task-chip chip-points"><i data-lucide="zap"></i> ${t.points} pts</span>` : ''}
+            ${t.due        ? `<span class="task-chip chip-due"><i data-lucide="clock"></i> ${formatDue(t.due)}</span>` : ''}
+            ${t.due && !t.done && new Date(t.due) < new Date() ? `<span class="overdue-badge"><i data-lucide="alert-circle"></i> Overdue</span>` : ''}
           </div>
         </div>
-        <div class="task-cat">${t.cat}</div>
+        <span class="task-cat-tag" style="background:${color}18; color:${color}; border-color:${color}40">${label}</span>
         <button class="task-del" onclick="deleteTask(${t.id})">
           <i data-lucide="x"></i>
         </button>
@@ -235,6 +271,21 @@ function renderTasks() {
       list.appendChild(el);
     });
   }
+
+  // Update section heading
+  const sectionTitles = {
+    all:     'All Tasks',
+    pending: 'Pending',
+    done:    'Completed',
+  };
+  const title = sectionTitles[filter] || catLabel[filter] || 'Tasks';
+  const count = visible.length;
+  const countLabel = filter === 'done'
+    ? `${count} completed`
+    : `${count} task${count !== 1 ? 's' : ''} remaining`;
+
+  document.getElementById('task-section-title').textContent = title;
+  document.getElementById('task-section-count').textContent = count > 0 ? countLabel : '';
 
   // Update stats
   const done = tasks.filter(t => t.done).length;

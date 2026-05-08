@@ -20,6 +20,99 @@
   margin-bottom: 2.25rem;
 }
 
+/* ── Stats summary cards ───────────────────────── */
+.stats-cards {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 140px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card-icon svg[data-lucide] {
+  width: 22px;
+  height: 22px;
+}
+
+.stat-card-value {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+
+.stat-card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card-points {
+  border-color: rgba(193, 127, 90, 0.3);
+  background: rgba(193, 127, 90, 0.04);
+}
+
+.stat-card-points .stat-card-icon {
+  background: rgba(193, 127, 90, 0.12);
+  color: var(--accent);
+}
+
+.stat-card-points .stat-card-value {
+  color: var(--accent);
+}
+
+.stat-card-rank {
+  border-color: rgba(154, 106, 184, 0.3);
+  background: rgba(154, 106, 184, 0.04);
+}
+
+.stat-card-rank .stat-card-icon {
+  background: rgba(154, 106, 184, 0.12);
+  color: #9a6ab8;
+}
+
+.stat-card-rank .stat-card-value {
+  color: #9a6ab8;
+}
+
+.stat-card-streak {
+  border-color: rgba(138, 158, 122, 0.3);
+  background: rgba(138, 158, 122, 0.04);
+}
+
+.stat-card-streak .stat-card-icon {
+  background: rgba(138, 158, 122, 0.15);
+  color: var(--accent2);
+}
+
+.stat-card-streak .stat-card-value {
+  color: var(--accent2);
+}
+
 /* ── Cards ─────────────────────────────────────── */
 .card-custom {
   background: var(--surface);
@@ -375,5 +468,18 @@ textarea.form-control-custom {
 
   .progress-bar-custom {
     max-width: 120px;
+  }
+
+  .stats-cards {
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    min-width: 120px;
+    padding: 1rem 1.25rem;
+  }
+
+  .stat-card-value {
+    font-size: 1.3rem;
   }
 }

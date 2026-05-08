@@ -159,7 +159,7 @@ svg[data-lucide] {
 }
 
 .greeting-sub {
-  font-size: 13px;
+  font-size: 17px;
   color: var(--muted);
   margin-bottom: 4px;
 }
@@ -169,6 +169,12 @@ svg[data-lucide] {
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.5px;
+}
+
+.greeting-date {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
 }
 
 .greeting-title span {
@@ -264,6 +270,31 @@ svg[data-lucide] {
   background: #b07248;
 }
 
+/* Task section header */
+.task-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  margin-top: 4px;
+}
+
+.task-section-title {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.task-section-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
 /* Task list */
 .task-list {
   display: flex;
@@ -274,20 +305,20 @@ svg[data-lucide] {
 .task-item {
   background: var(--surface);
   border: 1.5px solid var(--border);
+  border-left: 4px solid var(--border);
   border-radius: 12px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   animation: slideIn 0.2s ease;
-  transition:
-    box-shadow 0.2s,
-    opacity 0.2s;
+  transition: box-shadow 0.2s, opacity 0.2s;
 }
 
 .task-item:hover {
   box-shadow: 0 4px 16px rgba(61, 52, 42, 0.07);
 }
+
 .task-item.done {
   opacity: 0.5;
 }
@@ -323,11 +354,19 @@ svg[data-lucide] {
   border-color: var(--success);
 }
 
-.task-icon {
+.task-icon-pill {
   flex-shrink: 0;
-  color: var(--muted);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.task-icon-pill svg[data-lucide] {
+  width: 16px;
+  height: 16px;
 }
 
 .task-text {
@@ -341,16 +380,16 @@ svg[data-lucide] {
   color: var(--muted);
 }
 
-.task-cat {
+.task-cat-tag {
+  flex-shrink: 0;
   font-size: 11px;
   font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 6px;
-  background: var(--surface2);
-  color: var(--muted);
-  border: 1px solid var(--border);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+  text-transform: capitalize;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .task-del {
@@ -596,6 +635,63 @@ svg[data-lucide] {
   gap: 12px;
 }
 
+/* ════════════════════════════
+   DATETIME-LOCAL INPUT
+════════════════════════════ */
+input[type="datetime-local"] {
+  color-scheme: light;
+  color: var(--text);
+  min-width: 220px;
+  width: 100%;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  background-color: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  filter: opacity(0.6);
+  transition: filter 0.2s;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  filter: opacity(1);
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit {
+  color: var(--text);
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
+  background: transparent;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-text {
+  color: var(--muted);
+  padding: 0 2px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: var(--text);
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
+  background: var(--accent);
+  color: #fff;
+  outline: none;
+}
+
 .cat-select-wrap {
   display: flex;
   align-items: center;
@@ -731,21 +827,54 @@ svg[data-lucide] {
   margin-top: 4px;
 }
 
-.task-meta-item {
+.task-chip {
   display: inline-flex;
   align-items: center;
   gap: 3px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid;
 }
 
-.task-meta-item svg[data-lucide] {
+.task-chip svg[data-lucide] { width: 11px; height: 11px; }
+.task-item.done .task-chip { opacity: 0.5; }
+
+.chip-user {
+  background: rgba(61, 52, 42, 0.05);
+  color: var(--muted);
+  border-color: var(--border);
+}
+
+.chip-points {
+  background: rgba(193, 127, 90, 0.1);
+  color: var(--accent);
+  border-color: rgba(193, 127, 90, 0.25);
+}
+
+.chip-due {
+  background: transparent;
+  color: var(--muted);
+  border-color: transparent;
+  padding-left: 0;
+}
+
+.overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--danger);
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+.overdue-badge svg[data-lucide] {
   width: 11px;
   height: 11px;
-}
-.task-item.done .task-meta-item {
-  opacity: 0.5;
 }
 
 /* ════════════════════════════
@@ -769,23 +898,19 @@ svg[data-lucide] {
 
 .lb-title {
   font-family: var(--serif);
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin-bottom: 4px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text);
 }
 
 .lb-title svg[data-lucide] {
   width: 28px;
   height: 28px;
-  color: #c49a2a;
-}
-
-.lb-title span {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .lb-sub {
