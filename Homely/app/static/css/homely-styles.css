@@ -940,18 +940,34 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: var(--surface2);
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  border: 2px solid var(--border);
+  border: 2.5px solid var(--border);
+  transition: box-shadow 0.2s;
 }
 
+/* 1st — gold */
 .podium-slot.first .podium-avatar {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #fffbe8 0%, #fdf3c4 100%);
   border-color: #e8c98a;
-  background: #fffcf5;
+  box-shadow: 0 0 0 5px rgba(196, 154, 42, 0.15), 0 0 18px rgba(196, 154, 42, 0.25);
+}
+
+/* 2nd — silver */
+.podium-slot.second .podium-avatar {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e6e3 100%);
+  border-color: #c0bbb4;
+  box-shadow: 0 0 0 4px rgba(158, 144, 135, 0.12), 0 0 14px rgba(158, 144, 135, 0.2);
+}
+
+/* 3rd — bronze */
+.podium-slot.third .podium-avatar {
+  background: linear-gradient(135deg, #fdf3ec 0%, #f5e0cc 100%);
+  border-color: #d4a982;
+  box-shadow: 0 0 0 4px rgba(176, 114, 72, 0.12), 0 0 14px rgba(176, 114, 72, 0.2);
 }
 
 .podium-avatar svg[data-lucide] {
@@ -961,9 +977,21 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
 }
 
 .podium-slot.first .podium-avatar svg[data-lucide] {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   color: #c49a2a;
+}
+
+.podium-slot.second .podium-avatar svg[data-lucide] {
+  width: 22px;
+  height: 22px;
+  color: #9e9087;
+}
+
+.podium-slot.third .podium-avatar svg[data-lucide] {
+  width: 22px;
+  height: 22px;
+  color: #b07248;
 }
 
 .podium-name {
@@ -1096,6 +1124,24 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   height: 20px;
   color: var(--muted);
 }
+
+.rank-1-avatar {
+  background: linear-gradient(135deg, #fffbe8 0%, #fdf3c4 100%);
+  border-color: #e8c98a;
+}
+.rank-1-avatar svg[data-lucide] { color: #c49a2a; }
+
+.rank-2-avatar {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e6e3 100%);
+  border-color: #c0bbb4;
+}
+.rank-2-avatar svg[data-lucide] { color: #9e9087; }
+
+.rank-3-avatar {
+  background: linear-gradient(135deg, #fdf3ec 0%, #f5e0cc 100%);
+  border-color: #d4a982;
+}
+.rank-3-avatar svg[data-lucide] { color: #b07248; }
 
 .lb-info {
   flex: 1;
