@@ -1145,13 +1145,41 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
 
 .lb-info {
   flex: 1;
+  min-width: 0;
+}
+
+.lb-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.1rem;
+}
+
+.lb-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(138, 158, 122, 0.12);
+  border: 1px solid rgba(138, 158, 122, 0.28);
+  color: var(--accent2);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.lb-streak-badge svg[data-lucide] {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
 }
 
 .lb-person-name {
   font-size: 15px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 2px;
 }
 
 .lb-tasks-done {
