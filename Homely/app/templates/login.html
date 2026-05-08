@@ -1,32 +1,111 @@
 {% extends 'base.html' %}
-{% block title %}Log in | Homely{% endblock %}
-{% block content %}
-<section class="two-column">
-    <div class="panel hero-panel">
-        <span class="eyebrow">Checkpoint 3</span>
-        <h1>Welcome home.</h1>
-        <p>Sign in to manage your household with real Flask routes, Jinja templates, and SQLite-backed data.</p>
-        <ul class="feature-list">
-            <li>Persistent users and households</li>
-            <li>Shared roster view</li>
-            <li>Two-step sign-up flow</li>
-        </ul>
-    </div>
 
-    <div class="panel form-panel">
-        <span class="eyebrow">Log in</span>
-        <h2>Come on in</h2>
-        <form method="post" class="stack-form">
-            <label>Email
-                <input type="email" name="email" placeholder="aisha@example.com" required>
-            </label>
-            <label>Password
-                <input type="password" name="password" placeholder="password123" required>
-            </label>
-            <button type="submit" class="btn btn-primary">Log in</button>
-        </form>
-        <p class="muted-copy">Demo login: aisha@example.com / password123</p>
-        <p class="helper-links">No account yet? <a href="{{ url_for('signup') }}">Create one now</a>.</p>
+{% block page_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+
+  <!-- Left hero panel -->
+  <div class="login-hero">
+    <div class="login-hero-inner">
+      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
+      <h1 class="login-hero-title">Your household,<br>organised.</h1>
+      <p class="login-hero-sub">
+        Track chores, earn points, and keep everyone on the same page.
+      </p>
+      <ul class="login-feature-list">
+        <li><i data-lucide="check-circle"></i> Shared chore board</li>
+        <li><i data-lucide="zap"></i> Points &amp; rewards system</li>
+        <li><i data-lucide="trophy"></i> Household leaderboard</li>
+        <li><i data-lucide="flame"></i> Streaks &amp; milestone badges</li>
+      </ul>
     </div>
-</section>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-form-panel">
+    <div class="login-form-wrap">
+
+      <div class="login-form-header">
+        <div class="login-form-title">Welcome back</div>
+        <p class="login-form-sub">Sign in to your household account.</p>
+      </div>
+
+      {% if error %}
+      <div class="login-alert">
+        <i data-lucide="alert-circle"></i> {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('login') }}" id="loginForm" novalidate>
+
+        <div class="login-field">
+          <label class="login-label" for="email">Email Address</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="mail"></i></span>
+            <input
+              class="login-input"
+              type="email"
+              name="email"
+              id="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <span class="login-field-error" id="emailError"></span>
+        </div>
+
+        <div class="login-field">
+          <label class="login-label" for="password">Password</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="lock"></i></span>
+            <input
+              class="login-input"
+              type="password"
+              name="password"
+              id="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="login-pw-toggle" id="pwToggle" aria-label="Show password">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+          <span class="login-field-error" id="passwordError"></span>
+        </div>
+
+        <div class="login-options-row">
+          <label class="login-remember">
+            <input type="checkbox" name="remember" id="remember" />
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="login-forgot">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="login-btn">
+          <i data-lucide="log-in"></i> Sign In
+        </button>
+
+      </form>
+
+      <div class="login-divider"><span>or</span></div>
+
+      <p class="login-signup-link">
+        Don't have an account?
+        <a href="{{ url_for('signup') }}">Create one</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <script>lucide.createIcons();</script>
 {% endblock %}

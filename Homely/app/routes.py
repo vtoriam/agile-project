@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, request
 
 from app import app
 
@@ -11,6 +11,10 @@ def index():
 
 
 @app.route("/")
+def root():
+    return redirect(url_for("login"))
+
+
 @app.route("/home")
 def home():
     return render_template("home.html", title="Home")
@@ -36,9 +40,17 @@ def rewards():
     return render_template("rewards.html", title="Rewards")
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html", title="Login")
+    error = None
+    if request.method == "POST":
+        email    = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        if not email or not password:
+            error = "Please fill in all fields."
+        else:
+            return redirect(url_for("home"))
+    return render_template("login.html", title="Login", error=error)
 
 
 @app.route("/logout")
