@@ -16,19 +16,19 @@ household_nav %} {% block page_styles %}
 <!-- Podium -->
 <div class="podium">
   <div class="podium-slot second">
-    <div class="podium-avatar"><i data-lucide="user"></i></div>
+    <div class="podium-avatar"><i data-lucide="medal"></i></div>
     <div class="podium-name">Marcus</div>
     <div class="podium-points">340 pts</div>
     <div class="podium-bar"><span class="podium-rank">2</span></div>
   </div>
   <div class="podium-slot first">
-    <div class="podium-avatar"><i data-lucide="user"></i></div>
+    <div class="podium-avatar"><i data-lucide="crown"></i></div>
     <div class="podium-name">Bob</div>
     <div class="podium-points">520 pts</div>
     <div class="podium-bar"><span class="podium-rank">1</span></div>
   </div>
   <div class="podium-slot third">
-    <div class="podium-avatar"><i data-lucide="user"></i></div>
+    <div class="podium-avatar"><i data-lucide="award"></i></div>
     <div class="podium-name">Jamie</div>
     <div class="podium-points">210 pts</div>
     <div class="podium-bar"><span class="podium-rank">3</span></div>
@@ -39,9 +39,12 @@ household_nav %} {% block page_styles %}
 <div class="lb-list">
   <div class="lb-row rank-1">
     <div class="lb-pos">1</div>
-    <div class="lb-avatar"><i data-lucide="user"></i></div>
+    <div class="lb-avatar rank-1-avatar"><i data-lucide="crown"></i></div>
     <div class="lb-info">
-      <div class="lb-person-name">Bob</div>
+      <div class="lb-name-row">
+        <div class="lb-person-name">Bob</div>
+        <span class="lb-streak-badge"><i data-lucide="flame"></i> 4 day streak</span>
+      </div>
       <div class="lb-tasks-done">26 tasks completed</div>
       <div class="lb-bar-wrap">
         <div class="lb-bar-track">
@@ -57,9 +60,12 @@ household_nav %} {% block page_styles %}
 
   <div class="lb-row rank-2">
     <div class="lb-pos">2</div>
-    <div class="lb-avatar"><i data-lucide="user"></i></div>
+    <div class="lb-avatar rank-2-avatar"><i data-lucide="medal"></i></div>
     <div class="lb-info">
-      <div class="lb-person-name">Marcus</div>
+      <div class="lb-name-row">
+        <div class="lb-person-name">Marcus</div>
+        <span class="lb-streak-badge"><i data-lucide="flame"></i> 2 day streak</span>
+      </div>
       <div class="lb-tasks-done">17 tasks completed</div>
       <div class="lb-bar-wrap">
         <div class="lb-bar-track">
@@ -75,9 +81,11 @@ household_nav %} {% block page_styles %}
 
   <div class="lb-row rank-3">
     <div class="lb-pos">3</div>
-    <div class="lb-avatar"><i data-lucide="user"></i></div>
+    <div class="lb-avatar rank-3-avatar"><i data-lucide="award"></i></div>
     <div class="lb-info">
-      <div class="lb-person-name">Jamie</div>
+      <div class="lb-name-row">
+        <div class="lb-person-name">Jamie</div>
+      </div>
       <div class="lb-tasks-done">11 tasks completed</div>
       <div class="lb-bar-wrap">
         <div class="lb-bar-track">

@@ -15,34 +15,54 @@
           Update your personal details and how housemates see you.
         </p>
 
-        <!-- Stats row -->
-        <div class="d-flex gap-3 mb-4">
-          <span class="points-chip"><i data-lucide="zap"></i> 1,240 pts</span>
-          <span class="rank-chip"
-            ><i data-lucide="medal"></i> Rank #2 in household</span
-          >
+        <!-- Profile Header Card -->
+        <div class="profile-header-card">
+          <div class="profile-header-banner"></div>
+          <div class="profile-header-body">
+            <div class="profile-header-avatar-wrap">
+              <div class="profile-header-avatar" data-user-avatar-slot>
+                <i data-lucide="user-round"></i>
+              </div>
+            </div>
+            <div class="profile-header-info">
+              <div class="profile-header-name">John Smith</div>
+              <div class="profile-header-meta">
+                <span class="profile-role-badge admin">
+                  <i data-lucide="shield-check"></i> Admin
+                </span>
+                <span class="profile-since">
+                  <i data-lucide="calendar"></i> Member since Jan 2024
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="profile-header-stats">
+            <div class="profile-stat">
+              <div class="profile-stat-value">1,240</div>
+              <div class="profile-stat-label"><i data-lucide="zap"></i> Total Points</div>
+            </div>
+            <div class="profile-stat-divider"></div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">#2</div>
+              <div class="profile-stat-label"><i data-lucide="medal"></i> Household Rank</div>
+            </div>
+            <div class="profile-stat-divider"></div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">4</div>
+              <div class="profile-stat-label"><i data-lucide="flame"></i> Day Streak</div>
+            </div>
+            <div class="profile-stat-divider"></div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">26</div>
+              <div class="profile-stat-label"><i data-lucide="check-circle"></i> Tasks Done</div>
+            </div>
+          </div>
         </div>
 
         <!-- Avatar Card -->
         <div class="card-custom">
           <h6>Profile Picture</h6>
-
-          <div class="d-flex align-items-center gap-4 mb-4">
-            <div class="current-avatar-wrap">
-              <div class="current-avatar" data-user-avatar-slot>
-                <i data-lucide="user-round"></i>
-              </div>
-              <div class="avatar-badge">
-                <i data-lucide="pencil" style="width: 12px; height: 12px"></i>
-              </div>
-            </div>
-            <div class="avatar-info">
-              <h6>Current Avatar</h6>
-              <p>Choose an avatar below.</p>
-            </div>
-          </div>
-
-          <hr class="divider" />
+          <p class="field-hint mb-3">Choose an avatar — it updates everywhere instantly.</p>
 
           <div class="form-label-custom mb-2">Default Avatars</div>
           <div class="default-avatars">
