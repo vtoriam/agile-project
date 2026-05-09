@@ -1,0 +1,361 @@
+/* ── Login page layout ─────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ── Left hero panel ───────────────────────────── */
+.login-hero {
+  flex: 1;
+  background: linear-gradient(
+    160deg,
+    rgba(193, 127, 90, 0.18) 0%,
+    rgba(193, 127, 90, 0.08) 40%,
+    rgba(138, 158, 122, 0.12) 100%
+  );
+  border-right: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative blobs */
+.login-hero::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(ellipse, rgba(193, 127, 90, 0.14) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.login-hero::after {
+  content: "";
+  position: absolute;
+  bottom: -60px;
+  left: -60px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(ellipse, rgba(138, 158, 122, 0.14) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.login-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+}
+
+.login-logo {
+  height: 48px;
+  margin-bottom: 2.5rem;
+}
+
+.login-hero-title {
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.login-hero-sub {
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.login-feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.login-feature-list li svg[data-lucide] {
+  width: 17px;
+  height: 17px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Right form panel ──────────────────────────── */
+.login-form-panel {
+  width: 460px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+  background: var(--surface);
+}
+
+.login-form-wrap {
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-form-header {
+  margin-bottom: 2rem;
+}
+
+.login-form-title {
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+
+.login-form-sub {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* ── Alert (server-side error) ─────────────────── */
+.login-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(192, 96, 74, 0.08);
+  border: 1px solid rgba(192, 96, 74, 0.25);
+  color: var(--danger);
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.login-alert svg[data-lucide] {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* ── Form fields ───────────────────────────────── */
+.login-field {
+  margin-bottom: 1.1rem;
+}
+
+.login-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+
+.login-input-wrap {
+  position: relative;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.login-input-icon svg[data-lucide] {
+  width: 16px;
+  height: 16px;
+}
+
+.login-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 0.7rem 1rem 0.7rem 2.5rem;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.login-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(193, 127, 90, 0.14);
+}
+
+.login-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(192, 96, 74, 0.1);
+}
+
+/* password has extra right padding for the toggle button */
+#password {
+  padding-right: 2.8rem;
+}
+
+.login-pw-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.login-pw-toggle:hover {
+  color: var(--accent);
+}
+
+.login-pw-toggle svg[data-lucide] {
+  width: 16px;
+  height: 16px;
+}
+
+.login-field-error {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--danger);
+  margin-top: 0.3rem;
+  min-height: 1rem;
+}
+
+/* ── Remember / forgot row ─────────────────────── */
+.login-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.login-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.login-remember input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.login-forgot {
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-forgot:hover {
+  text-decoration: underline;
+}
+
+/* ── Submit button ─────────────────────────────── */
+.login-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.login-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.login-btn svg[data-lucide] {
+  width: 17px;
+  height: 17px;
+}
+
+/* ── Divider ───────────────────────────────────── */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Sign up link ──────────────────────────────── */
+.login-signup-link {
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.login-signup-link a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* ── Mobile ────────────────────────────────────── */
+@media (max-width: 767px) {
+  .login-hero {
+    display: none;
+  }
+
+  .login-form-panel {
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+}
