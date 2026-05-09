@@ -22,11 +22,10 @@
       <i data-lucide="layout-dashboard"></i> Dashboard
     </a>
     <a
-      class="nav-item-custom {% if active_page == 'tasks' %}active{% endif %}"
-      href="{{ url_for('home') }}"
-      onclick="if(typeof openModal !== 'undefined'){ event.preventDefault(); openModal(); }"
+      class="nav-item-custom {% if active_page == 'my_tasks' %}active{% endif %}"
+      href="{{ url_for('my_tasks') }}"
     >
-      <i data-lucide="circle-check"></i> Add Tasks
+      <i data-lucide="clipboard-list"></i> My Tasks
     </a>
     <a
       class="nav-item-custom {% if active_page == 'rewards' %}active{% endif %}"
