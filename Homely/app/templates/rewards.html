@@ -2,8 +2,8 @@
 {% from 'partials/household_nav.html' import household_nav %}
 
 {% block page_styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit-profile.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/rewards.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homely-styles.css') }}" />
 {% endblock %}
 
 {% block content %}
@@ -15,6 +15,12 @@
         <p class="page-subtitle">
           Unlock rewards by reaching point milestones or holding the #1 spot.
         </p>
+
+        <div class="add-row">
+          <button class="btn-add-task" onclick="openRewardModal()">
+            <i data-lucide="plus"></i> Add Custom Reward
+          </button>
+        </div>
 
         <!-- Stats cards -->
         <div class="stats-cards">
@@ -149,7 +155,7 @@
               <div class="reward-icon"><i data-lucide="gamepad-2"></i></div>
             </div>
             <div class="reward-body">
-              <div class="d-flex align-items-center gap-2">
+              <div class="reward-title-row">
                 <div class="reward-title">Game Night Host</div>
                 <span class="custom-tag">Custom</span>
               </div>
@@ -169,50 +175,45 @@
 
         </div>
 
-        <!-- Add Custom Reward -->
-        <div class="card-custom mt-4" id="addRewardCard">
-          <h6><i data-lucide="circle-plus"></i> Add Custom Reward</h6>
-          <p class="field-hint mb-3">
-            Create a reward specific to your household.
-          </p>
-
-          <div class="row g-3">
-            <div class="col-12">
-              <label class="form-label-custom">Reward Title</label>
-              <div class="input-with-icon">
-                <span class="input-icon"><i data-lucide="medal"></i></span>
-                <input
-                  class="form-control-custom"
-                  type="text"
-                  id="rewardTitle"
-                  placeholder="e.g. Pick the weekend movie"
-                />
-              </div>
+        <!-- Add Custom Reward Modal -->
+        <div class="modal-overlay" id="rewardModalOverlay" onclick="closeRewardModal()"></div>
+        <div class="modal" id="rewardModal">
+          <div class="modal-header">
+            <div class="modal-title">New Custom Reward</div>
+            <button class="modal-close" onclick="closeRewardModal()">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-field">
+              <label>Reward Title</label>
+              <input
+                type="text"
+                id="rewardTitle"
+                placeholder="e.g. Pick the weekend movie"
+              />
             </div>
 
-            <div class="col-12">
-              <label class="form-label-custom">Description</label>
+            <div class="modal-field">
+              <label>Description</label>
               <textarea
-                class="form-control-custom"
                 id="rewardDesc"
                 rows="2"
                 placeholder="Describe what this reward gives the person..."
               ></textarea>
             </div>
 
-            <div class="col-sm-6">
-              <label class="form-label-custom">Reward Type</label>
-              <select class="form-control-custom" id="rewardType">
+            <div class="modal-field">
+              <label>Reward Type</label>
+              <select id="rewardType">
                 <option value="points">Points threshold</option>
               </select>
             </div>
 
-            <div class="col-sm-6">
-              <label class="form-label-custom" id="thresholdLabel">Points Required</label>
-              <div class="input-with-icon">
-                <span class="input-icon" id="thresholdIcon"><i data-lucide="zap"></i></span>
+            <div class="modal-row">
+              <div class="modal-field">
+                <label id="thresholdLabel">Points Required</label>
                 <input
-                  class="form-control-custom"
                   type="number"
                   id="thresholdValue"
                   placeholder="e.g. 500"
@@ -221,28 +222,35 @@
               </div>
             </div>
 
-            <div class="col-12">
-              <label class="form-label-custom">Icon</label>
-              <div class="icon-picker" id="rewardIconPicker">
-                <button type="button" class="icon-option active" data-icon="star"><i data-lucide="star"></i></button>
-                <button type="button" class="icon-option" data-icon="trophy"><i data-lucide="trophy"></i></button>
-                <button type="button" class="icon-option" data-icon="zap"><i data-lucide="zap"></i></button>
-                <button type="button" class="icon-option" data-icon="heart"><i data-lucide="heart"></i></button>
-                <button type="button" class="icon-option" data-icon="gift"><i data-lucide="gift"></i></button>
-                <button type="button" class="icon-option" data-icon="pizza"><i data-lucide="pizza"></i></button>
-                <button type="button" class="icon-option" data-icon="gamepad-2"><i data-lucide="gamepad-2"></i></button>
-                <button type="button" class="icon-option" data-icon="crown"><i data-lucide="crown"></i></button>
-                <button type="button" class="icon-option" data-icon="sofa"><i data-lucide="sofa"></i></button>
-                <button type="button" class="icon-option" data-icon="tv"><i data-lucide="tv"></i></button>
+            <div class="modal-field">
+              <label>Icon</label>
+              <div class="cat-select-wrap">
+                <div class="cat-icon-preview" id="rewardIconPreview">
+                  <i data-lucide="star"></i>
+                </div>
+                <select id="rewardIcon" onchange="updateRewardIconPreview()">
+                  <option value="star" data-icon="star">Star</option>
+                  <option value="trophy" data-icon="trophy">Trophy</option>
+                  <option value="zap" data-icon="zap">Zap</option>
+                  <option value="heart" data-icon="heart">Heart</option>
+                  <option value="gift" data-icon="gift">Gift</option>
+                  <option value="pizza" data-icon="pizza">Pizza</option>
+                  <option value="gamepad-2" data-icon="gamepad-2">Gamepad</option>
+                  <option value="crown" data-icon="crown">Crown</option>
+                  <option value="sofa" data-icon="sofa">Sofa</option>
+                  <option value="tv" data-icon="tv">TV</option>
+                </select>
               </div>
-              <input type="hidden" id="rewardIcon" value="star" />
             </div>
           </div>
-
-          <div class="mt-3">
-            <button class="btn-primary-custom" id="addRewardBtn">
-              Add Reward
-            </button>
+          <div class="modal-footer">
+            <div class="modal-error" id="rewardModalError"></div>
+            <div class="modal-actions">
+              <button class="modal-btn-cancel" onclick="closeRewardModal()">Cancel</button>
+              <button class="modal-btn-add" onclick="submitReward()">
+                <i data-lucide="plus"></i> Add Reward
+              </button>
+            </div>
           </div>
         </div>
       </main>

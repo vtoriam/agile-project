@@ -57,20 +57,59 @@ document.getElementById("rewardIconPicker").addEventListener("click", (e) => {
   lucide.createIcons();
 });
 
+function openRewardModal() {
+  document.getElementById("rewardModal").classList.add("open");
+  document.getElementById("rewardModalOverlay").classList.add("open");
+  document.getElementById("rewardTitle").focus();
+  updateRewardIconPreview();
+  lucide.createIcons();
+}
+
+function closeRewardModal() {
+  document.getElementById("rewardModal").classList.remove("open");
+  document.getElementById("rewardModalOverlay").classList.remove("open");
+  document.getElementById("rewardTitle").value = "";
+  document.getElementById("rewardDesc").value = "";
+  document.getElementById("rewardType").value = "points";
+  document.getElementById("thresholdValue").value = "";
+  document.getElementById("rewardIcon").value = "star";
+  document.getElementById("rewardModalError").textContent = "";
+  updateRewardIconPreview();
+  lucide.createIcons();
+}
+
+function updateRewardIconPreview() {
+  const select = document.getElementById("rewardIcon");
+  const option = select.options[select.selectedIndex];
+  const icon = option?.dataset.icon || select.value || "star";
+  document.getElementById("rewardIconPreview").innerHTML =
+    `<i data-lucide="${icon}"></i>`;
+  lucide.createIcons();
+}
+
 // Add custom reward
-document.getElementById("addRewardBtn").addEventListener("click", () => {
+function submitReward() {
   const title = document.getElementById("rewardTitle").value.trim();
   const desc = document.getElementById("rewardDesc").value.trim();
+  const type = document.getElementById("rewardType").value || "points";
   const threshold = parseInt(document.getElementById("thresholdValue").value);
   const icon = document.getElementById("rewardIcon").value || "star";
+  const errEl = document.getElementById("rewardModalError");
 
   // Basic validation
   if (!title) {
+    errEl.textContent = "Please enter a reward title.";
     highlight("rewardTitle");
     return;
   }
   if (!threshold || threshold < 1) {
+    errEl.textContent = "Points must be a positive number.";
     highlight("thresholdValue");
+    return;
+  }
+
+  if (type !== "points") {
+    errEl.textContent = "Only point-based rewards are supported right now.";
     return;
   }
 
@@ -110,7 +149,7 @@ document.getElementById("addRewardBtn").addEventListener("click", () => {
       <div class="reward-icon ${isUnlocked ? "" : "muted"}"><i data-lucide="${icon}"></i></div>
     </div>
     <div class="reward-body">
-      <div class="d-flex align-items-center gap-2">
+      <div class="reward-title-row">
         <div class="reward-title">${title}</div>
         <span class="custom-tag">Custom</span>
       </div>
@@ -137,21 +176,11 @@ document.getElementById("addRewardBtn").addEventListener("click", () => {
   document.getElementById("rewardsList").appendChild(newItem);
   lucide.createIcons();
 
-  // Reset form
-  document.getElementById("rewardTitle").value = "";
-  document.getElementById("rewardDesc").value = "";
-  document.getElementById("thresholdValue").value = "";
-  document
-    .querySelectorAll("#rewardIconPicker .icon-option")
-    .forEach((b) => b.classList.remove("active"));
-  document
-    .querySelector('#rewardIconPicker .icon-option[data-icon="star"]')
-    .classList.add("active");
-  document.getElementById("rewardIcon").value = "star";
+  closeRewardModal();
 
   // Scroll to new item
   newItem.scrollIntoView({ behavior: "smooth", block: "center" });
-});
+}
 
 // Highlight invalid field briefly
 function highlight(id) {
@@ -178,3 +207,8 @@ function checkEmptyState() {
     list.appendChild(empty);
   }
 }
+
+window.openRewardModal = openRewardModal;
+window.closeRewardModal = closeRewardModal;
+window.submitReward = submitReward;
+window.updateRewardIconPreview = updateRewardIconPreview;
