@@ -96,6 +96,23 @@ span {
   color: white;
 }
 
+.btn-danger-soft {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-danger-soft:hover {
+  background: rgba(192, 96, 74, 0.1);
+  border-color: var(--danger);
+}
+
 .icon-tile,
 .avatar-tile {
   border: 1px solid var(--border);
@@ -374,6 +391,25 @@ span {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.member-card--current {
+  background: linear-gradient(
+    180deg,
+    rgba(193, 127, 90, 0.11) 0%,
+    rgba(255, 250, 245, 1) 100%
+  );
+  border-color: rgba(193, 127, 90, 0.35);
+  box-shadow: 0 10px 24px rgba(193, 127, 90, 0.08);
+}
+
+.member-card--current .member-identity h2 {
+  color: var(--accent);
+}
+
+.member-card--current .badge-success {
+  background: rgba(138, 158, 122, 0.18);
+  color: #5d6e52;
 }
 
 .member-top {

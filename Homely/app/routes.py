@@ -75,7 +75,7 @@ def login():
     return render_template("login.html", title="Login", error=error)
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
     logout_user()
     return redirect(url_for("login"))

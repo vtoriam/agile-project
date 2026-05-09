@@ -56,7 +56,9 @@ page_styles %}
 
           <div class="member-grid">
             {% for member in members %}
-            <article class="member-card">
+            <article
+              class="member-card {% if current_membership and member.user_id == current_membership.user_id %}member-card--current{% endif %}"
+            >
               <div class="member-top">
                 <div class="member-identity">
                   <div class="avatar-circle">
@@ -66,15 +68,6 @@ page_styles %}
                     <h2>{{ member.user.display_name }}</h2>
                     <p class="muted-copy">{{ member.role }}</p>
                   </div>
-                </div>
-                <div class="member-badges">
-                  {% if member.user_id == current_membership.user_id %}
-                  <span class="badge badge-success">You</span>
-                  {% endif %} {% if member.role == 'admin' %}
-                  <span class="role-badge"
-                    ><i data-lucide="shield"></i> Admin</span
-                  >
-                  {% endif %}
                 </div>
               </div>
 
@@ -93,10 +86,9 @@ page_styles %}
                 >
               </div>
 
-              {% if current_membership.role == 'admin' and member.user_id !=
-              current_membership.user_id %}
+              {% if current_membership and current_membership.role|lower ==
+              'admin' and member.user_id != current_membership.user_id %}
               <div class="member-actions">
-                <button class="btn btn-outline-homely btn-sm">Edit role</button>
                 <button
                   class="btn btn-danger-soft btn-sm"
                   data-title="Remove member"
@@ -210,11 +202,18 @@ page_styles %}
             Log out of your Homely account on this device.
           </p>
           <div class="logout-actions">
-            <a
-              href="{{ url_for('logout') }}"
+            <button
+              type="button"
               class="btn btn-outline-homely btn-sm"
-              >Logout</a
+              data-title="Sign out"
+              data-message="Are you sure you want to sign out?"
+              data-sub="You'll need to log in again to access your household."
+              data-label="Sign out"
+              data-action="{{ url_for('logout') }}"
+              onclick="openDangerModal(this)"
             >
+              Logout
+            </button>
           </div>
         </section>
       </div>
