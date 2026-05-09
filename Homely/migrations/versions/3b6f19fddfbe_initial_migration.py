@@ -45,7 +45,6 @@ def upgrade():
     sa.Column('household_id', sa.Integer(), nullable=False),
     sa.Column('role', sa.String(length=30), nullable=True),
     sa.Column('points', sa.Integer(), nullable=True),
-    sa.Column('streak', sa.Integer(), nullable=True),
     sa.Column('joined_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['household_id'], ['household.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),

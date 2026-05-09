@@ -47,7 +47,6 @@ page_styles %}
             <select class="form-select">
               <option selected>Sort by points</option>
               <option>Sort by role</option>
-              <option>Sort by streak</option>
             </select>
           </div>
 
@@ -86,10 +85,6 @@ page_styles %}
               <div class="member-metrics">
                 <span class="points-badge"
                   ><i data-lucide="trophy"></i> {{ member.points }} pts</span
-                >
-                <span class="streak-badge"
-                  ><i data-lucide="flame"></i> {{ member.streak }}-day
-                  streak</span
                 >
               </div>
 
@@ -153,12 +148,15 @@ page_styles %}
         <div class="section-kicker">Leave household</div>
         <h2>Remove yourself from this household</h2>
         <p class="muted-copy">
-          You will lose access to this household's tasks, rewards, and member list.
+          You will lose access to this household's tasks, rewards, and member
+          list.
         </p>
         <form
           method="post"
           action="{{ url_for('leave_household') }}"
-          onsubmit="return confirm('Are you sure you want to leave this household?');"
+          onsubmit="
+            return confirm('Are you sure you want to leave this household?');
+          "
         >
           <button type="submit" class="danger-link">Leave household</button>
         </form>

@@ -132,8 +132,7 @@ span {
 .step-chip,
 .info-chip,
 .role-badge,
-.points-badge,
-.streak-badge {
+.points-badge {
   border-radius: 999px;
   padding: 0.35rem 0.75rem;
   font-size: 12px;
@@ -162,11 +161,6 @@ span {
 .points-badge {
   background: rgba(138, 158, 122, 0.16);
   color: #5d6e52;
-}
-
-.streak-badge {
-  background: rgba(196, 154, 42, 0.16);
-  color: #8b6b18;
 }
 
 .manage-household-page .nav-homely {

@@ -19,19 +19,19 @@ household_nav %} {% block page_styles %}
     <div class="podium-avatar"><i data-lucide="medal"></i></div>
     <div class="podium-name"> {{ second.user.display_name }} </div>
     <div class="podium-points"> {{ second.points }} </div>
-    <div class="podium-bar"><span class="podium-rank">2</span></div>
+      <div class="podium-bar"><span class="podium-rank">2</span></div>
   </div>
   <div class="podium-slot first">
     <div class="podium-avatar"><i data-lucide="crown"></i></div>
     <div class="podium-name"> {{ first.user.display_name }} </div>
     <div class="podium-points"> {{ first.points }} </div>
-    <div class="podium-bar"><span class="podium-rank">1</span></div>
+      <div class="podium-bar"><span class="podium-rank">1</span></div>
   </div>
   <div class="podium-slot third">
     <div class="podium-avatar"><i data-lucide="award"></i></div>
     <div class="podium-name"> {{ third.user.display_name }} </div>
     <div class="podium-points"> {{ third.points }} </div>
-    <div class="podium-bar"><span class="podium-rank">3</span></div>
+      <div class="podium-bar"><span class="podium-rank">3</span></div>
   </div>
 </div>
 
@@ -43,7 +43,6 @@ household_nav %} {% block page_styles %}
     <div class="lb-info">
       <div class="lb-name-row">
         <div class="lb-person-name"> {{ first.user.display_name }} </div>
-        <span class="lb-streak-badge"><i data-lucide="flame"></i> {{ first.streak }} day streak</span>
       </div>
       <!-- <div class="lb-tasks-done">{{ first.tasks_completed }} tasks completed</div> -->
       <div class="lb-bar-wrap">
@@ -64,7 +63,6 @@ household_nav %} {% block page_styles %}
     <div class="lb-info">
       <div class="lb-name-row">
         <div class="lb-person-name"> {{ second.user.display_name }} </div>
-        <span class="lb-streak-badge"><i data-lucide="flame"></i> {{ second.streak }} day streak</span>
       </div>
       <!-- <div class="lb-tasks-done">{{ second.tasks_completed }} tasks completed</div> -->
       <div class="lb-bar-wrap">
@@ -85,7 +83,6 @@ household_nav %} {% block page_styles %}
     <div class="lb-info">
       <div class="lb-name-row">
         <div class="lb-person-name"> {{ third.user.display_name }} </div>
-        <span class="lb-streak-badge"><i data-lucide="flame"></i> {{ third.streak }} day streak</span>
       </div>
       <!-- <div class="lb-tasks-done">{{ third.tasks_completed }} tasks completed</div> -->
       <div class="lb-bar-wrap">
@@ -107,7 +104,6 @@ household_nav %} {% block page_styles %}
     <div class="lb-info">
       <div class="lb-name-row">
         <div class="lb-person-name"> {{ member.user.display_name }} </div>
-        <span class="lb-streak-badge"><i data-lucide="flame"></i> {{ member.streak }} day streak</span>
       </div>
       <!-- <div class="lb-tasks-done">{{ member.tasks_completed }} tasks completed</div> -->
       <div class="lb-bar-wrap">

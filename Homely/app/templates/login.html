@@ -1,17 +1,19 @@
-{% extends 'base.html' %}
-
-{% block page_styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
-{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block page_styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+{% endblock %} {% block content %}
 <div class="login-page">
-
   <!-- Left hero panel -->
   <div class="login-hero">
     <div class="login-hero-inner">
-      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
-      <h1 class="login-hero-title">Your household,<br>organised.</h1>
+      <img
+        class="login-logo"
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        alt="Homely"
+      />
+      <h1 class="login-hero-title">Your household,<br />organised.</h1>
       <p class="login-hero-sub">
         Track chores, earn points, and keep everyone on the same page.
       </p>
@@ -19,7 +21,6 @@
         <li><i data-lucide="check-circle"></i> Shared chore board</li>
         <li><i data-lucide="zap"></i> Points &amp; rewards system</li>
         <li><i data-lucide="trophy"></i> Household leaderboard</li>
-        <li><i data-lucide="flame"></i> Streaks &amp; milestone badges</li>
       </ul>
     </div>
   </div>
@@ -27,7 +28,6 @@
   <!-- Right form panel -->
   <div class="login-form-panel">
     <div class="login-form-wrap">
-
       <div class="login-form-header">
         <div class="login-form-title">Welcome back</div>
         <p class="login-form-sub">Sign in to your household account.</p>
@@ -39,8 +39,12 @@
       </div>
       {% endif %}
 
-      <form method="POST" action="{{ url_for('login') }}" id="loginForm" novalidate>
-
+      <form
+        method="POST"
+        action="{{ url_for('login') }}"
+        id="loginForm"
+        novalidate
+      >
         <div class="login-field">
           <label class="login-label" for="email">Email Address</label>
           <div class="login-input-wrap">
@@ -71,7 +75,12 @@
               autocomplete="current-password"
               required
             />
-            <button type="button" class="login-pw-toggle" id="pwToggle" aria-label="Show password">
+            <button
+              type="button"
+              class="login-pw-toggle"
+              id="pwToggle"
+              aria-label="Show password"
+            >
               <i data-lucide="eye"></i>
             </button>
           </div>
@@ -89,7 +98,6 @@
         <button type="submit" class="login-btn">
           <i data-lucide="log-in"></i> Sign In
         </button>
-
       </form>
 
       <div class="login-divider"><span>or</span></div>
@@ -98,14 +106,12 @@
         Don't have an account?
         <a href="{{ url_for('signup') }}">Create one</a>
       </p>
-
     </div>
   </div>
-
 </div>
-{% endblock %}
-
-{% block scripts %}
-    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
-    <script>lucide.createIcons();</script>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+<script>
+  lucide.createIcons();
+</script>
 {% endblock %}
