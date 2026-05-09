@@ -70,10 +70,6 @@ page_styles %}
                   <span class="role-badge"
                     ><i data-lucide="shield"></i> Admin</span
                   >
-                  {% else %}
-                  <span class="role-badge"
-                    ><i data-lucide="user"></i> Member</span
-                  >
                   {% endif %}
                 </div>
               </div>
@@ -85,6 +81,11 @@ page_styles %}
               <div class="member-metrics">
                 <span class="points-badge"
                   ><i data-lucide="trophy"></i> {{ member.points }} pts</span
+                >
+                <span class="chores-badge"
+                  ><i data-lucide="check"></i> {{ member.completed_chores }}
+                  chore{% if member.completed_chores != 1 %}s{% endif %}
+                  completed</span
                 >
               </div>
 
@@ -107,17 +108,9 @@ page_styles %}
                   </div>
                   <div>
                     <h2>Open invite slot</h2>
-                    <p class="muted-copy">Pending member</p>
                   </div>
                 </div>
-                <span class="role-badge"
-                  ><i data-lucide="mail-plus"></i> Invite ready</span
-                >
               </div>
-              <p class="muted-copy member-bio">
-                Reserve a spot for a new housemate and share an invite code from
-                this page.
-              </p>
               <button class="btn btn-homely btn-sm">Send invitation</button>
             </article>
           </div>
@@ -135,10 +128,6 @@ page_styles %}
             <tr>
               <th>Members</th>
               <td>View scores, complete tasks, redeem rewards</td>
-            </tr>
-            <tr>
-              <th>Guests</th>
-              <td>Read-only access if added later</td>
             </tr>
           </tbody>
         </table>

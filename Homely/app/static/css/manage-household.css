@@ -163,6 +163,18 @@ span {
   color: #5d6e52;
 }
 
+.chores-badge {
+  background: rgba(138, 158, 122, 0.16);
+  color: #5d6e52;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .manage-household-page .nav-homely {
   background: rgba(250, 247, 242, 0.92);
   border-bottom: 1px solid var(--border);

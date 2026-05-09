@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from flask import render_template, redirect, url_for, request
 
 from app import app, db
-from app.models import User, Household, Membership
+from app.models import User, Household, Membership, Task
 from flask_login import login_user, logout_user, current_user, login_required
 
 @app.route("/index")
@@ -104,11 +104,21 @@ def manage_household():
     current_membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
         household_id=household.id    ).first() if household else None
+    members = db.session.query(Membership).filter_by(household_id=household.id).all() if household else []
+
+    for member in members:
+        completed_chores = db.session.query(Task).filter_by(
+            household_id=household.id,
+            assigned_user_id=member.user_id,
+            is_completed=True,
+        ).count() if household else 0
+        member.completed_chores = completed_chores
+
     return render_template(
         "manage_household.html",
         title="Manage Household",
         household=db.session.query(Household).first(),
-        members= db.session.query(Membership).filter_by(household_id=household.id).all() if household else [],
+        members=members,
         current_membership=current_membership
     )
 
