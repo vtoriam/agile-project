@@ -77,7 +77,8 @@
 }
 
 .sidebar-logo {
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
+  padding-inline: 15%;
 }
 
 .nav-item-custom {

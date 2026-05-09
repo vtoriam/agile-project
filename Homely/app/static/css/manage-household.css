@@ -132,8 +132,7 @@ span {
 .step-chip,
 .info-chip,
 .role-badge,
-.points-badge,
-.streak-badge {
+.points-badge {
   border-radius: 999px;
   padding: 0.35rem 0.75rem;
   font-size: 12px;
@@ -164,9 +163,16 @@ span {
   color: #5d6e52;
 }
 
-.streak-badge {
-  background: rgba(196, 154, 42, 0.16);
-  color: #8b6b18;
+.chores-badge {
+  background: rgba(138, 158, 122, 0.16);
+  color: #5d6e52;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .manage-household-page .nav-homely {
@@ -501,6 +507,30 @@ span {
   margin: 0;
 }
 
+.household-footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+}
+
+.logout-zone {
+  align-self: stretch;
+}
+
+.logout-zone h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 6px 0 8px;
+}
+
+.logout-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .danger-link {
   color: var(--danger);
   font-size: 0.9rem;
@@ -518,6 +548,10 @@ span {
 
 @media (max-width: 991px) {
   .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .household-footer-grid {
     grid-template-columns: 1fr;
   }
 

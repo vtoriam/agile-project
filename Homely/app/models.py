@@ -1,6 +1,7 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db
+from app import db, login
+from flask_login import UserMixin
 
 
 class Household(db.Model):
@@ -25,7 +26,7 @@ class Household(db.Model):
         return f"<Household {self.name}>"
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(120), nullable=False)
     display_name = db.Column(db.String(80), nullable=False)
@@ -62,7 +63,6 @@ class Membership(db.Model):
     household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
     role = db.Column(db.String(30), default="member")
     points = db.Column(db.Integer, default=0)
-    streak = db.Column(db.Integer, default=0)
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship("User", back_populates="memberships")
@@ -95,3 +95,33 @@ class Task(db.Model):
 
     def __repr__(self):
         return f"<Task {self.title}>"
+
+@login.user_loader
+def load_user(user_id):
+    return db.session.get(User, user_id)
+
+def create_sample_data():
+    # Create sample users
+    user1 = User(full_name="Aisha Khan", display_name="Aisha", email="aisha@example.com")
+    user2 = User(full_name="Jordan Khan", display_name="Jordan", email="jordan@example.com")
+    user3 = User(full_name="Mohammad Khan", display_name="Mohammad", email="mohammad@example.com")
+
+    user1.set_password("password123")
+    user2.set_password("password123")
+    user3.set_password("password123")
+
+    db.session.add_all([user1, user2, user3])
+    db.session.commit()
+
+    # Create sample household
+    household = Household(name="Khan Family", join_code="HM-72QA")
+    db.session.add(household)
+    db.session.commit()
+
+    # Create memberships
+    membership1 = Membership(user_id=user1.id, household_id=household.id, role="Admin", points=120)
+    membership2 = Membership(user_id=user2.id, household_id=household.id, role="Member", points=95)
+    membership3 = Membership(user_id=user3.id, household_id=household.id, role="Member", points=80)
+
+    db.session.add_all([membership1, membership2, membership3])
+    db.session.commit()
