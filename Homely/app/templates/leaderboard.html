@@ -17,19 +17,19 @@ household_nav %} {% block page_styles %}
 <div class="podium">
   <div class="podium-slot second">
     <div class="podium-avatar"><i data-lucide="medal"></i></div>
-    <div class="podium-name">Marcus</div>
+    <div class="podium-name lb-person-clickable" data-person="Marcus">Marcus</div>
     <div class="podium-points">340 pts</div>
     <div class="podium-bar"><span class="podium-rank">2</span></div>
   </div>
   <div class="podium-slot first">
     <div class="podium-avatar"><i data-lucide="crown"></i></div>
-    <div class="podium-name">Bob</div>
+    <div class="podium-name lb-person-clickable" data-person="Bob">Bob</div>
     <div class="podium-points">520 pts</div>
     <div class="podium-bar"><span class="podium-rank">1</span></div>
   </div>
   <div class="podium-slot third">
     <div class="podium-avatar"><i data-lucide="award"></i></div>
-    <div class="podium-name">Jamie</div>
+    <div class="podium-name lb-person-clickable" data-person="Jamie">Jamie</div>
     <div class="podium-points">210 pts</div>
     <div class="podium-bar"><span class="podium-rank">3</span></div>
   </div>
@@ -42,7 +42,7 @@ household_nav %} {% block page_styles %}
     <div class="lb-avatar rank-1-avatar"><i data-lucide="crown"></i></div>
     <div class="lb-info">
       <div class="lb-name-row">
-        <div class="lb-person-name">Bob</div>
+        <div class="lb-person-name lb-person-clickable" data-person="Bob">Bob</div>
         <span class="lb-streak-badge"><i data-lucide="flame"></i> 4 day streak</span>
       </div>
       <div class="lb-tasks-done">26 tasks completed</div>
@@ -63,7 +63,7 @@ household_nav %} {% block page_styles %}
     <div class="lb-avatar rank-2-avatar"><i data-lucide="medal"></i></div>
     <div class="lb-info">
       <div class="lb-name-row">
-        <div class="lb-person-name">Marcus</div>
+        <div class="lb-person-name lb-person-clickable" data-person="Marcus">Marcus</div>
         <span class="lb-streak-badge"><i data-lucide="flame"></i> 2 day streak</span>
       </div>
       <div class="lb-tasks-done">17 tasks completed</div>
@@ -84,7 +84,7 @@ household_nav %} {% block page_styles %}
     <div class="lb-avatar rank-3-avatar"><i data-lucide="award"></i></div>
     <div class="lb-info">
       <div class="lb-name-row">
-        <div class="lb-person-name">Jamie</div>
+        <div class="lb-person-name lb-person-clickable" data-person="Jamie">Jamie</div>
       </div>
       <div class="lb-tasks-done">11 tasks completed</div>
       <div class="lb-bar-wrap">
@@ -100,13 +100,54 @@ household_nav %} {% block page_styles %}
   </div>
 </div>
 
+<!-- Person summary popup -->
+<div class="person-overlay" id="personOverlay" onclick="closePersonModal()"></div>
+<div class="person-modal" id="personModal">
+  <button class="person-modal-close" onclick="closePersonModal()">
+    <i data-lucide="x"></i>
+  </button>
+  <div class="person-modal-header">
+    <div class="person-modal-avatar" id="modalAvatar"></div>
+    <div class="person-modal-info">
+      <div class="person-modal-name" id="modalName"></div>
+      <div class="person-modal-rank" id="modalRank"></div>
+    </div>
+  </div>
+  <div class="person-modal-stats">
+    <div class="person-stat">
+      <div class="person-stat-value" id="modalTotal"></div>
+      <div class="person-stat-label"><i data-lucide="check-circle"></i> Total Completed</div>
+    </div>
+    <div class="person-stat on-time">
+      <div class="person-stat-value" id="modalOnTime"></div>
+      <div class="person-stat-label"><i data-lucide="clock"></i> On Time</div>
+    </div>
+    <div class="person-stat overdue">
+      <div class="person-stat-value" id="modalLate"></div>
+      <div class="person-stat-label"><i data-lucide="alert-circle"></i> After Deadline</div>
+    </div>
+  </div>
+  <div class="person-modal-breakdown">
+    <div class="breakdown-label">
+      <span>On-time rate</span>
+      <span id="modalRate"></span>
+    </div>
+    <div class="breakdown-bar-track">
+      <div class="breakdown-bar-fill" id="modalBarFill"></div>
+      <div class="breakdown-bar-late" id="modalBarLate"></div>
+    </div>
+    <div class="breakdown-legend">
+      <span class="legend-dot on-time-dot"></span> On time
+      <span class="legend-dot late-dot"></span> After deadline
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 
 {% endblock %}
 
 {% block scripts %}
-<script>
-  lucide.createIcons();
-</script>
+<script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
 {% endblock %}

@@ -1239,6 +1239,232 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   background: #c49a7a;
 }
 
+/* ── Clickable person names ────────────────────── */
+.lb-person-clickable {
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.lb-person-clickable:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* Podium names are already styled differently */
+.podium-name.lb-person-clickable:hover {
+  color: var(--accent);
+}
+
+/* ── Person summary popup ──────────────────────── */
+.person-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 52, 42, 0.35);
+  z-index: 400;
+}
+
+.person-overlay.open {
+  display: block;
+}
+
+.person-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -48%) scale(0.97);
+  z-index: 401;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 1.75rem;
+  width: 340px;
+  max-width: calc(100vw - 2rem);
+  box-shadow: 0 8px 40px rgba(61, 52, 42, 0.14);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.person-modal.open {
+  display: block;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.person-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.person-modal-close:hover {
+  background: #f8e8e3;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.person-modal-close svg[data-lucide] {
+  width: 13px;
+  height: 13px;
+}
+
+.person-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.person-modal-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.person-modal-avatar svg[data-lucide] {
+  width: 24px;
+  height: 24px;
+}
+
+.person-modal-name {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.person-modal-rank {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+/* Stats row */
+.person-modal-stats {
+  display: flex;
+  gap: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.person-stat {
+  flex: 1;
+  text-align: center;
+  padding: 0.85rem 0.5rem;
+  border-right: 1px solid var(--border);
+}
+
+.person-stat:last-child {
+  border-right: none;
+}
+
+.person-stat-value {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.person-stat-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.person-stat-label svg[data-lucide] {
+  width: 10px;
+  height: 10px;
+}
+
+.person-stat.on-time .person-stat-value { color: var(--accent2); }
+.person-stat.overdue .person-stat-value { color: var(--danger); }
+
+/* Breakdown bar */
+.person-modal-breakdown {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+
+.breakdown-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.breakdown-bar-track {
+  height: 8px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--border);
+  display: flex;
+}
+
+.breakdown-bar-fill {
+  height: 100%;
+  background: var(--accent2);
+  border-radius: 99px 0 0 99px;
+  transition: width 0.4s ease;
+}
+
+.breakdown-bar-late {
+  height: 100%;
+  background: var(--danger);
+  opacity: 0.6;
+  transition: width 0.4s ease;
+}
+
+.breakdown-legend {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.25rem;
+}
+
+.on-time-dot { background: var(--accent2); }
+.late-dot    { background: var(--danger); opacity: 0.6; }
+
 /* ════════════════════════════
    ANIMATIONS
 ════════════════════════════ */
