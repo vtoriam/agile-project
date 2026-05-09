@@ -32,20 +32,12 @@
               <div class="stat-card-label">Household Rank</div>
             </div>
           </div>
-          <div class="stat-card stat-card-streak">
-            <div class="stat-card-icon"><i data-lucide="flame"></i></div>
-            <div class="stat-card-body">
-              <div class="stat-card-value">4</div>
-              <div class="stat-card-label">Day Streak</div>
-            </div>
-          </div>
         </div>
 
         <!-- Filter tabs -->
         <div class="filter-tabs mb-4">
           <button class="filter-tab active" data-filter="all">All</button>
           <button class="filter-tab" data-filter="points">Points</button>
-          <button class="filter-tab" data-filter="streak">Streak</button>
           <button class="filter-tab" data-filter="unlocked">Unlocked</button>
           <button class="filter-tab" data-filter="custom">Custom</button>
         </div>
@@ -122,52 +114,6 @@
             </div>
             <div class="reward-status">
               <div class="status-locked"><i data-lucide="lock"></i> 760 pts away</div>
-            </div>
-          </div>
-
-          <!-- Streak reward - unlocked -->
-          <div class="reward-item unlocked" data-type="streak">
-            <div class="reward-icon-wrap">
-              <div class="reward-icon"><i data-lucide="brush"></i></div>
-            </div>
-            <div class="reward-body">
-              <div class="reward-title">Assign a Chore to Someone Else</div>
-              <p class="reward-desc">
-                Redirect one of your assigned chores to another household member
-                of your choice.
-              </p>
-              <div class="reward-condition">
-                <span class="condition-badge streak-badge"><i data-lucide="flame"></i> 3 day streak at #1</span>
-              </div>
-            </div>
-            <div class="reward-status">
-              <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
-            </div>
-          </div>
-
-          <!-- Streak reward - locked -->
-          <div class="reward-item locked" data-type="streak">
-            <div class="reward-icon-wrap">
-              <div class="reward-icon muted"><i data-lucide="crown"></i></div>
-            </div>
-            <div class="reward-body">
-              <div class="reward-title">Household MVP Badge</div>
-              <p class="reward-desc">
-                Earn a special MVP badge displayed on your profile and the
-                leaderboard for a full week.
-              </p>
-              <div class="reward-condition">
-                <span class="condition-badge streak-badge"><i data-lucide="flame"></i> 7 day streak at #1</span>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-bar-custom streak-bar">
-                  <div class="progress-fill streak-fill" style="width: 57%"></div>
-                </div>
-                <span class="progress-label">4 / 7 days</span>
-              </div>
-            </div>
-            <div class="reward-status">
-              <div class="status-locked"><i data-lucide="lock"></i> 3 days away</div>
             </div>
           </div>
 
@@ -258,7 +204,6 @@
               <label class="form-label-custom">Reward Type</label>
               <select class="form-control-custom" id="rewardType">
                 <option value="points">Points threshold</option>
-                <option value="streak">Leaderboard streak</option>
               </select>
             </div>
 

@@ -63,7 +63,6 @@ class Membership(db.Model):
     household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
     role = db.Column(db.String(30), default="member")
     points = db.Column(db.Integer, default=0)
-    streak = db.Column(db.Integer, default=0)
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship("User", back_populates="memberships")
@@ -120,9 +119,9 @@ def create_sample_data():
     db.session.commit()
 
     # Create memberships
-    membership1 = Membership(user_id=user1.id, household_id=household.id, role="Admin", points=120, streak=5)
-    membership2 = Membership(user_id=user2.id, household_id=household.id, role="Member", points=95, streak=3)
-    membership3 = Membership(user_id=user3.id, household_id=household.id, role="Member", points=80, streak=2)
+    membership1 = Membership(user_id=user1.id, household_id=household.id, role="Admin", points=120)
+    membership2 = Membership(user_id=user2.id, household_id=household.id, role="Member", points=95)
+    membership3 = Membership(user_id=user3.id, household_id=household.id, role="Member", points=80)
 
     db.session.add_all([membership1, membership2, membership3])
     db.session.commit()

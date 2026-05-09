@@ -317,7 +317,9 @@ svg[data-lucide] {
   align-items: center;
   gap: 12px;
   animation: slideIn 0.2s ease;
-  transition: box-shadow 0.2s, opacity 0.2s;
+  transition:
+    box-shadow 0.2s,
+    opacity 0.2s;
 }
 
 .task-item:hover {
@@ -557,7 +559,8 @@ svg[data-lucide] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22px 24px 0;
+  padding: 22px 24px 0px;
+  border-bottom: none;
 }
 
 .modal-title {
@@ -592,7 +595,7 @@ svg[data-lucide] {
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
 }
 
 .modal-field {
@@ -844,8 +847,13 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   border: 1px solid;
 }
 
-.task-chip svg[data-lucide] { width: 11px; height: 11px; }
-.task-item.done .task-chip { opacity: 0.5; }
+.task-chip svg[data-lucide] {
+  width: 11px;
+  height: 11px;
+}
+.task-item.done .task-chip {
+  opacity: 0.5;
+}
 
 .chip-user {
   background: rgba(61, 52, 42, 0.05);
@@ -959,21 +967,27 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   height: 64px;
   background: linear-gradient(135deg, #fffbe8 0%, #fdf3c4 100%);
   border-color: #e8c98a;
-  box-shadow: 0 0 0 5px rgba(196, 154, 42, 0.15), 0 0 18px rgba(196, 154, 42, 0.25);
+  box-shadow:
+    0 0 0 5px rgba(196, 154, 42, 0.15),
+    0 0 18px rgba(196, 154, 42, 0.25);
 }
 
 /* 2nd — silver */
 .podium-slot.second .podium-avatar {
   background: linear-gradient(135deg, #f5f5f5 0%, #e8e6e3 100%);
   border-color: #c0bbb4;
-  box-shadow: 0 0 0 4px rgba(158, 144, 135, 0.12), 0 0 14px rgba(158, 144, 135, 0.2);
+  box-shadow:
+    0 0 0 4px rgba(158, 144, 135, 0.12),
+    0 0 14px rgba(158, 144, 135, 0.2);
 }
 
 /* 3rd — bronze */
 .podium-slot.third .podium-avatar {
   background: linear-gradient(135deg, #fdf3ec 0%, #f5e0cc 100%);
   border-color: #d4a982;
-  box-shadow: 0 0 0 4px rgba(176, 114, 72, 0.12), 0 0 14px rgba(176, 114, 72, 0.2);
+  box-shadow:
+    0 0 0 4px rgba(176, 114, 72, 0.12),
+    0 0 14px rgba(176, 114, 72, 0.2);
 }
 
 .podium-avatar svg[data-lucide] {
@@ -1135,19 +1149,25 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   background: linear-gradient(135deg, #fffbe8 0%, #fdf3c4 100%);
   border-color: #e8c98a;
 }
-.rank-1-avatar svg[data-lucide] { color: #c49a2a; }
+.rank-1-avatar svg[data-lucide] {
+  color: #c49a2a;
+}
 
 .rank-2-avatar {
   background: linear-gradient(135deg, #f5f5f5 0%, #e8e6e3 100%);
   border-color: #c0bbb4;
 }
-.rank-2-avatar svg[data-lucide] { color: #9e9087; }
+.rank-2-avatar svg[data-lucide] {
+  color: #9e9087;
+}
 
 .rank-3-avatar {
   background: linear-gradient(135deg, #fdf3ec 0%, #f5e0cc 100%);
   border-color: #d4a982;
 }
-.rank-3-avatar svg[data-lucide] { color: #b07248; }
+.rank-3-avatar svg[data-lucide] {
+  color: #b07248;
+}
 
 .lb-info {
   flex: 1;
@@ -1160,26 +1180,6 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.1rem;
-}
-
-.lb-streak-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  background: rgba(138, 158, 122, 0.12);
-  border: 1px solid rgba(138, 158, 122, 0.28);
-  color: var(--accent2);
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 0.15rem 0.55rem;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-
-.lb-streak-badge svg[data-lucide] {
-  width: 11px;
-  height: 11px;
-  flex-shrink: 0;
 }
 
 .lb-person-name {
@@ -1261,5 +1261,45 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .modal {
+    top: 50px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100vh - 50px);
+    border-radius: 0;
+    border-bottom: none;
+  }
+
+  .modal.open {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .modal-close {
+    display: none;
+  }
+
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
