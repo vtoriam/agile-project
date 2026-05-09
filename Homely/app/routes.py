@@ -25,6 +25,11 @@ def dashboard():
     return render_template("home.html", title="Dashboard")
 
 
+@app.route("/my-tasks")
+def my_tasks():
+    return render_template("my-tasks.html", title="My Tasks")
+
+
 @app.route("/leaderboard")
 def leaderboard():
     return render_template("leaderboard.html", title="Leaderboard")
@@ -58,18 +63,40 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/signup")
+@app.route("/signup", methods=["GET", "POST"])
 def signup():
-    return render_template("signup.html", title="Sign Up", form_data={})
+    error = None
+    form_data = {}
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        if not all([
+            form_data.get("first_name"),
+            form_data.get("last_name"),
+            form_data.get("display_name"),
+            form_data.get("email"),
+            form_data.get("password"),
+        ]):
+            error = "Please fill in all required fields."
+        elif form_data.get("password") != form_data.get("confirm_password"):
+            error = "Passwords do not match."
+        else:
+            return redirect(url_for("signup_household"))
+    return render_template("signup.html", title="Sign Up", form_data=form_data, error=error)
 
 
-@app.route("/signup/household")
-@app.route("/signup-household")
+@app.route("/signup/household", methods=["GET", "POST"])
+@app.route("/signup-household", methods=["GET", "POST"])
 def signup_household():
+    error = None
+    form_data = {}
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        return redirect(url_for("home"))
     return render_template(
         "signup_household.html",
         title="Household Setup",
-        form_data={}
+        form_data=form_data,
+        error=error
     )
 
 

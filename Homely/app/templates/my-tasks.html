@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% from 'partials/household_nav.html' import household_nav %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/homely-styles.css') }}" />
+{% endblock %}
+
+{% block content %}
+{{ household_nav('my_tasks') }}
+<main class="main-content home-main">
+
+  <div class="greeting">
+    <div class="greeting-sub" id="time-greeting">Good morning</div>
+    <div class="greeting-title">My Tasks</div>
+    <div class="greeting-date" id="greeting-date"></div>
+  </div>
+
+  <div class="add-row">
+    <button class="btn-add-task" onclick="openModal()">
+      <i data-lucide="plus"></i> Add Task
+    </button>
+  </div>
+
+  <!-- Add Task Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+  <div class="modal" id="taskModal">
+    <div class="modal-header">
+      <div class="modal-title">New Task</div>
+      <button class="modal-close" onclick="closeModal()">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label>Task Name</label>
+        <input type="text" id="modal-task-name" placeholder="e.g. Vacuum the living room" />
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Points</label>
+          <input type="number" id="modal-points" placeholder="e.g. 20" min="1" max="999" />
+        </div>
+        <div class="modal-field">
+          <label>Done By</label>
+          <input type="datetime-local" id="modal-due" />
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Category</label>
+        <div class="cat-select-wrap">
+          <div class="cat-icon-preview" id="catIconPreview">
+            <i data-lucide="sparkles"></i>
+          </div>
+          <select id="modal-cat-select" onchange="updateCatPreview()">
+            <option value="cleaning"  data-icon="sparkles">Cleaning</option>
+            <option value="kitchen"   data-icon="utensils">Kitchen</option>
+            <option value="garden"    data-icon="leaf">Garden</option>
+            <option value="laundry"   data-icon="shirt">Laundry</option>
+            <option value="shopping"  data-icon="shopping-cart">Shopping</option>
+            <option value="trash"     data-icon="trash-2">Bins &amp; Trash</option>
+            <option value="pets"      data-icon="paw-print">Pets</option>
+            <option value="repairs"   data-icon="wrench">Repairs</option>
+            <option value="bathroom"  data-icon="bath">Bathroom</option>
+            <option value="storage"   data-icon="package">Storage</option>
+            <option value="other"     data-icon="clipboard-list">Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-error" id="modal-error"></div>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-btn-add" onclick="submitTask()">
+          <i data-lucide="plus"></i> Add Task
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-row" id="cat-row"></div>
+
+  <div class="task-section-header" id="task-section-header">
+    <span class="task-section-title" id="task-section-title">My Tasks</span>
+    <span class="task-section-count" id="task-section-count"></span>
+  </div>
+
+  <div class="task-list" id="task-list"></div>
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon"><i data-lucide="clipboard-list"></i></div>
+    No tasks assigned to you yet — add one above!
+  </div>
+
+  <div class="stats">
+    <div class="stat"><i data-lucide="list"></i> Tasks: <span id="stat-total">0</span></div>
+    <div class="stat"><i data-lucide="check"></i> Done: <span id="stat-done">0</span></div>
+    <div class="stat"><i data-lucide="clock"></i> To do: <span id="stat-rem">0</span></div>
+  </div>
+
+</main>
+</div>
+
+<script src="{{ url_for('static', filename='js/my-tasks.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mascot-state.js') }}"></script>
+
+{% endblock %}
