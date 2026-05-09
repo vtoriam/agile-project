@@ -507,6 +507,30 @@ span {
   margin: 0;
 }
 
+.household-footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+}
+
+.logout-zone {
+  align-self: stretch;
+}
+
+.logout-zone h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 6px 0 8px;
+}
+
+.logout-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .danger-link {
   color: var(--danger);
   font-size: 0.9rem;
@@ -524,6 +548,10 @@ span {
 
 @media (max-width: 991px) {
   .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .household-footer-grid {
     grid-template-columns: 1fr;
   }
 

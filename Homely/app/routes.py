@@ -126,3 +126,22 @@ def manage_household():
 @app.route("/household/leave", methods=["POST"])
 def leave_household():
     return redirect(url_for("home"))
+
+
+@app.route("/household/delete", methods=["POST"])
+@login_required
+def delete_household():
+    household = db.session.query(Household).first()
+    if not household:
+        return redirect(url_for("home"))
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not membership or membership.role.lower() != "admin":
+        return redirect(url_for("manage_household"))
+
+    db.session.delete(household)
+    db.session.commit()
+    return redirect(url_for("home"))

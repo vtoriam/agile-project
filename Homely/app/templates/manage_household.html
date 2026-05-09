@@ -133,23 +133,61 @@ page_styles %}
         </table>
       </section>
 
-      <section class="content-card danger-zone">
-        <div class="section-kicker">Leave household</div>
-        <h2>Remove yourself from this household</h2>
-        <p class="muted-copy">
-          You will lose access to this household's tasks, rewards, and member
-          list.
-        </p>
-        <form
-          method="post"
-          action="{{ url_for('leave_household') }}"
-          onsubmit="
-            return confirm('Are you sure you want to leave this household?');
-          "
-        >
-          <button type="submit" class="danger-link">Leave household</button>
-        </form>
-      </section>
+      <div class="household-footer-grid">
+        <section class="content-card danger-zone">
+          {% set is_admin = current_membership and current_membership.role|lower
+          == 'admin' %} {% if is_admin %}
+          <div class="section-kicker">Delete household</div>
+          <h2>Delete this household</h2>
+          <p class="muted-copy">
+            This will permanently remove the household, members, tasks, and
+            rewards.
+          </p>
+          <form
+            method="post"
+            action="{{ url_for('delete_household') }}"
+            onsubmit="
+              return confirm(
+                'Are you sure you want to delete this household? This cannot be undone.',
+              );
+            "
+          >
+            <button type="submit" class="danger-link">Delete household</button>
+          </form>
+          {% else %}
+          <div class="section-kicker">Leave household</div>
+          <h2>Remove yourself from this household</h2>
+          <p class="muted-copy">
+            You will lose access to this household's tasks, rewards, and member
+            list.
+          </p>
+          <form
+            method="post"
+            action="{{ url_for('leave_household') }}"
+            onsubmit="
+              return confirm('Are you sure you want to leave this household?');
+            "
+          >
+            <button type="submit" class="danger-link">Leave household</button>
+          </form>
+          {% endif %}
+        </section>
+
+        <section class="content-card logout-zone">
+          <div class="section-kicker">Account</div>
+          <h2>Sign out</h2>
+          <p class="muted-copy">
+            Log out of your Homely account on this device.
+          </p>
+          <div class="logout-actions">
+            <a
+              href="{{ url_for('logout') }}"
+              class="btn btn-outline-homely btn-sm"
+              >Logout</a
+            >
+          </div>
+        </section>
+      </div>
     </div>
   </section>
 </main>
