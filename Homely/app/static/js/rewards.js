@@ -1,5 +1,6 @@
-// Current user stats (in a real app these would come from a database)
-const USER_POINTS = 1240;
+// Current user stats provided by the server
+const rewardsPage = document.getElementById("rewardsPage");
+const USER_POINTS = Number(rewardsPage?.dataset.userPoints || 0);
 
 // Filter tabs
 const filterTabs = document.querySelectorAll(".filter-tab");
@@ -82,12 +83,12 @@ document.getElementById("addRewardBtn").addEventListener("click", () => {
   const remaining = threshold - USER_POINTS;
   statusText = isUnlocked
     ? "✓ Unlocked"
-    : `🔒 ${remaining.toLocaleString()} pts away`;
+    : `<i data-lucide="lock"></i> ${remaining.toLocaleString()} pts away`;
   const progressPct = Math.min(
     100,
     Math.round((USER_POINTS / threshold) * 100),
   );
-  conditionHTML = `<span class="condition-badge points-badge">⚡ ${threshold.toLocaleString()} pts</span>`;
+  conditionHTML = `<span class="condition-badge points-badge"><i data-lucide="zap"></i> ${threshold.toLocaleString()} pts</span>`;
   if (!isUnlocked) {
     conditionHTML += `
       <div class="progress-wrap">
@@ -173,7 +174,7 @@ function checkEmptyState() {
   if (visible.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
-    empty.innerHTML = `<div class="empty-icon">🎁</div><p>No rewards in this category yet.</p>`;
+    empty.innerHTML = `<div class="empty-icon"><i data-lucide="gift"></i></div><p>No rewards in this category yet.</p>`;
     list.appendChild(empty);
   }
 }

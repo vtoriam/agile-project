@@ -10,7 +10,7 @@
     {{ household_nav('rewards') }}
 
       <!-- Main -->
-      <main class="main-content">
+      <main class="main-content" id="rewardsPage" data-user-points="{{ user_points|default(0) }}">
         <div class="page-title">Rewards</div>
         <p class="page-subtitle">
           Unlock rewards by reaching point milestones or holding the #1 spot.
@@ -21,14 +21,14 @@
           <div class="stat-card stat-card-points">
             <div class="stat-card-icon"><i data-lucide="zap"></i></div>
             <div class="stat-card-body">
-              <div class="stat-card-value">1,240</div>
+              <div class="stat-card-value">{{ "{:,}".format(user_points|default(0)) }}</div>
               <div class="stat-card-label">Total Points</div>
             </div>
           </div>
           <div class="stat-card stat-card-rank">
             <div class="stat-card-icon"><i data-lucide="medal"></i></div>
             <div class="stat-card-body">
-              <div class="stat-card-value">#2</div>
+              <div class="stat-card-value">#{{ household_rank|default(1) }}</div>
               <div class="stat-card-label">Household Rank</div>
             </div>
           </div>
