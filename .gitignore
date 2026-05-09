@@ -7,3 +7,27 @@ __pycache__/
 .venv/
 venv/
 Homely/venv/
+
+# Environment variables
+.env
+.flaskenv
+
+# Flask instance folder
+instance/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Testing
+.pytest_cache/
+
+# Package distribution
+*.egg-info/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
