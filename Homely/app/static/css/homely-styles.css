@@ -669,6 +669,12 @@ svg[data-lucide] {
 .modal-row {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-row .modal-field {
+  min-width: 220px;
+  flex: 1 1 220px;
 }
 
 .modal::-webkit-scrollbar {
