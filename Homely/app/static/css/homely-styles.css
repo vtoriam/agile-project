@@ -535,9 +535,10 @@ svg[data-lucide] {
   border-radius: 20px;
   box-shadow: 0 16px 48px rgba(61, 52, 42, 0.16);
   z-index: 101;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow-y: auto;
   animation: modalIn 0.25s ease;
+  scrollbar-gutter: stable;
 }
 
 .modal.open {
@@ -668,6 +669,24 @@ svg[data-lucide] {
 .modal-row {
   display: flex;
   gap: 12px;
+}
+
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 16px; /* keeps it away from the rounded corners */
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
 }
 
 /* ════════════════════════════
