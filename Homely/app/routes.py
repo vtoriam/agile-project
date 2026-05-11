@@ -351,7 +351,7 @@ def manage_household():
 
     members = db.session.query(Membership).filter_by(
         household_id=household.id
-    ).all() if household else []
+    ).order_by(Membership.points.desc()).all() if household else []
 
     for member in members:
         member.completed_chores = db.session.query(Task).filter_by(
