@@ -79,14 +79,7 @@ def dismiss_overdue_popup():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
-    members = (
-        db.session.query(Membership)
-        .filter_by(household_id=membership.household_id)
-        .all()
-        if membership else []
-    )
-    return render_template("home.html", title="Dashboard", members=members)
+    return redirect(url_for("home"))
 
 
 @app.route("/my-tasks")
