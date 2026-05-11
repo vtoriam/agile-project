@@ -55,11 +55,11 @@
 }
 
 .sidebar {
-  width: 240px;
+  width: 290px;
   background: var(--surface);
   border-right: 1px solid var(--border);
   min-height: 100vh;
-  padding: 2rem 1.25rem;
+  padding: 2.75rem 1.25rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
