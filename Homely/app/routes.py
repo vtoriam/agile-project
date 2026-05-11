@@ -56,6 +56,23 @@ def home():
            (now - membership.last_overdue_popup).total_seconds() > 86400:
             show_popup = True
 
+    import json
+
+    tasks_data = [
+        {
+            "id": t.id,
+            "text": t.title,
+            "done": t.is_completed,
+            "cat": t.category,
+            "assignedTo": t.assignee.display_name if t.assignee else None,
+            "points": t.points_value,
+            "due": t.due_date.isoformat() if t.due_date else None,
+        }
+        for t in db.session.query(Task).filter_by(
+            household_id=membership.household_id
+        ).all()
+    ] if membership else []
+
     return render_template(
         "home.html",
         title="Home",
@@ -63,6 +80,7 @@ def home():
         overdue_count=overdue_count,
         total_points_lost=total_points_lost,
         show_popup=show_popup,
+        tasks_data=tasks_data,
     )
 
 @app.route("/dismiss-overdue-popup", methods=["POST"])

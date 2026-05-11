@@ -156,7 +156,9 @@ household_nav %} {% block page_styles %}
 
 </main>
 </div>
-
+<script>
+  var initialTasks = {{ tasks_data | tojson }};
+</script>
 <script src="{{ url_for('static', filename='js/homely-tasks.js') }}"></script>
 <script src="{{ url_for('static', filename='js/mascot-state.js') }}"></script>
 
