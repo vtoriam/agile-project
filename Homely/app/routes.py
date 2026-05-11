@@ -30,8 +30,51 @@ def home():
         .all()
         if membership else []
     )
-    return render_template("home.html", title="Home", members=members)
 
+    now = datetime.utcnow()
+
+    # Find overdue tasks assigned to the current user
+    overdue_tasks = db.session.query(Task).filter(
+        Task.is_completed == False,
+        Task.due_date != None,
+        Task.due_date < now,
+        Task.assigned_user_id == current_user.id,
+    ).all() if membership else []
+
+    overdue_count = len(overdue_tasks)
+
+    # Calculate total points at risk (days overdue × 5 per task)
+    total_points_lost = sum(
+        max(0, (now - task.due_date).days) * 5
+        for task in overdue_tasks
+    )
+
+    # Show popup if they have overdue tasks and haven't dismissed it today
+    show_popup = False
+    if overdue_count > 0 and membership:
+        if membership.last_overdue_popup is None or \
+           (now - membership.last_overdue_popup).total_seconds() > 86400:
+            show_popup = True
+
+    return render_template(
+        "home.html",
+        title="Home",
+        members=members,
+        overdue_count=overdue_count,
+        total_points_lost=total_points_lost,
+        show_popup=show_popup,
+    )
+
+@app.route("/dismiss-overdue-popup", methods=["POST"])
+@login_required
+def dismiss_overdue_popup():
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id
+    ).first()
+    if membership:
+        membership.last_overdue_popup = datetime.utcnow()
+        db.session.commit()
+    return "", 204
 
 @app.route("/dashboard")
 @login_required

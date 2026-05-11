@@ -75,6 +75,8 @@ class Membership(db.Model):
     role = db.Column(db.String(30), default="member")
     points = db.Column(db.Integer, default=0)
     joined_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    last_overdue_popup = db.Column(db.DateTime, nullable=True)
+
     user = db.relationship("User", back_populates="memberships")
     household = db.relationship("Household", back_populates="memberships")
 
