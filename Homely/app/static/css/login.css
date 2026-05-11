@@ -59,7 +59,7 @@
 }
 
 .login-logo {
-  height: 48px;
+  height: 88px;
   margin-bottom: 2.5rem;
 }
 
@@ -104,7 +104,7 @@
 
 /* ── Right form panel ──────────────────────────── */
 .login-form-panel {
-  width: 460px;
+  width: 520px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
