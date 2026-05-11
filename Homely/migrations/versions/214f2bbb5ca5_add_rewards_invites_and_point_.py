@@ -71,8 +71,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    with op.batch_alter_table('membership', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('streak', sa.Integer(), nullable=True))
 
     with op.batch_alter_table('task', schema=None) as batch_op:
         batch_op.add_column(sa.Column('status', sa.String(length=30), nullable=True))
@@ -89,8 +87,6 @@ def downgrade():
         batch_op.drop_column('icon')
         batch_op.drop_column('status')
 
-    with op.batch_alter_table('membership', schema=None) as batch_op:
-        batch_op.drop_column('streak')
 
     op.drop_table('point_transaction')
     op.drop_table('reward_redemption')
