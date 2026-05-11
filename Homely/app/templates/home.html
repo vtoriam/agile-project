@@ -10,6 +10,39 @@ household_nav %} {% block page_styles %}
 />
 {% endblock %} {% block content %} {{ household_nav('dashboard') }}
 <main class="main-content home-main">
+{% if overdue_count > 0 %}
+<div class="overdue-banner">
+  <i data-lucide="alert-triangle"></i>
+  You have <strong>{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing 5 points per task per day!
+</div>
+{% endif %}
+{% if show_popup %}
+<div class="modal-overlay" id="overdueOverlay"></div>
+<div class="modal" id="overdueModal">
+  <div class="modal-header">
+    <div class="modal-title">Overdue tasks</div>
+  </div>
+  <div class="modal-body">
+    <div class="danger-modal-icon">
+      <i data-lucide="alert-triangle"></i>
+    </div>
+    <p>You have <strong>{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong>.</p>
+    <p class="muted-copy" style="font-size: 13px; margin-top: 8px;">
+      You are losing <strong>5 points per task per day</strong>. 
+      So far you have lost a total of 
+      <strong style="color: var(--danger);">{{ total_points_lost }} points</strong> 
+      across your overdue tasks.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="modal-btn-add" id="dismissOverdueBtn">
+        Got it
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}
 <div class="greeting">
   <div class="greeting-sub" id="time-greeting">Good morning</div>
   <div class="greeting-title">What needs doing?</div>
@@ -127,8 +160,29 @@ household_nav %} {% block page_styles %}
 
 </main>
 </div>
-
+<script>
+  var initialTasks = {{ tasks_data | tojson }};
+</script>
 <script src="{{ url_for('static', filename='js/homely-tasks.js') }}"></script>
 <script src="{{ url_for('static', filename='js/mascot-state.js') }}"></script>
 
+{% endblock %}
+{% block scripts %}
+<script>
+{% if show_popup %}
+var dismissUrl = "{{ url_for('dismiss_overdue_popup') }}";
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('overdueModal').classList.add('open');
+  document.getElementById('overdueOverlay').classList.add('open');
+  lucide.createIcons();
+
+  document.getElementById('dismissOverdueBtn').addEventListener('click', function() {
+    fetch(dismissUrl, { method: 'POST' });
+    document.getElementById('overdueModal').classList.remove('open');
+    document.getElementById('overdueOverlay').classList.remove('open');
+  });
+});
+{% endif %}
+</script>
 {% endblock %}

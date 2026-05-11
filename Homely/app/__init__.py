@@ -13,3 +13,6 @@ login = LoginManager(app)
 login.login_view = 'login'
 
 from app import routes, models
+
+from app.scheduler import start_scheduler
+scheduler = start_scheduler(app)
