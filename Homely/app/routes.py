@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 from flask import render_template, redirect, url_for, request
+from sqlalchemy import func
 
 from app import app, db
 from app.models import User, Household, Membership, Task
@@ -94,7 +95,52 @@ def edit_profile():
 @app.route("/rewards")
 @login_required
 def rewards():
-    return render_template("rewards.html", title="Rewards")
+    household = db.session.query(Household).first()
+    current_membership = None
+    user_points = 0
+    household_rank = None
+    household_points = 0
+
+    if household:
+        current_membership = db.session.query(Membership).filter_by(
+            user_id=current_user.id,
+            household_id=household.id,
+        ).first()
+        if current_membership:
+            user_points = current_membership.points or 0
+
+        household_points = (
+            db.session.query(func.coalesce(func.sum(Membership.points), 0))
+            .filter(Membership.household_id == household.id)
+            .scalar()
+            or 0
+        )
+
+        ranked_households = (
+            db.session.query(
+                Household.id.label("household_id"),
+                func.coalesce(func.sum(Membership.points), 0).label("total_points"),
+            )
+            .outerjoin(Membership, Membership.household_id == Household.id)
+            .group_by(Household.id)
+            .all()
+        )
+        household_rank = (
+            1
+            + sum(
+                1
+                for item in ranked_households
+                if item.total_points > household_points
+            )
+        )
+
+    return render_template(
+        "rewards.html",
+        title="Rewards",
+        user_points=user_points,
+        current_membership=current_membership,
+        household_rank=household_rank,
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -114,7 +160,7 @@ def login():
     return render_template("login.html", title="Login", error=error)
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
     logout_user()
     return redirect(url_for("login"))
@@ -206,3 +252,16 @@ def delete_household():
     db.session.delete(household)
     db.session.commit()
     return redirect(url_for("home"))
+
+@app.route("/household/remove/<int:user_id>", methods=["POST"])
+@login_required
+def remove_member(user_id):
+    household = db.session.query(Household).first()
+    membership = db.session.query(Membership).filter_by(
+        user_id=user_id,
+        household_id=household.id
+    ).first()
+    if membership:
+        db.session.delete(membership)
+        db.session.commit()
+    return redirect(url_for("manage_household"))

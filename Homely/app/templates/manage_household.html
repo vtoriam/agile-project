@@ -3,6 +3,10 @@
 page_styles %}
 <link
   rel="stylesheet"
+  href="{{ url_for('static', filename='css/homely-styles.css') }}"
+/>
+<link
+  rel="stylesheet"
   href="{{ url_for('static', filename='css/manage-household.css') }}"
 />
 {% endblock %} {% block content %} {{ household_nav('settings') }}
@@ -31,7 +35,13 @@ page_styles %}
           <span class="inline-code-soft">Active</span>
         </div>
         <div class="sidebar-actions">
-          <button class="btn btn-homely btn-sm">Copy code</button>
+          <button
+            type="button"
+            class="btn btn-homely btn-sm"
+            onclick="copyCode()"
+          >
+            Copy code
+          </button>
           <button class="btn btn-outline-homely btn-sm">Regenerate code</button>
         </div>
       </section>
@@ -52,7 +62,9 @@ page_styles %}
 
           <div class="member-grid">
             {% for member in members %}
-            <article class="member-card">
+            <article
+              class="member-card {% if current_membership and member.user_id == current_membership.user_id %}member-card--current{% endif %}"
+            >
               <div class="member-top">
                 <div class="member-identity">
                   <div class="avatar-circle">
@@ -62,15 +74,6 @@ page_styles %}
                     <h2>{{ member.user.display_name }}</h2>
                     <p class="muted-copy">{{ member.role }}</p>
                   </div>
-                </div>
-                <div class="member-badges">
-                  {% if member.user_id == current_membership.user_id %}
-                  <span class="badge badge-success">You</span>
-                  {% endif %} {% if member.role == 'admin' %}
-                  <span class="role-badge"
-                    ><i data-lucide="shield"></i> Admin</span
-                  >
-                  {% endif %}
                 </div>
               </div>
 
@@ -89,11 +92,20 @@ page_styles %}
                 >
               </div>
 
-              {% if current_membership.role == 'admin' and member.user_id !=
-              current_membership.user_id %}
+              {% if current_membership and current_membership.role|lower ==
+              'admin' and member.user_id != current_membership.user_id %}
               <div class="member-actions">
-                <button class="btn btn-outline-homely btn-sm">Edit role</button>
-                <button class="btn btn-outline-homely btn-sm">Remove</button>
+                <button
+                  class="btn btn-danger-soft btn-sm"
+                  data-title="Remove member"
+                  data-message="Are you sure you want to remove {{ member.user.display_name }} from the household?"
+                  data-sub="They will lose access to all tasks, rewards, and household data."
+                  data-label="Remove member"
+                  data-action="{{ url_for('remove_member', user_id=member.user_id) }}"
+                  onclick="openDangerModal(this)"
+                >
+                  <i data-lucide="user-minus"></i> Remove
+                </button>
               </div>
               {% endif %}
             </article>
@@ -146,13 +158,20 @@ page_styles %}
           <form
             method="post"
             action="{{ url_for('delete_household') }}"
-            onsubmit="
-              return confirm(
-                'Are you sure you want to delete this household? This cannot be undone.',
-              );
-            "
+            id="deleteHouseholdForm"
           >
-            <button type="submit" class="danger-link">Delete household</button>
+            <button
+              type="button"
+              class="danger-link"
+              data-title="Delete household"
+              data-message="Are you sure you want to delete this household?"
+              data-sub="This will permanently remove all members, tasks, and rewards. This cannot be undone."
+              data-label="Delete household"
+              data-action="{{ url_for('delete_household') }}"
+              onclick="openDangerModal(this)"
+            >
+              Delete household
+            </button>
           </form>
           {% else %}
           <div class="section-kicker">Leave household</div>
@@ -164,11 +183,20 @@ page_styles %}
           <form
             method="post"
             action="{{ url_for('leave_household') }}"
-            onsubmit="
-              return confirm('Are you sure you want to leave this household?');
-            "
+            id="leaveHouseholdForm"
           >
-            <button type="submit" class="danger-link">Leave household</button>
+            <button
+              type="button"
+              class="danger-link"
+              data-title="Leave household"
+              data-message="Are you sure you want to leave this household?"
+              data-sub="You will lose access to all tasks, rewards, and member data."
+              data-label="Leave household"
+              data-action="{{ url_for('leave_household') }}"
+              onclick="openDangerModal(this)"
+            >
+              Leave household
+            </button>
           </form>
           {% endif %}
         </section>
@@ -180,15 +208,71 @@ page_styles %}
             Log out of your Homely account on this device.
           </p>
           <div class="logout-actions">
-            <a
-              href="{{ url_for('logout') }}"
+            <button
+              type="button"
               class="btn btn-outline-homely btn-sm"
-              >Logout</a
+              data-title="Sign out"
+              data-message="Are you sure you want to sign out?"
+              data-sub="You'll need to log in again to access your household."
+              data-label="Sign out"
+              data-action="{{ url_for('logout') }}"
+              onclick="openDangerModal(this)"
             >
+              Logout
+            </button>
           </div>
         </section>
       </div>
     </div>
   </section>
 </main>
+
+<!-- Confirm Danger Modal -->
+<div
+  class="modal-overlay"
+  id="dangerOverlay"
+  onclick="closeDangerModal()"
+></div>
+<div class="modal" id="dangerModal">
+  <div class="modal-header">
+    <div class="modal-title" id="dangerModalTitle">Are you sure?</div>
+  </div>
+  <div class="modal-body">
+    <div class="danger-modal-icon">
+      <i data-lucide="alert-triangle"></i>
+    </div>
+    <p id="dangerModalMessage"></p>
+    <p
+      class="muted-copy"
+      id="dangerModalSub"
+      style="font-size: 13px; margin-top: 8px"
+    ></p>
+  </div>
+  <div class="modal-footer">
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeDangerModal()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn-danger-confirm"
+        onclick="submitDangerAction()"
+      >
+        <i data-lucide="alert-triangle"></i>
+        <span id="dangerBtnLabel">Confirm</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+
+{% endblock %} {% block scripts %}
+<script>
+  function copyCode() {
+    navigator.clipboard.writeText({{ household.join_code | tojson }});
+  }
+</script>
 {% endblock %}
+
+
