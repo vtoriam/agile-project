@@ -1,54 +1,196 @@
 {% extends 'base.html' %}
-{% block title %}Sign up | Homely{% endblock %}
-{% block content %}
-<section class="two-column">
-    <div class="panel hero-panel">
-        <span class="eyebrow">Step 1 of 2</span>
-        <h1>Create profile</h1>
-        <p>This is Mohammad’s sign-up flow turned into a real Jinja template. Step 1 stores personal details before the user chooses whether to create a household or join one.</p>
-        <ul class="feature-list">
-            <li>Keeps the form shorter and clearer</li>
-            <li>Makes household logic easier to validate</li>
-            <li>Matches the checkpoint prototype flow</li>
-        </ul>
-    </div>
 
-    <div class="panel form-panel">
-        <span class="eyebrow">Profile details</span>
-        <h2>Create your account</h2>
-        <form method="post" class="stack-form">
-            <label>First name
-                <input type="text" name="first_name" value="{{ form_data.get('first_name', '') }}" required>
-            </label>
-            <label>Last name
-                <input type="text" name="last_name" value="{{ form_data.get('last_name', '') }}" required>
-            </label>
-            <label>Display name
-                <input type="text" name="display_name" value="{{ form_data.get('display_name', '') }}" required>
-            </label>
-            <label>Email
-                <input type="email" name="email" value="{{ form_data.get('email', '') }}" required>
-            </label>
-            <label>Password
-                <input type="password" name="password" required>
-            </label>
-            <label>Confirm password
-                <input type="password" name="confirm_password" required>
-            </label>
-            <label>Choose a profile icon
-                <select name="profile_icon">
-                    {% set current_icon = form_data.get('profile_icon', 'home') %}
-                    <option value="home" {% if current_icon == 'home' %}selected{% endif %}>Home</option>
-                    <option value="sparkles" {% if current_icon == 'sparkles' %}selected{% endif %}>Cleaning</option>
-                    <option value="utensils" {% if current_icon == 'utensils' %}selected{% endif %}>Kitchen</option>
-                </select>
-            </label>
-            <label class="checkbox-row">
-                <input type="checkbox" name="accepted_rules" {% if form_data.get('accepted_rules') %}checked{% endif %}>
-                <span>I agree to the privacy policy, house rules, and fair-play guidelines.</span>
-            </label>
-            <button type="submit" class="btn btn-primary">Continue to household setup</button>
-        </form>
+{% block page_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+
+  <!-- Left hero panel -->
+  <div class="login-hero">
+    <div class="login-hero-inner">
+      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
+
+      <!-- Step indicator -->
+      <div class="auth-steps">
+        <div class="auth-step active">
+          <div class="auth-step-dot">1</div>
+          <span>Your details</span>
+        </div>
+        <div class="auth-step-line"></div>
+        <div class="auth-step">
+          <div class="auth-step-dot">2</div>
+          <span>Your household</span>
+        </div>
+      </div>
+
+      <h1 class="login-hero-title">Create your<br>account.</h1>
+      <p class="login-hero-sub">
+        Join your household in two simple steps. Start with your personal details.
+      </p>
+      <ul class="login-feature-list">
+        <li><i data-lucide="user"></i> Personal profile</li>
+        <li><i data-lucide="home"></i> Link to your household</li>
+        <li><i data-lucide="trophy"></i> Earn points &amp; climb the leaderboard</li>
+        <li><i data-lucide="gift"></i> Unlock household rewards</li>
+      </ul>
     </div>
-</section>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-form-panel">
+    <div class="login-form-wrap">
+
+      <div class="login-form-header">
+        <div class="login-form-title">Personal details</div>
+        <p class="login-form-sub">Step 1 of 2 — tell us about yourself.</p>
+      </div>
+
+      {% if error %}
+      <div class="login-alert">
+        <i data-lucide="alert-circle"></i> {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('signup') }}" id="signupForm" novalidate>
+
+        <div class="signup-name-row">
+          <div class="login-field">
+            <label class="login-label" for="first_name">First Name</label>
+            <div class="login-input-wrap">
+              <span class="login-input-icon"><i data-lucide="user"></i></span>
+              <input
+                class="login-input"
+                type="text"
+                name="first_name"
+                id="first_name"
+                placeholder="Alex"
+                value="{{ form_data.get('first_name', '') }}"
+                required
+              />
+            </div>
+            <span class="login-field-error" id="firstNameError"></span>
+          </div>
+
+          <div class="login-field">
+            <label class="login-label" for="last_name">Last Name</label>
+            <div class="login-input-wrap">
+              <input
+                class="login-input"
+                type="text"
+                name="last_name"
+                id="last_name"
+                placeholder="Smith"
+                value="{{ form_data.get('last_name', '') }}"
+                required
+              />
+            </div>
+            <span class="login-field-error" id="lastNameError"></span>
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label class="login-label" for="display_name">Display Name</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="pencil"></i></span>
+            <input
+              class="login-input"
+              type="text"
+              name="display_name"
+              id="display_name"
+              placeholder="How housemates see you, e.g. Alex"
+              value="{{ form_data.get('display_name', '') }}"
+              required
+            />
+          </div>
+          <span class="login-field-error" id="displayNameError"></span>
+        </div>
+
+        <div class="login-field">
+          <label class="login-label" for="email">Email Address</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="mail"></i></span>
+            <input
+              class="login-input"
+              type="email"
+              name="email"
+              id="email"
+              placeholder="you@example.com"
+              value="{{ form_data.get('email', '') }}"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <span class="login-field-error" id="emailError"></span>
+        </div>
+
+        <div class="login-field">
+          <label class="login-label" for="password">Password</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="lock"></i></span>
+            <input
+              class="login-input"
+              type="password"
+              name="password"
+              id="password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              required
+            />
+            <button type="button" class="login-pw-toggle" id="pwToggle" aria-label="Show password">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+          <div class="pw-strength-wrap">
+            <div class="pw-strength-bar">
+              <div class="pw-strength-fill" id="pwStrengthFill"></div>
+            </div>
+            <span class="pw-strength-label" id="pwStrengthLabel"></span>
+          </div>
+          <span class="login-field-error" id="passwordError"></span>
+        </div>
+
+        <div class="login-field">
+          <label class="login-label" for="confirm_password">Confirm Password</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="lock"></i></span>
+            <input
+              class="login-input"
+              type="password"
+              name="confirm_password"
+              id="confirm_password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              required
+            />
+            <button type="button" class="login-pw-toggle" id="confirmPwToggle" aria-label="Show password">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+          <span class="login-field-error" id="confirmPasswordError"></span>
+        </div>
+
+        <button type="submit" class="login-btn" style="margin-top: 1.25rem">
+          Continue <i data-lucide="arrow-right"></i>
+        </button>
+
+      </form>
+
+      <div class="login-divider"><span>or</span></div>
+
+      <p class="login-signup-link">
+        Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+    <script>lucide.createIcons();</script>
 {% endblock %}

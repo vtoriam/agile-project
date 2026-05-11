@@ -1,175 +1,174 @@
-{% extends 'base.html' %} {% block title %}Household setup | Homely{% endblock
-%} {% block page_styles %}
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/mohammad-signup-household.css') }}"
-/>
-{% endblock %} {% block content %}
-<section class="two-column">
-  <div class="panel hero-panel">
-    <span class="eyebrow">Step 2 of 2</span>
-    <h1>Create or join a household</h1>
-    <p>
-      This page writes the shared-home part of the sign-up flow to the database.
-      Users can either create a new household or join one using a real invite
-      code.
-    </p>
-    <ul class="feature-list">
-      <li>Stores household settings separately from personal details</li>
-      <li>Supports server-side join code validation</li>
-      <li>Turns the prototype into a real multi-step form</li>
-    </ul>
+{% extends 'base.html' %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+
+  <!-- Left hero panel -->
+  <div class="login-hero">
+    <div class="login-hero-inner">
+      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
+
+      <!-- Step indicator -->
+      <div class="auth-steps">
+        <div class="auth-step done">
+          <div class="auth-step-dot"><i data-lucide="check"></i></div>
+          <span>Your details</span>
+        </div>
+        <div class="auth-step-line active"></div>
+        <div class="auth-step active">
+          <div class="auth-step-dot">2</div>
+          <span>Your household</span>
+        </div>
+      </div>
+
+      <h1 class="login-hero-title">Set up your<br>household.</h1>
+      <p class="login-hero-sub">
+        Create a new household or join one using an invite code from a housemate.
+      </p>
+      <ul class="login-feature-list">
+        <li><i data-lucide="home"></i> Create or join a household</li>
+        <li><i data-lucide="users"></i> Invite your housemates</li>
+        <li><i data-lucide="zap"></i> Start earning points together</li>
+        <li><i data-lucide="gift"></i> Set up your rewards style</li>
+      </ul>
+
+      <div class="auth-join-hint">
+        <i data-lucide="info"></i>
+        Demo join code: <strong>HM-72QA</strong>
+      </div>
+    </div>
   </div>
 
-  <div class="panel form-panel">
-    <span class="eyebrow">Household setup</span>
-    <h2>Finish your sign-up</h2>
-    <form method="post" class="stack-form">
-      {% set action = form_data.get('household_action', 'create') %}
-      <label
-        >Choose an option
-        <select name="household_action">
-          <option
-            value="create"
-            {%
-            if
-            action=""
-            ="create"
-            %}selected{%
-            endif
-            %}
-          >
-            Create a new household
-          </option>
-          <option value="join" {% if action="" ="join" %}selected{% endif %}>
-            Join an existing household
-          </option>
-        </select>
-      </label>
+  <!-- Right form panel -->
+  <div class="login-form-panel">
+    <div class="login-form-wrap">
 
-      <label
-        >Role {% set role = form_data.get('role', 'Member') %}
-        <select name="role">
-          <option value="Member" {% if role="" ="Member" %}selected{% endif %}>
-            Member
-          </option>
-          <option value="Admin" {% if role="" ="Admin" %}selected{% endif %}>
-            Admin
-          </option>
-        </select>
-      </label>
+      <div class="login-form-header">
+        <div class="login-form-title">Household setup</div>
+        <p class="login-form-sub">Step 2 of 2 — create or join a household.</p>
+      </div>
 
-      <label
-        >Household name
-        <input
-          type="text"
-          name="household_name"
-          value="{{ form_data.get('household_name', '') }}"
-          placeholder="The Clean Machine"
-        />
-      </label>
-      <label
-        >Join code
-        <input
-          type="text"
-          name="join_code"
-          value="{{ form_data.get('join_code', '') }}"
-          placeholder="HM-72QA"
-        />
-      </label>
-      <label
-        >Default rewards style {% set reward_style =
-        form_data.get('reward_style', 'Balanced') %}
-        <select name="reward_style">
-          <option
-            value="Balanced"
-            {%
-            if
-            reward_style=""
-            ="Balanced"
-            %}selected{%
-            endif
-            %}
-          >
-            Balanced
-          </option>
-          <option
-            value="Competitive"
-            {%
-            if
-            reward_style=""
-            ="Competitive"
-            %}selected{%
-            endif
-            %}
-          >
-            Competitive
-          </option>
-          <option
-            value="Collaborative"
-            {%
-            if
-            reward_style=""
-            ="Collaborative"
-            %}selected{%
-            endif
-            %}
-          >
-            Collaborative
-          </option>
-        </select>
-      </label>
-      <label
-        >Task reminders {% set reminder_frequency =
-        form_data.get('reminder_frequency', 'Weekly') %}
-        <select name="reminder_frequency">
-          <option
-            value="Weekly"
-            {%
-            if
-            reminder_frequency=""
-            ="Weekly"
-            %}selected{%
-            endif
-            %}
-          >
-            Weekly
-          </option>
-          <option
-            value="Daily"
-            {%
-            if
-            reminder_frequency=""
-            ="Daily"
-            %}selected{%
-            endif
-            %}
-          >
-            Daily
-          </option>
-          <option
-            value="Off"
-            {%
-            if
-            reminder_frequency=""
-            ="Off"
-            %}selected{%
-            endif
-            %}
-          >
-            Off
-          </option>
-        </select>
-      </label>
-      <button type="submit" class="btn btn-primary">Create profile</button>
-    </form>
-    <p class="muted-copy">
-      Tip: use join code <strong>HM-72QA</strong> to join the seeded demo
-      household.
-    </p>
-    <p class="helper-links">
-      <a href="{{ url_for('signup') }}">Back to profile details</a>
-    </p>
+      {% if error %}
+      <div class="login-alert">
+        <i data-lucide="alert-circle"></i> {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('signup_household') }}" id="householdForm" novalidate>
+
+        <!-- Create / Join toggle -->
+        <div class="login-field">
+          <label class="login-label">I want to</label>
+          <div class="action-tabs">
+            <button type="button" class="action-tab active" id="tabCreate" data-target="create">
+              <i data-lucide="plus-circle"></i> Create a household
+            </button>
+            <button type="button" class="action-tab" id="tabJoin" data-target="join">
+              <i data-lucide="log-in"></i> Join a household
+            </button>
+          </div>
+          <input type="hidden" name="household_action" id="householdAction" value="{{ form_data.get('household_action', 'create') }}" />
+        </div>
+
+        <!-- Create fields -->
+        <div id="createFields">
+          <div class="login-field">
+            <label class="login-label" for="household_name">Household Name</label>
+            <div class="login-input-wrap">
+              <span class="login-input-icon"><i data-lucide="home"></i></span>
+              <input
+                class="login-input"
+                type="text"
+                name="household_name"
+                id="household_name"
+                placeholder="e.g. The Clean Machine"
+                value="{{ form_data.get('household_name', '') }}"
+              />
+            </div>
+            <span class="login-field-error" id="householdNameError"></span>
+          </div>
+        </div>
+
+        <!-- Join fields -->
+        <div id="joinFields" style="display:none">
+          <div class="login-field">
+            <label class="login-label" for="join_code">Invite Code</label>
+            <div class="login-input-wrap">
+              <span class="login-input-icon"><i data-lucide="hash"></i></span>
+              <input
+                class="login-input login-input-mono"
+                type="text"
+                name="join_code"
+                id="join_code"
+                placeholder="e.g. HM-72QA"
+                value="{{ form_data.get('join_code', '') }}"
+              />
+            </div>
+            <span class="login-field-error" id="joinCodeError"></span>
+          </div>
+        </div>
+
+        <div class="signup-row-two">
+          <div class="login-field">
+            <label class="login-label" for="role">Your Role</label>
+            <div class="login-input-wrap">
+              <span class="login-input-icon"><i data-lucide="shield-check"></i></span>
+              <select class="login-input login-select" name="role" id="role">
+                <option value="Admin"  {{ 'selected' if form_data.get('role','Admin')  == 'Admin' }}>Admin</option>
+                <option value="Member" {{ 'selected' if form_data.get('role','Admin')  == 'Member' }}>Member</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="login-field">
+            <label class="login-label" for="reward_style">Rewards Style</label>
+            <div class="login-input-wrap">
+              <span class="login-input-icon"><i data-lucide="zap"></i></span>
+              <select class="login-input login-select" name="reward_style" id="reward_style">
+                <option value="Balanced"      {{ 'selected' if form_data.get('reward_style','Balanced') == 'Balanced' }}>Balanced</option>
+                <option value="Competitive"   {{ 'selected' if form_data.get('reward_style','Balanced') == 'Competitive' }}>Competitive</option>
+                <option value="Collaborative" {{ 'selected' if form_data.get('reward_style','Balanced') == 'Collaborative' }}>Collaborative</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label class="login-label" for="reminder_frequency">Task Reminders</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="bell"></i></span>
+            <select class="login-input login-select" name="reminder_frequency" id="reminder_frequency">
+              <option value="Daily"  {{ 'selected' if form_data.get('reminder_frequency','Weekly') == 'Daily' }}>Daily</option>
+              <option value="Weekly" {{ 'selected' if form_data.get('reminder_frequency','Weekly') == 'Weekly' }}>Weekly</option>
+              <option value="Off"    {{ 'selected' if form_data.get('reminder_frequency','Weekly') == 'Off' }}>Off</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="login-btn" style="margin-top: 1.25rem">
+          <i data-lucide="check-circle"></i> Finish setup
+        </button>
+
+      </form>
+
+      <div class="login-divider"><span></span></div>
+
+      <p class="login-signup-link">
+        <a href="{{ url_for('signup') }}">← Back to personal details</a>
+      </p>
+
+    </div>
   </div>
-</section>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+    <script>lucide.createIcons();</script>
 {% endblock %}

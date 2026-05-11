@@ -38,6 +38,7 @@ def my_tasks():
 @login_required
 def leaderboard():
     household = db.session.query(Household).first()
+    member_stats = {}
     if household:
         members = db.session.query(Membership).filter_by(household_id=household.id).all()
         members.sort(key=lambda m: m.points, reverse=True)
@@ -45,10 +46,43 @@ def leaderboard():
         second = members[1] if len(members) > 1 else None
         third = members[2] if len(members) > 2 else None
         other_members = members[3:] if len(members) > 3 else []
+
+        rank_icons = ['crown', 'medal', 'award']
+        rank_colors = ['#c49a2a', '#9e9087', '#b07248']
+        for i, m in enumerate(members):
+            done_tasks = db.session.query(Task).filter_by(
+                household_id=household.id,
+                assigned_user_id=m.user_id,
+                is_completed=True,
+            ).all()
+            completed = len(done_tasks)
+            on_time = sum(
+                1 for t in done_tasks
+                if t.completed_at and t.due_date and t.completed_at <= t.due_date
+            )
+            late = sum(
+                1 for t in done_tasks
+                if t.completed_at and t.due_date and t.completed_at > t.due_date
+            )
+            member_stats[m.user.display_name] = {
+                'rank':      i + 1,
+                'points':    m.points,
+                'completed': completed,
+                'on_time':   on_time,
+                'late':      late,
+                'avatar':    rank_icons[i] if i < 3 else 'user',
+                'rankColor': rank_colors[i] if i < 3 else '#888888',
+            }
     else:
         first = second = third = None
         other_members = []
-    return render_template("leaderboard.html", title="Leaderboard", first=first, second=second, third=third, other_members=other_members)
+    return render_template(
+        "leaderboard.html",
+        title="Leaderboard",
+        first=first, second=second, third=third,
+        other_members=other_members,
+        member_stats=member_stats,
+    )
 
 
 @app.route("/edit-profile")

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login
 from flask_login import UserMixin
@@ -88,6 +88,7 @@ class Task(db.Model):
 
     due_date = db.Column(db.DateTime, nullable=True)
     is_completed = db.Column(db.Boolean, default=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     household = db.relationship("Household", back_populates="tasks")
@@ -124,4 +125,36 @@ def create_sample_data():
     membership3 = Membership(user_id=user3.id, household_id=household.id, role="Member", points=80)
 
     db.session.add_all([membership1, membership2, membership3])
+    db.session.commit()
+
+    now = datetime.utcnow()
+    d = lambda days: now - timedelta(days=days)
+
+    # Sample tasks: mix of on-time completions and late completions
+    sample_tasks = [
+        # Aisha — 7 completed (5 on time, 2 late), 1 pending overdue
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Vacuum living room",     category="cleaning",  points_value=15, is_completed=True,  due_date=d(12), completed_at=d(13)),
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Take out bins",          category="trash",     points_value=10, is_completed=True,  due_date=d(9),  completed_at=d(10)),
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Wipe kitchen counters",  category="kitchen",   points_value=10, is_completed=True,  due_date=d(7),  completed_at=d(8)),
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Clean bathroom",         category="bathroom",  points_value=20, is_completed=True,  due_date=d(5),  completed_at=d(6)),
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Grocery run",            category="shopping",  points_value=15, is_completed=True,  due_date=d(3),  completed_at=d(4)),
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Mop floors",             category="cleaning",  points_value=15, is_completed=True,  due_date=d(8),  completed_at=d(6)),   # late
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Organise pantry",        category="kitchen",   points_value=20, is_completed=True,  due_date=d(14), completed_at=d(11)),  # late
+        Task(household_id=household.id, assigned_user_id=user1.id, title="Water the plants",       category="garden",    points_value=5,  is_completed=False, due_date=d(2),  completed_at=None),   # overdue
+
+        # Jordan — 5 completed (4 on time, 1 late), 1 pending overdue
+        Task(household_id=household.id, assigned_user_id=user2.id, title="Do the laundry",         category="laundry",   points_value=15, is_completed=True,  due_date=d(10), completed_at=d(11)),
+        Task(household_id=household.id, assigned_user_id=user2.id, title="Clean the hob",          category="kitchen",   points_value=10, is_completed=True,  due_date=d(7),  completed_at=d(8)),
+        Task(household_id=household.id, assigned_user_id=user2.id, title="Empty dishwasher",       category="kitchen",   points_value=5,  is_completed=True,  due_date=d(4),  completed_at=d(5)),
+        Task(household_id=household.id, assigned_user_id=user2.id, title="Wipe bathroom mirror",   category="bathroom",  points_value=5,  is_completed=True,  due_date=d(6),  completed_at=d(7)),
+        Task(household_id=household.id, assigned_user_id=user2.id, title="Fix leaky tap",          category="repairs",   points_value=25, is_completed=True,  due_date=d(11), completed_at=d(9)),   # late
+        Task(household_id=household.id, assigned_user_id=user2.id, title="Sort recycling",         category="trash",     points_value=5,  is_completed=False, due_date=d(1),  completed_at=None),   # overdue
+
+        # Mohammad — 4 completed (2 on time, 2 late)
+        Task(household_id=household.id, assigned_user_id=user3.id, title="Sweep the patio",        category="garden",    points_value=10, is_completed=True,  due_date=d(9),  completed_at=d(10)),
+        Task(household_id=household.id, assigned_user_id=user3.id, title="Clean fridge",           category="kitchen",   points_value=15, is_completed=True,  due_date=d(5),  completed_at=d(6)),
+        Task(household_id=household.id, assigned_user_id=user3.id, title="Replace light bulb",     category="repairs",   points_value=5,  is_completed=True,  due_date=d(13), completed_at=d(10)),  # late
+        Task(household_id=household.id, assigned_user_id=user3.id, title="Deep clean oven",        category="kitchen",   points_value=20, is_completed=True,  due_date=d(15), completed_at=d(12)),  # late
+    ]
+    db.session.add_all(sample_tasks)
     db.session.commit()
