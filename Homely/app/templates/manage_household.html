@@ -30,19 +30,62 @@ page_styles %}
         <p class="muted-copy">
           Share a short code so new users can join the household from sign-up.
         </p>
+
+        {% if invite and invite.is_valid() %}
         <div class="join-code-display">
-          <span class="fw-bold">{{ household.join_code }}</span>
-          <span class="inline-code-soft">Active</span>
+          <span class="fw-bold" id="joinCodeText">{{ invite.code }}</span>
+          <span class="inline-code-soft" style="color: var(--accent2)">
+            <i data-lucide="check-circle"></i> Active
+          </span>
         </div>
+        <p class="muted-copy" style="font-size: 12px; margin-bottom: 16px">
+          <i data-lucide="clock"></i>
+          Expires {{ invite.expires_at.strftime('%d %b %Y at %I:%M %p') }}
+        </p>
+        {% elif invite and not invite.is_valid() %}
+        <div class="join-code-display">
+          <span class="fw-bold" style="color: var(--muted)"
+            >{{ invite.code }}</span
+          >
+          <span class="inline-code-soft" style="color: var(--danger)">
+            <i data-lucide="x-circle"></i> Expired
+          </span>
+        </div>
+        <p class="muted-copy" style="font-size: 12px; margin-bottom: 16px">
+          This code expired on {{ invite.expires_at.strftime('%d %b %Y') }}.
+          Regenerate to create a new one.
+        </p>
+        {% else %}
+        <div class="join-code-display" style="color: var(--muted)">
+          <span>No active invite code</span>
+        </div>
+        <p class="muted-copy" style="font-size: 12px; margin-bottom: 16px">
+          Generate a code so new members can join.
+        </p>
+        {% endif %}
+
         <div class="sidebar-actions">
+          {% if invite and invite.is_valid() %}
           <button
             type="button"
             class="btn btn-homely btn-sm"
             onclick="copyCode()"
           >
-            Copy code
+            <i data-lucide="copy"></i> Copy code
           </button>
-          <button class="btn btn-outline-homely btn-sm">Regenerate code</button>
+          {% endif %} {% if current_membership.role == 'admin' %}
+          <form method="post" action="{{ url_for('regenerate_invite') }}">
+            <button
+              type="submit"
+              class="btn btn-outline-homely btn-sm"
+              style="width: 100%"
+            >
+              <i data-lucide="refresh-cw"></i>
+              {% if invite and invite.is_valid() %} Regenerate code {% else %}
+              Generate code {% endif %}
+            </button>
+          </form>
+          {% endif %}
         </div>
       </section>
 
@@ -54,10 +97,6 @@ page_styles %}
               <div class="section-kicker">Members</div>
               <h2>Current household roster</h2>
             </div>
-            <select class="form-select">
-              <option selected>Sort by points</option>
-              <option>Sort by role</option>
-            </select>
           </div>
 
           <div class="member-grid">
@@ -135,7 +174,7 @@ page_styles %}
           <tbody>
             <tr>
               <th>Admins</th>
-              <td>Edit roles, remove members, manage rewards</td>
+              <td>Remove and add members, manage household.</td>
             </tr>
             <tr>
               <th>Members</th>
@@ -270,9 +309,17 @@ page_styles %}
 {% endblock %} {% block scripts %}
 <script>
   function copyCode() {
-    navigator.clipboard.writeText({{ household.join_code | tojson }});
+    const code = document.getElementById("joinCodeText").textContent.trim();
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.querySelector('[onclick="copyCode()"]');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="check"></i> Copied!';
+      lucide.createIcons();
+      setTimeout(() => {
+        btn.innerHTML = original;
+        lucide.createIcons();
+      }, 2000);
+    });
   }
 </script>
 {% endblock %}
-
-
