@@ -1,11 +1,20 @@
-from types import SimpleNamespace
+import random
+import string
 
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for, request, session
 from sqlalchemy import func
 
 from app import app, db
 from app.models import User, Household, Membership, Task
 from flask_login import login_user, logout_user, current_user, login_required
+
+
+def _generate_join_code():
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        code = "HM-" + "".join(random.choices(chars, k=4))
+        if not db.session.query(Household).filter_by(join_code=code).first():
+            return code
 
 @app.route("/index")
 @login_required
@@ -182,24 +191,125 @@ def signup():
             error = "Please fill in all required fields."
         elif form_data.get("password") != form_data.get("confirm_password"):
             error = "Passwords do not match."
+        elif db.session.query(User).filter_by(email=form_data["email"].strip().lower()).first():
+            error = "An account with that email already exists."
         else:
+            session["signup_data"] = {
+                "first_name":    form_data["first_name"].strip(),
+                "last_name":     form_data["last_name"].strip(),
+                "display_name":  form_data["display_name"].strip(),
+                "email":         form_data["email"].strip().lower(),
+                "password":      form_data["password"],
+            }
             return redirect(url_for("signup_household"))
     return render_template("signup.html", title="Sign Up", form_data=form_data, error=error)
 
 
-@app.route("/signup/household", methods=["GET", "POST"])
-@app.route("/signup-household", methods=["GET", "POST"])
+@app.route("/signup/household")
+@app.route("/signup-household")
 def signup_household():
+    if not session.get("signup_data"):
+        return redirect(url_for("signup"))
+    return render_template("signup_household.html", title="Household Setup")
+
+
+@app.route("/signup/household/create", methods=["GET", "POST"])
+def signup_create_household():
+    signup_data = session.get("signup_data")
+    if not signup_data:
+        return redirect(url_for("signup"))
+
     error = None
     form_data = {}
+
     if request.method == "POST":
         form_data = request.form.to_dict()
-        return redirect(url_for("home"))
+        household_name = form_data.get("household_name", "").strip()
+
+        if db.session.query(User).filter_by(email=signup_data["email"]).first():
+            error = "An account with that email already exists. Please sign in."
+        elif not household_name:
+            error = "Please enter a household name."
+        else:
+            user = User(
+                full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
+                display_name=signup_data["display_name"],
+                email=signup_data["email"],
+            )
+            user.set_password(signup_data["password"])
+            db.session.add(user)
+            db.session.flush()
+
+            household = Household(name=household_name, join_code=_generate_join_code())
+            db.session.add(household)
+            db.session.flush()
+
+            db.session.add(Membership(
+                user_id=user.id,
+                household_id=household.id,
+                role=form_data.get("role", "Admin"),
+                points=0,
+            ))
+            db.session.commit()
+            session.pop("signup_data", None)
+            login_user(user)
+            return redirect(url_for("home"))
+
     return render_template(
-        "signup_household.html",
-        title="Household Setup",
+        "signup_create_household.html",
+        title="Create Household",
         form_data=form_data,
-        error=error
+        error=error,
+    )
+
+
+@app.route("/signup/household/join", methods=["GET", "POST"])
+def signup_join_household():
+    signup_data = session.get("signup_data")
+    if not signup_data:
+        return redirect(url_for("signup"))
+
+    error = None
+    form_data = {}
+
+    if request.method == "POST":
+        form_data = request.form.to_dict()
+        join_code = form_data.get("join_code", "").strip().upper()
+
+        if db.session.query(User).filter_by(email=signup_data["email"]).first():
+            error = "An account with that email already exists. Please sign in."
+        elif not join_code:
+            error = "Please enter an invite code."
+        else:
+            household = db.session.query(Household).filter_by(join_code=join_code).first()
+            if not household:
+                error = "No household found with that code. Check the code and try again."
+            else:
+                user = User(
+                    full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
+                    display_name=signup_data["display_name"],
+                    email=signup_data["email"],
+                )
+                user.set_password(signup_data["password"])
+                db.session.add(user)
+                db.session.flush()
+
+                db.session.add(Membership(
+                    user_id=user.id,
+                    household_id=household.id,
+                    role=form_data.get("role", "Member"),
+                    points=0,
+                ))
+                db.session.commit()
+                session.pop("signup_data", None)
+                login_user(user)
+                return redirect(url_for("home"))
+
+    return render_template(
+        "signup_join_household.html",
+        title="Join Household",
+        form_data=form_data,
+        error=error,
     )
 
 
