@@ -3,47 +3,54 @@
 // ════════════════════════════
 
 let currentUser = null;
-let filter = 'pending';
+let filter = "pending";
 let nextId = 1;
 
-let tasks = [];
+let tasks = typeof initialTasks !== "undefined" ? initialTasks : [];
 
 // Map category → Lucide icon name
 const catIcon = {
-  cleaning: 'sparkles',
-  kitchen:  'utensils',
-  garden:   'leaf',
-  laundry:  'shirt',
-  shopping: 'shopping-cart',
-  trash:    'trash-2',
-  pets:     'paw-print',
-  repairs:  'wrench',
-  bathroom: 'bath',
-  storage:  'package',
-  other:    'clipboard-list',
+  cleaning: "sparkles",
+  kitchen: "utensils",
+  garden: "leaf",
+  laundry: "shirt",
+  shopping: "shopping-cart",
+  trash: "trash-2",
+  pets: "paw-print",
+  repairs: "wrench",
+  bathroom: "bath",
+  storage: "package",
+  other: "clipboard-list",
 };
 
 // Map category → accent colour
 const catColor = {
-  cleaning: '#c17f5a',
-  kitchen:  '#d4834a',
-  garden:   '#6a9e5a',
-  laundry:  '#5a7eb8',
-  shopping: '#9a6ab8',
-  trash:    '#8a9e7a',
-  pets:     '#d4a84a',
-  repairs:  '#6a8eb8',
-  bathroom: '#5ab0a8',
-  storage:  '#b89a5a',
-  other:    '#9e9087',
+  cleaning: "#c17f5a",
+  kitchen: "#d4834a",
+  garden: "#6a9e5a",
+  laundry: "#5a7eb8",
+  shopping: "#9a6ab8",
+  trash: "#8a9e7a",
+  pets: "#d4a84a",
+  repairs: "#6a8eb8",
+  bathroom: "#5ab0a8",
+  storage: "#b89a5a",
+  other: "#9e9087",
 };
 
 // Map category → display label
 const catLabel = {
-  cleaning: 'Cleaning', kitchen: 'Kitchen',  garden:   'Garden',
-  laundry:  'Laundry',  shopping: 'Shopping', trash:    'Bins & Trash',
-  pets:     'Pets',     repairs:  'Repairs',  bathroom: 'Bathroom',
-  storage:  'Storage',  other:    'Other',
+  cleaning: "Cleaning",
+  kitchen: "Kitchen",
+  garden: "Garden",
+  laundry: "Laundry",
+  shopping: "Shopping",
+  trash: "Bins & Trash",
+  pets: "Pets",
+  repairs: "Repairs",
+  bathroom: "Bathroom",
+  storage: "Storage",
+  other: "Other",
 };
 
 // ════════════════════════════
@@ -53,25 +60,38 @@ const catLabel = {
 function setGreeting() {
   const now = new Date();
   const h = now.getHours();
-  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('time-greeting').textContent = g;
-  document.getElementById('greeting-date').textContent = now.toLocaleDateString([], {
-    weekday: 'long', day: 'numeric', month: 'long'
-  });
+  const g =
+    h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  document.getElementById("time-greeting").textContent = g;
+  document.getElementById("greeting-date").textContent = now.toLocaleDateString(
+    [],
+    {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    },
+  );
 }
 
 function guessCategory(text) {
   const t = text.toLowerCase();
-  if (/vacu|mop|dust|wipe|sweep|clean|scrub|wash|laundry/.test(t)) return 'cleaning';
-  if (/cook|meal|dish|kitchen|grocery|groceries|food|bake|dinner|lunch|breakfast/.test(t)) return 'kitchen';
-  if (/garden|plant|water|mow|lawn|weed|prune|flower|herb/.test(t)) return 'garden';
-  return 'other';
+  if (/vacu|mop|dust|wipe|sweep|clean|scrub|wash|laundry/.test(t))
+    return "cleaning";
+  if (
+    /cook|meal|dish|kitchen|grocery|groceries|food|bake|dinner|lunch|breakfast/.test(
+      t,
+    )
+  )
+    return "kitchen";
+  if (/garden|plant|water|mow|lawn|weed|prune|flower|herb/.test(t))
+    return "garden";
+  return "other";
 }
 
 function formatDue(val) {
-  if (!val) return '';
+  if (!val) return "";
   const d = new Date(val);
-  return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
 // Re-render all Lucide icons after DOM changes
@@ -84,7 +104,7 @@ function refreshIcons() {
 // ════════════════════════════
 
 function doLogout() {
-  window.location.href = '/logout';
+  window.location.href = "/logout";
 }
 
 // ════════════════════════════
@@ -92,17 +112,17 @@ function doLogout() {
 // ════════════════════════════
 
 function showLeaderboard() {
-  document.getElementById('home-page').classList.remove('active');
-  document.getElementById('leaderboard-page').classList.add('active');
-  document.getElementById('nav-home').classList.remove('active');
-  document.getElementById('nav-leaderboard').classList.add('active');
+  document.getElementById("home-page").classList.remove("active");
+  document.getElementById("leaderboard-page").classList.add("active");
+  document.getElementById("nav-home").classList.remove("active");
+  document.getElementById("nav-leaderboard").classList.add("active");
 }
 
 function showHome() {
-  document.getElementById('leaderboard-page').classList.remove('active');
-  document.getElementById('home-page').classList.add('active');
-  document.getElementById('nav-leaderboard').classList.remove('active');
-  document.getElementById('nav-home').classList.add('active');
+  document.getElementById("leaderboard-page").classList.remove("active");
+  document.getElementById("home-page").classList.add("active");
+  document.getElementById("nav-leaderboard").classList.remove("active");
+  document.getElementById("nav-home").classList.add("active");
 }
 
 // ════════════════════════════
@@ -110,9 +130,9 @@ function showHome() {
 // ════════════════════════════
 
 function openModal() {
-  document.getElementById('taskModal').classList.add('open');
-  document.getElementById('modalOverlay').classList.add('open');
-  document.getElementById('modal-task-name').focus();
+  document.getElementById("taskModal").classList.add("open");
+  document.getElementById("modalOverlay").classList.add("open");
+  document.getElementById("modal-task-name").focus();
   refreshIcons();
 }
 
@@ -122,7 +142,8 @@ function closeModal() {
   document.getElementById('modal-task-name').value = '';
   document.getElementById('modal-assigned').value = '';
   document.getElementById('modal-points').value = '';
-  document.getElementById('modal-due').value = '';
+  document.getElementById('modal-due-date').value = '';
+  document.getElementById('modal-due-time').value = '';
   document.getElementById('modal-error').textContent = '';
   document.getElementById('modal-cat-select').value = 'cleaning';
   updateCatPreview();
@@ -130,9 +151,10 @@ function closeModal() {
 }
 
 function updateCatPreview() {
-  const sel  = document.getElementById('modal-cat-select');
-  const icon = sel.options[sel.selectedIndex].dataset.icon || 'clipboard-list';
-  document.getElementById('catIconPreview').innerHTML = `<i data-lucide="${icon}"></i>`;
+  const sel = document.getElementById("modal-cat-select");
+  const icon = sel.options[sel.selectedIndex].dataset.icon || "clipboard-list";
+  document.getElementById("catIconPreview").innerHTML =
+    `<i data-lucide="${icon}"></i>`;
   refreshIcons();
 }
 
@@ -140,27 +162,29 @@ function submitTask() {
   const name     = document.getElementById('modal-task-name').value.trim();
   const assigned = document.getElementById('modal-assigned').value;
   const points   = document.getElementById('modal-points').value;
-  const due      = document.getElementById('modal-due').value;
+  const dueDate  = document.getElementById('modal-due-date').value;
+  const dueTime  = document.getElementById('modal-due-time').value;
+  const due      = dueDate ? `${dueDate}T${dueTime || '00:00'}` : '';
   const cat      = document.getElementById('modal-cat-select').value || 'other';
   const errEl    = document.getElementById('modal-error');
 
   if (!name) {
-    errEl.textContent = 'Please enter a task name.';
-    document.getElementById('modal-task-name').focus();
+    errEl.textContent = "Please enter a task name.";
+    document.getElementById("modal-task-name").focus();
     return;
   }
   if (!assigned) {
-    errEl.textContent = 'Please select who this is assigned to.';
+    errEl.textContent = "Please select who this is assigned to.";
     return;
   }
 
-  if (points !== '' && (isNaN(parseInt(points)) || parseInt(points) < 1)) {
-    errEl.textContent = 'Points must be a positive number.';
-    document.getElementById('modal-points').focus();
+  if (points !== "" && (isNaN(parseInt(points)) || parseInt(points) < 1)) {
+    errEl.textContent = "Points must be a positive number.";
+    document.getElementById("modal-points").focus();
     return;
   }
 
-  errEl.textContent = '';
+  errEl.textContent = "";
   tasks.unshift({
     id: nextId++,
     text: name,
@@ -176,13 +200,13 @@ function submitTask() {
 }
 
 function toggleTask(id) {
-  const t = tasks.find(t => t.id === id);
+  const t = tasks.find((t) => t.id === id);
   if (t) t.done = !t.done;
   renderTasks();
 }
 
 function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
+  tasks = tasks.filter((t) => t.id !== id);
   renderTasks();
 }
 
@@ -192,27 +216,29 @@ function setFilter(f) {
 }
 
 function renderFilters() {
-  const row = document.getElementById('cat-row');
+  const row = document.getElementById("cat-row");
 
   // Only show category tabs for categories that still have incomplete tasks
-  const activeCats = [...new Set(tasks.filter(t => !t.done).map(t => t.cat))];
+  const activeCats = [
+    ...new Set(tasks.filter((t) => !t.done).map((t) => t.cat)),
+  ];
 
-  let html = `<button class="cat-btn ${filter === 'all' ? 'active' : ''}" onclick="setFilter('all')">
+  let html = `<button class="cat-btn ${filter === "all" ? "active" : ""}" onclick="setFilter('all')">
     <i data-lucide="layout-grid"></i> All
   </button>
-  <button class="cat-btn ${filter === 'pending' ? 'active' : ''}" onclick="setFilter('pending')">
+  <button class="cat-btn ${filter === "pending" ? "active" : ""}" onclick="setFilter('pending')">
     <i data-lucide="clock"></i> Pending
   </button>`;
 
-  activeCats.forEach(cat => {
-    const icon  = catIcon[cat] || 'clipboard-list';
+  activeCats.forEach((cat) => {
+    const icon = catIcon[cat] || "clipboard-list";
     const label = catLabel[cat] || cat;
-    html += `<button class="cat-btn ${filter === cat ? 'active' : ''}" onclick="setFilter('${cat}')">
+    html += `<button class="cat-btn ${filter === cat ? "active" : ""}" onclick="setFilter('${cat}')">
       <i data-lucide="${icon}"></i> ${label}
     </button>`;
   });
 
-  html += `<button class="cat-btn ${filter === 'done' ? 'active' : ''}" onclick="setFilter('done')">
+  html += `<button class="cat-btn ${filter === "done" ? "active" : ""}" onclick="setFilter('done')">
     <i data-lucide="check-circle"></i> Done
   </button>`;
 
@@ -223,29 +249,29 @@ function renderFilters() {
 function renderTasks() {
   renderFilters();
 
-  const list  = document.getElementById('task-list');
-  const empty = document.getElementById('empty-state');
+  const list = document.getElementById("task-list");
+  const empty = document.getElementById("empty-state");
 
-  const visible = tasks.filter(t => {
-    if (filter === 'all')     return true;
-    if (filter === 'pending') return !t.done;
-    if (filter === 'done')    return t.done;
+  const visible = tasks.filter((t) => {
+    if (filter === "all") return true;
+    if (filter === "pending") return !t.done;
+    if (filter === "done") return t.done;
     return t.cat === filter && !t.done;
   });
 
-  list.innerHTML = '';
+  list.innerHTML = "";
 
   if (visible.length === 0) {
-    empty.classList.add('show');
+    empty.classList.add("show");
   } else {
-    empty.classList.remove('show');
+    empty.classList.remove("show");
 
-    visible.forEach(t => {
-      const icon  = catIcon[t.cat]  || 'clipboard-list';
-      const color = catColor[t.cat] || '#9e9087';
+    visible.forEach((t) => {
+      const icon = catIcon[t.cat] || "clipboard-list";
+      const color = catColor[t.cat] || "#9e9087";
       const label = catLabel[t.cat] || t.cat;
-      const el    = document.createElement('div');
-      el.className = 'task-item' + (t.done ? ' done' : '');
+      const el = document.createElement("div");
+      el.className = "task-item" + (t.done ? " done" : "");
       el.style.borderLeftColor = color;
       el.innerHTML = `
         <div class="task-check" onclick="toggleTask(${t.id})">
@@ -257,10 +283,10 @@ function renderTasks() {
         <div class="task-body">
           <div class="task-text">${t.text}</div>
           <div class="task-meta">
-            ${t.assignedTo ? `<span class="task-chip chip-user"><i data-lucide="user"></i> ${t.assignedTo}</span>` : ''}
-            ${t.points     ? `<span class="task-chip chip-points"><i data-lucide="zap"></i> ${t.points} pts</span>` : ''}
-            ${t.due        ? `<span class="task-chip chip-due"><i data-lucide="clock"></i> ${formatDue(t.due)}</span>` : ''}
-            ${t.due && !t.done && new Date(t.due) < new Date() ? `<span class="overdue-badge"><i data-lucide="alert-circle"></i> Overdue</span>` : ''}
+            ${t.assignedTo ? `<span class="task-chip chip-user"><i data-lucide="user"></i> ${t.assignedTo}</span>` : ""}
+            ${t.points ? `<span class="task-chip chip-points"><i data-lucide="zap"></i> ${t.points} pts</span>` : ""}
+            ${t.due ? `<span class="task-chip chip-due"><i data-lucide="clock"></i> ${formatDue(t.due)}</span>` : ""}
+            ${t.due && !t.done && new Date(t.due) < new Date() ? `<span class="overdue-badge"><i data-lucide="alert-circle"></i> Overdue</span>` : ""}
           </div>
         </div>
         <span class="task-cat-tag" style="background:${color}18; color:${color}; border-color:${color}40">${label}</span>
@@ -274,24 +300,26 @@ function renderTasks() {
 
   // Update section heading
   const sectionTitles = {
-    all:     'All Tasks',
-    pending: 'Pending',
-    done:    'Completed',
+    all: "All Tasks",
+    pending: "Pending",
+    done: "Completed",
   };
-  const title = sectionTitles[filter] || catLabel[filter] || 'Tasks';
+  const title = sectionTitles[filter] || catLabel[filter] || "Tasks";
   const count = visible.length;
-  const countLabel = filter === 'done'
-    ? `${count} completed`
-    : `${count} task${count !== 1 ? 's' : ''} remaining`;
+  const countLabel =
+    filter === "done"
+      ? `${count} completed`
+      : `${count} task${count !== 1 ? "s" : ""} remaining`;
 
-  document.getElementById('task-section-title').textContent = title;
-  document.getElementById('task-section-count').textContent = count > 0 ? countLabel : '';
+  document.getElementById("task-section-title").textContent = title;
+  document.getElementById("task-section-count").textContent =
+    count > 0 ? countLabel : "";
 
   // Update stats
-  const done = tasks.filter(t => t.done).length;
-  document.getElementById('stat-total').textContent = tasks.length;
-  document.getElementById('stat-done').textContent  = done;
-  document.getElementById('stat-rem').textContent   = tasks.length - done;
+  const done = tasks.filter((t) => t.done).length;
+  document.getElementById("stat-total").textContent = tasks.length;
+  document.getElementById("stat-done").textContent = done;
+  document.getElementById("stat-rem").textContent = tasks.length - done;
 
   // Re-render Lucide icons after DOM update
   refreshIcons();

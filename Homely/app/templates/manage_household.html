@@ -3,6 +3,10 @@
 page_styles %}
 <link
   rel="stylesheet"
+  href="{{ url_for('static', filename='css/homely-styles.css') }}"
+/>
+<link
+  rel="stylesheet"
   href="{{ url_for('static', filename='css/manage-household.css') }}"
 />
 {% endblock %} {% block content %} {{ household_nav('settings') }}
@@ -26,13 +30,62 @@ page_styles %}
         <p class="muted-copy">
           Share a short code so new users can join the household from sign-up.
         </p>
+
+        {% if invite and invite.is_valid() %}
         <div class="join-code-display">
-          <span class="fw-bold">{{ household.join_code }}</span>
-          <span class="inline-code-soft">Active</span>
+          <span class="fw-bold" id="joinCodeText">{{ invite.code }}</span>
+          <span class="inline-code-soft" style="color: var(--accent2)">
+            <i data-lucide="check-circle"></i> Active
+          </span>
         </div>
+        <p class="muted-copy" style="font-size: 12px; margin-bottom: 16px">
+          <i data-lucide="clock"></i>
+          Expires {{ invite.expires_at.strftime('%d %b %Y at %I:%M %p') }}
+        </p>
+        {% elif invite and not invite.is_valid() %}
+        <div class="join-code-display">
+          <span class="fw-bold" style="color: var(--muted)"
+            >{{ invite.code }}</span
+          >
+          <span class="inline-code-soft" style="color: var(--danger)">
+            <i data-lucide="x-circle"></i> Expired
+          </span>
+        </div>
+        <p class="muted-copy" style="font-size: 12px; margin-bottom: 16px">
+          This code expired on {{ invite.expires_at.strftime('%d %b %Y') }}.
+          Regenerate to create a new one.
+        </p>
+        {% else %}
+        <div class="join-code-display" style="color: var(--muted)">
+          <span>No active invite code</span>
+        </div>
+        <p class="muted-copy" style="font-size: 12px; margin-bottom: 16px">
+          Generate a code so new members can join.
+        </p>
+        {% endif %}
+
         <div class="sidebar-actions">
-          <button class="btn btn-homely btn-sm">Copy code</button>
-          <button class="btn btn-outline-homely btn-sm">Regenerate code</button>
+          {% if invite and invite.is_valid() %}
+          <button
+            type="button"
+            class="btn btn-homely btn-sm"
+            onclick="copyCode()"
+          >
+            <i data-lucide="copy"></i> Copy code
+          </button>
+          {% endif %} {% if current_membership.role == 'admin' %}
+          <form method="post" action="{{ url_for('regenerate_invite') }}">
+            <button
+              type="submit"
+              class="btn btn-outline-homely btn-sm"
+              style="width: 100%"
+            >
+              <i data-lucide="refresh-cw"></i>
+              {% if invite and invite.is_valid() %} Regenerate code {% else %}
+              Generate code {% endif %}
+            </button>
+          </form>
+          {% endif %}
         </div>
       </section>
 
@@ -44,15 +97,13 @@ page_styles %}
               <div class="section-kicker">Members</div>
               <h2>Current household roster</h2>
             </div>
-            <select class="form-select">
-              <option selected>Sort by points</option>
-              <option>Sort by role</option>
-            </select>
           </div>
 
           <div class="member-grid">
             {% for member in members %}
-            <article class="member-card">
+            <article
+              class="member-card {% if current_membership and member.user_id == current_membership.user_id %}member-card--current{% endif %}"
+            >
               <div class="member-top">
                 <div class="member-identity">
                   <div class="avatar-circle">
@@ -62,15 +113,6 @@ page_styles %}
                     <h2>{{ member.user.display_name }}</h2>
                     <p class="muted-copy">{{ member.role }}</p>
                   </div>
-                </div>
-                <div class="member-badges">
-                  {% if member.user_id == current_membership.user_id %}
-                  <span class="badge badge-success">You</span>
-                  {% endif %} {% if member.role == 'admin' %}
-                  <span class="role-badge"
-                    ><i data-lucide="shield"></i> Admin</span
-                  >
-                  {% endif %}
                 </div>
               </div>
 
@@ -89,11 +131,20 @@ page_styles %}
                 >
               </div>
 
-              {% if current_membership.role == 'admin' and member.user_id !=
-              current_membership.user_id %}
+              {% if current_membership and current_membership.role|lower ==
+              'admin' and member.user_id != current_membership.user_id %}
               <div class="member-actions">
-                <button class="btn btn-outline-homely btn-sm">Edit role</button>
-                <button class="btn btn-outline-homely btn-sm">Remove</button>
+                <button
+                  class="btn btn-danger-soft btn-sm"
+                  data-title="Remove member"
+                  data-message="Are you sure you want to remove {{ member.user.display_name }} from the household?"
+                  data-sub="They will lose access to all tasks, rewards, and household data."
+                  data-label="Remove member"
+                  data-action="{{ url_for('remove_member', user_id=member.user_id) }}"
+                  onclick="openDangerModal(this)"
+                >
+                  <i data-lucide="user-minus"></i> Remove
+                </button>
               </div>
               {% endif %}
             </article>
@@ -123,7 +174,7 @@ page_styles %}
           <tbody>
             <tr>
               <th>Admins</th>
-              <td>Edit roles, remove members, manage rewards</td>
+              <td>Remove and add members, manage household.</td>
             </tr>
             <tr>
               <th>Members</th>
@@ -146,13 +197,20 @@ page_styles %}
           <form
             method="post"
             action="{{ url_for('delete_household') }}"
-            onsubmit="
-              return confirm(
-                'Are you sure you want to delete this household? This cannot be undone.',
-              );
-            "
+            id="deleteHouseholdForm"
           >
-            <button type="submit" class="danger-link">Delete household</button>
+            <button
+              type="button"
+              class="danger-link"
+              data-title="Delete household"
+              data-message="Are you sure you want to delete this household?"
+              data-sub="This will permanently remove all members, tasks, and rewards. This cannot be undone."
+              data-label="Delete household"
+              data-action="{{ url_for('delete_household') }}"
+              onclick="openDangerModal(this)"
+            >
+              Delete household
+            </button>
           </form>
           {% else %}
           <div class="section-kicker">Leave household</div>
@@ -164,11 +222,20 @@ page_styles %}
           <form
             method="post"
             action="{{ url_for('leave_household') }}"
-            onsubmit="
-              return confirm('Are you sure you want to leave this household?');
-            "
+            id="leaveHouseholdForm"
           >
-            <button type="submit" class="danger-link">Leave household</button>
+            <button
+              type="button"
+              class="danger-link"
+              data-title="Leave household"
+              data-message="Are you sure you want to leave this household?"
+              data-sub="You will lose access to all tasks, rewards, and member data."
+              data-label="Leave household"
+              data-action="{{ url_for('leave_household') }}"
+              onclick="openDangerModal(this)"
+            >
+              Leave household
+            </button>
           </form>
           {% endif %}
         </section>
@@ -180,15 +247,79 @@ page_styles %}
             Log out of your Homely account on this device.
           </p>
           <div class="logout-actions">
-            <a
-              href="{{ url_for('logout') }}"
+            <button
+              type="button"
               class="btn btn-outline-homely btn-sm"
-              >Logout</a
+              data-title="Sign out"
+              data-message="Are you sure you want to sign out?"
+              data-sub="You'll need to log in again to access your household."
+              data-label="Sign out"
+              data-action="{{ url_for('logout') }}"
+              onclick="openDangerModal(this)"
             >
+              Logout
+            </button>
           </div>
         </section>
       </div>
     </div>
   </section>
 </main>
+
+<!-- Confirm Danger Modal -->
+<div
+  class="modal-overlay"
+  id="dangerOverlay"
+  onclick="closeDangerModal()"
+></div>
+<div class="modal" id="dangerModal">
+  <div class="modal-header">
+    <div class="modal-title" id="dangerModalTitle">Are you sure?</div>
+  </div>
+  <div class="modal-body">
+    <div class="danger-modal-icon">
+      <i data-lucide="alert-triangle"></i>
+    </div>
+    <p id="dangerModalMessage"></p>
+    <p
+      class="muted-copy"
+      id="dangerModalSub"
+      style="font-size: 13px; margin-top: 8px"
+    ></p>
+  </div>
+  <div class="modal-footer">
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeDangerModal()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn-danger-confirm"
+        onclick="submitDangerAction()"
+      >
+        <i data-lucide="alert-triangle"></i>
+        <span id="dangerBtnLabel">Confirm</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+
+{% endblock %} {% block scripts %}
+<script>
+  function copyCode() {
+    const code = document.getElementById("joinCodeText").textContent.trim();
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.querySelector('[onclick="copyCode()"]');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="check"></i> Copied!';
+      lucide.createIcons();
+      setTimeout(() => {
+        btn.innerHTML = original;
+        lucide.createIcons();
+      }, 2000);
+    });
+  }
+</script>
 {% endblock %}

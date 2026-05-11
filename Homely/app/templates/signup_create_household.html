@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+
+  <!-- Left hero panel -->
+  <div class="login-hero">
+    <div class="login-hero-inner">
+      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
+
+      <div class="auth-steps">
+        <div class="auth-step done">
+          <div class="auth-step-dot"><i data-lucide="check"></i></div>
+          <span>Your details</span>
+        </div>
+        <div class="auth-step-line active"></div>
+        <div class="auth-step active">
+          <div class="auth-step-dot">2</div>
+          <span>Your household</span>
+        </div>
+      </div>
+
+      <h1 class="login-hero-title">Create your<br>household.</h1>
+      <p class="login-hero-sub">
+        Give your household a name. We'll generate a unique invite code so you can bring housemates on board.
+      </p>
+      <ul class="login-feature-list">
+        <li><i data-lucide="home"></i> Name your household</li>
+        <li><i data-lucide="key"></i> Get a shareable invite code</li>
+        <li><i data-lucide="users"></i> Invite housemates any time</li>
+        <li><i data-lucide="trophy"></i> Climb the leaderboard together</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-form-panel">
+    <div class="login-form-wrap">
+
+      <div class="login-form-header">
+        <div class="login-form-title">Create a household</div>
+        <p class="login-form-sub">Step 2 of 2 — name your new household.</p>
+      </div>
+
+      {% if error %}
+      <div class="login-alert">
+        <i data-lucide="alert-circle"></i> {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('signup_create_household') }}" novalidate>
+
+        <div class="login-field">
+          <label class="login-label" for="household_name">Household Name</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="home"></i></span>
+            <input
+              class="login-input"
+              type="text"
+              name="household_name"
+              id="household_name"
+              placeholder="e.g. The Clean Machine"
+              value="{{ form_data.get('household_name', '') }}"
+              required
+              autofocus
+            />
+          </div>
+          <span class="login-field-error" id="householdNameError"></span>
+        </div>
+
+        <button type="submit" class="login-btn" style="margin-top: 1.25rem">
+          <i data-lucide="check-circle"></i> Create household
+        </button>
+
+      </form>
+
+      <div class="login-divider"><span></span></div>
+
+      <p class="login-signup-link">
+        <a href="{{ url_for('signup_household') }}">← Back to household options</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>lucide.createIcons();</script>
+{% endblock %}

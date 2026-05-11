@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+
+  <!-- Left hero panel -->
+  <div class="login-hero">
+    <div class="login-hero-inner">
+      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
+
+      <div class="auth-steps">
+        <div class="auth-step done">
+          <div class="auth-step-dot"><i data-lucide="check"></i></div>
+          <span>Your details</span>
+        </div>
+        <div class="auth-step-line active"></div>
+        <div class="auth-step active">
+          <div class="auth-step-dot">2</div>
+          <span>Your household</span>
+        </div>
+      </div>
+
+      <h1 class="login-hero-title">Join your<br>household.</h1>
+      <p class="login-hero-sub">
+        Enter the invite code shared by your housemate to join their household instantly.
+      </p>
+      <ul class="login-feature-list">
+        <li><i data-lucide="hash"></i> Enter your invite code</li>
+        <li><i data-lucide="users"></i> Join your housemates</li>
+        <li><i data-lucide="trophy"></i> Climb the leaderboard</li>
+        <li><i data-lucide="gift"></i> Earn points &amp; rewards</li>
+      </ul>
+
+      <div class="auth-join-hint">
+        <i data-lucide="info"></i>
+        Demo join code: <strong>HM-72QA</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-form-panel">
+    <div class="login-form-wrap">
+
+      <div class="login-form-header">
+        <div class="login-form-title">Join a household</div>
+        <p class="login-form-sub">Step 2 of 2 — enter your invite code.</p>
+      </div>
+
+      {% if error %}
+      <div class="login-alert">
+        <i data-lucide="alert-circle"></i> {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('signup_join_household') }}" novalidate>
+
+        <div class="login-field">
+          <label class="login-label" for="join_code">Invite Code</label>
+          <div class="login-input-wrap">
+            <span class="login-input-icon"><i data-lucide="hash"></i></span>
+            <input
+              class="login-input login-input-mono"
+              type="text"
+              name="join_code"
+              id="join_code"
+              placeholder="e.g. HM-72QA"
+              value="{{ form_data.get('join_code', '') }}"
+              required
+              autofocus
+            />
+          </div>
+          <span class="login-field-error" id="joinCodeError"></span>
+        </div>
+
+        <button type="submit" class="login-btn" style="margin-top: 1.25rem">
+          <i data-lucide="log-in"></i> Join household
+        </button>
+
+      </form>
+
+      <div class="login-divider"><span></span></div>
+
+      <p class="login-signup-link">
+        <a href="{{ url_for('signup_household') }}">← Back to household options</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>lucide.createIcons();</script>
+{% endblock %}

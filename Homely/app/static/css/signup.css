@@ -1,0 +1,232 @@
+/* ── Step indicator ─────────────────────────────── */
+.auth-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+
+.auth-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.4;
+}
+
+.auth-step.active,
+.auth-step.done {
+  opacity: 1;
+}
+
+.auth-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.auth-step.active .auth-step-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.auth-step.done .auth-step-dot {
+  background: var(--success, #8a9e7a);
+  border-color: var(--success, #8a9e7a);
+  color: #fff;
+}
+
+.auth-step.done .auth-step-dot svg[data-lucide] {
+  width: 13px;
+  height: 13px;
+}
+
+.auth-step span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.auth-step.active span,
+.auth-step.done span {
+  color: var(--text);
+}
+
+.auth-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 0.5rem;
+  min-width: 24px;
+}
+
+.auth-step-line.active {
+  background: var(--accent);
+}
+
+/* ── Signup name row ────────────────────────────── */
+.signup-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* Last-name input has no icon, adjust padding */
+.signup-name-row .login-field:last-child .login-input {
+  padding-left: 1rem;
+}
+
+/* ── Two-column row ─────────────────────────────── */
+.signup-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* ── Password strength ──────────────────────────── */
+.pw-strength-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.pw-strength-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.pw-strength-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  transition: width 0.2s, background 0.2s;
+}
+
+.pw-strength-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 44px;
+  text-align: right;
+}
+
+/* ── Select input ───────────────────────────────── */
+.login-select {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* ── Monospace input (join code) ────────────────── */
+.login-input-mono {
+  font-family: monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Household choice cards ─────────────────────── */
+.household-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 0.5rem 0 1.75rem;
+}
+
+.household-choice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  padding: 1.6rem 1rem;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+}
+
+.household-choice-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(193, 127, 90, 0.1);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.household-choice-icon {
+  width: 52px;
+  height: 52px;
+  background: rgba(193, 127, 90, 0.1);
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.household-choice-icon svg[data-lucide] {
+  width: 24px;
+  height: 24px;
+}
+
+.household-choice-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.household-choice-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── Join hint (demo code) ──────────────────────── */
+.auth-join-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 0.65rem 0.9rem;
+  background: rgba(193, 127, 90, 0.08);
+  border: 1px solid rgba(193, 127, 90, 0.2);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.auth-join-hint svg[data-lucide] {
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.auth-join-hint strong {
+  color: var(--text);
+  font-family: monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ── Mobile ─────────────────────────────────────── */
+@media (max-width: 767px) {
+  .signup-name-row,
+  .signup-row-two,
+  .household-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
