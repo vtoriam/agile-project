@@ -73,17 +73,6 @@
           <span class="login-field-error" id="householdNameError"></span>
         </div>
 
-        <div class="login-field">
-          <label class="login-label" for="role">Your Role</label>
-          <div class="login-input-wrap">
-            <span class="login-input-icon"><i data-lucide="shield-check"></i></span>
-            <select class="login-input login-select" name="role" id="role">
-              <option value="Admin"  {{ 'selected' if form_data.get('role', 'Admin') == 'Admin' }}>Admin</option>
-              <option value="Member" {{ 'selected' if form_data.get('role', 'Admin') == 'Member' }}>Member</option>
-            </select>
-          </div>
-        </div>
-
         <button type="submit" class="login-btn" style="margin-top: 1.25rem">
           <i data-lucide="check-circle"></i> Create household
         </button>

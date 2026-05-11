@@ -261,7 +261,7 @@ def signup_create_household():
             db.session.add(Membership(
                 user_id=user.id,
                 household_id=household.id,
-                role=form_data.get("role", "Admin"),
+                role="Admin",
                 points=0,
             ))
             db.session.commit()
@@ -311,7 +311,7 @@ def signup_join_household():
                 db.session.add(Membership(
                     user_id=user.id,
                     household_id=household.id,
-                    role=form_data.get("role", "Member"),
+                    role="Member",
                     points=0,
                 ))
                 db.session.commit()
