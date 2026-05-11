@@ -80,7 +80,7 @@ def login():
     return render_template("login.html", title="Login", error=error)
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
     logout_user()
     return redirect(url_for("login"))
@@ -172,3 +172,16 @@ def delete_household():
     db.session.delete(household)
     db.session.commit()
     return redirect(url_for("home"))
+
+@app.route("/household/remove/<int:user_id>", methods=["POST"])
+@login_required
+def remove_member(user_id):
+    household = db.session.query(Household).first()
+    membership = db.session.query(Membership).filter_by(
+        user_id=user_id,
+        household_id=household.id
+    ).first()
+    if membership:
+        db.session.delete(membership)
+        db.session.commit()
+    return redirect(url_for("manage_household"))
