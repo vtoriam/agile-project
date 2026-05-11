@@ -235,6 +235,12 @@
   margin-bottom: 0.2rem;
 }
 
+.reward-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .reward-desc {
   font-size: 0.82rem;
   color: var(--muted);

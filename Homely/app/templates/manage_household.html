@@ -35,7 +35,13 @@ page_styles %}
           <span class="inline-code-soft">Active</span>
         </div>
         <div class="sidebar-actions">
-          <button class="btn btn-homely btn-sm">Copy code</button>
+          <button
+            type="button"
+            class="btn btn-homely btn-sm"
+            onclick="copyCode()"
+          >
+            Copy code
+          </button>
           <button class="btn btn-outline-homely btn-sm">Regenerate code</button>
         </div>
       </section>
@@ -260,4 +266,13 @@ page_styles %}
 </div>
 
 <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+
+{% endblock %} {% block scripts %}
+<script>
+  function copyCode() {
+    navigator.clipboard.writeText({{ household.join_code | tojson }});
+  }
+</script>
 {% endblock %}
+
+
