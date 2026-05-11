@@ -44,7 +44,7 @@ body::after {
 .main-content {
   flex: 1;
   min-width: 0;
-  padding: 2.5rem 2.75rem;
+  padding: 4rem 2.75rem 2.5rem 3.5rem;
 }
 
 .home-main {
@@ -530,16 +530,15 @@ svg[data-lucide] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 380px;
-  height: 420px;
+  width: 420px;
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: 20px;
   box-shadow: 0 16px 48px rgba(61, 52, 42, 0.16);
   scrollbar-gutter: stable;
   z-index: 1001;
-  max-height: 420px;
-  overflow: hidden;
+  max-height: 90vh;
+  overflow-y: auto;
   animation: modalIn 0.25s ease;
   pointer-events: auto;
   flex-direction: column;
@@ -598,14 +597,13 @@ svg[data-lucide] {
 }
 
 .modal-body {
-  padding: 16px 18px;
+  padding: 12px 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .danger-modal-icon {
@@ -635,7 +633,8 @@ svg[data-lucide] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1;
+  flex: none;
+  width: 100%;
 }
 
 .modal-field label {
@@ -699,14 +698,14 @@ svg[data-lucide] {
 }
 
 .modal-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
 .modal-row .modal-field {
-  min-width: 220px;
-  flex: 1 1 220px;
+  width: 100%;
+  min-width: 0;
 }
 
 .modal::-webkit-scrollbar {
@@ -728,57 +727,62 @@ svg[data-lucide] {
 }
 
 /* ════════════════════════════
-   DATETIME-LOCAL INPUT
+   DATE & TIME INPUTS
 ════════════════════════════ */
-input[type="datetime-local"] {
+input[type="date"],
+input[type="time"] {
   color-scheme: light;
   color: var(--text);
-  min-width: 220px;
+  min-width: 0;
   width: 100%;
 }
 
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
   background-color: transparent;
-  color: var(--accent);
   cursor: pointer;
-  filter: opacity(0.6);
+  filter: opacity(0.5);
   transition: filter 0.2s;
 }
 
-input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
   filter: opacity(1);
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit {
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit {
   color: var(--text);
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="time"]::-webkit-datetime-edit-fields-wrapper {
   background: transparent;
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-text {
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="time"]::-webkit-datetime-edit-text {
   color: var(--muted);
   padding: 0 2px;
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-month-field,
-input[type="datetime-local"]::-webkit-datetime-edit-day-field,
-input[type="datetime-local"]::-webkit-datetime-edit-year-field,
-input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
-input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
-input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field,
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field,
+input[type="time"]::-webkit-datetime-edit-ampm-field {
   color: var(--text);
   border-radius: 4px;
   padding: 0 2px;
 }
 
-input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus,
-input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus,
+input[type="time"]::-webkit-datetime-edit-hour-field:focus,
+input[type="time"]::-webkit-datetime-edit-minute-field:focus,
+input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   background: var(--accent);
   color: #fff;
   outline: none;
@@ -846,10 +850,11 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
 }
 
 .modal-footer {
-  padding: 10px 18px 18px;
+  padding: 8px 18px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: auto;
 }
 
 .modal-error {
@@ -861,7 +866,7 @@ input[type="datetime-local"]::-webkit-datetime-edit-ampm-field:focus {
 .modal-actions {
   display: flex;
   gap: 6px;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
 }
 

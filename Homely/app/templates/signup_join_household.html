@@ -78,17 +78,6 @@
           <span class="login-field-error" id="joinCodeError"></span>
         </div>
 
-        <div class="login-field">
-          <label class="login-label" for="role">Your Role</label>
-          <div class="login-input-wrap">
-            <span class="login-input-icon"><i data-lucide="shield-check"></i></span>
-            <select class="login-input login-select" name="role" id="role">
-              <option value="Member" {{ 'selected' if form_data.get('role', 'Member') == 'Member' }}>Member</option>
-              <option value="Admin"  {{ 'selected' if form_data.get('role', 'Member') == 'Admin' }}>Admin</option>
-            </select>
-          </div>
-        </div>
-
         <button type="submit" class="login-btn" style="margin-top: 1.25rem">
           <i data-lucide="log-in"></i> Join household
         </button>
