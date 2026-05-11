@@ -30,13 +30,27 @@ def root():
 @app.route("/home")
 @login_required
 def home():
-    return render_template("home.html", title="Home")
+    membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
+    members = (
+        db.session.query(Membership)
+        .filter_by(household_id=membership.household_id)
+        .all()
+        if membership else []
+    )
+    return render_template("home.html", title="Home", members=members)
 
 
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("home.html", title="Dashboard")
+    membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
+    members = (
+        db.session.query(Membership)
+        .filter_by(household_id=membership.household_id)
+        .all()
+        if membership else []
+    )
+    return render_template("home.html", title="Dashboard", members=members)
 
 
 @app.route("/my-tasks")
