@@ -304,7 +304,7 @@ svg[data-lucide] {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 860px;
+  max-width: 600px;
 }
 
 .task-item {
@@ -537,7 +537,7 @@ svg[data-lucide] {
   box-shadow: 0 16px 48px rgba(61, 52, 42, 0.16);
   scrollbar-gutter: stable;
   z-index: 1001;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow-y: auto;
   animation: modalIn 0.25s ease;
   pointer-events: auto;
@@ -1716,4 +1716,28 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
       transform: translateY(0);
     }
   }
+}
+
+/* ════════════════════════════
+   OVERDUE BANNER
+════════════════════════════ */
+.overdue-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(190, 83, 58, 0.08);
+  border: 1px solid rgba(190, 83, 58, 0.2);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--danger);
+  margin-bottom: 24px;
+  max-width: 860px;
+}
+
+.overdue-banner svg[data-lucide] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }

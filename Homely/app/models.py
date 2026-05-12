@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login
 from flask_login import UserMixin
@@ -7,8 +7,7 @@ from flask_login import UserMixin
 class Household(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    join_code = db.Column(db.String(20), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     memberships = db.relationship(
         "Membership",
@@ -18,6 +17,12 @@ class Household(db.Model):
 
     tasks = db.relationship(
         "Task",
+        back_populates="household",
+        cascade="all, delete-orphan"
+    )
+
+    invites = db.relationship(
+        "HouseholdInvite",
         back_populates="household",
         cascade="all, delete-orphan"
     )
@@ -33,7 +38,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     avatar = db.Column(db.String(50), default="avatar1")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     memberships = db.relationship(
         "Membership",
@@ -45,6 +50,12 @@ class User(UserMixin, db.Model):
         "Task",
         back_populates="assignee",
         foreign_keys="Task.assigned_user_id"
+    )
+
+    created_invites = db.relationship(
+        "HouseholdInvite",
+        back_populates="created_by",
+        foreign_keys="HouseholdInvite.created_by_user_id"
     )
 
     def set_password(self, password):
@@ -63,7 +74,8 @@ class Membership(db.Model):
     household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
     role = db.Column(db.String(30), default="member")
     points = db.Column(db.Integer, default=0)
-    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    joined_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    last_overdue_popup = db.Column(db.DateTime, nullable=True)
 
     user = db.relationship("User", back_populates="memberships")
     household = db.relationship("Household", back_populates="memberships")
@@ -75,6 +87,26 @@ class Membership(db.Model):
     def __repr__(self):
         return f"<Membership user={self.user_id} household={self.household_id}>"
 
+class HouseholdInvite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    code = db.Column(db.String(20), unique=True, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    household = db.relationship("Household", back_populates="invites")
+    created_by = db.relationship(
+        "User",
+        back_populates="created_invites",
+        foreign_keys=[created_by_user_id]
+    )
+
+    def is_valid(self):
+        return self.is_active and datetime.utcnow() < self.expires_at
+    def __repr__(self):
+        return f"<HouseholdInvite {self.code}>"
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,7 +121,7 @@ class Task(db.Model):
     due_date = db.Column(db.DateTime, nullable=True)
     is_completed = db.Column(db.Boolean, default=False)
     completed_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     household = db.relationship("Household", back_populates="tasks")
     assignee = db.relationship("User", back_populates="assigned_tasks", foreign_keys=[assigned_user_id])
@@ -115,7 +147,7 @@ def create_sample_data():
     db.session.commit()
 
     # Create sample household
-    household = Household(name="Khan Family", join_code="HM-72QA")
+    household = Household(name="Khan Family")
     db.session.add(household)
     db.session.commit()
 
@@ -127,7 +159,7 @@ def create_sample_data():
     db.session.add_all([membership1, membership2, membership3])
     db.session.commit()
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     d = lambda days: now - timedelta(days=days)
 
     # Sample tasks: mix of on-time completions and late completions
@@ -157,4 +189,14 @@ def create_sample_data():
         Task(household_id=household.id, assigned_user_id=user3.id, title="Deep clean oven",        category="kitchen",   points_value=20, is_completed=True,  due_date=d(15), completed_at=d(12)),  # late
     ]
     db.session.add_all(sample_tasks)
+    db.session.commit()
+
+    # Create a sample invite code
+    invite = HouseholdInvite(
+        household_id=household.id,
+        created_by_user_id=user1.id,
+        code="HM-SAMPLE",
+        expires_at=datetime.utcnow() + timedelta(days=7),
+    )
+    db.session.add(invite)
     db.session.commit()

@@ -5,16 +5,9 @@ from flask import render_template, redirect, url_for, request, session
 from sqlalchemy import func
 
 from app import app, db
-from app.models import User, Household, Membership, Task
+from app.models import User, Household, Membership, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
-
-
-def _generate_join_code():
-    chars = string.ascii_uppercase + string.digits
-    while True:
-        code = "HM-" + "".join(random.choices(chars, k=4))
-        if not db.session.query(Household).filter_by(join_code=code).first():
-            return code
+from datetime import datetime, timedelta
 
 @app.route("/index")
 @login_required
@@ -37,20 +30,85 @@ def home():
         .all()
         if membership else []
     )
-    return render_template("home.html", title="Home", members=members)
 
+    now = datetime.utcnow()
+
+    # Find overdue tasks assigned to the current user
+    overdue_tasks = db.session.query(Task).filter(
+        Task.is_completed == False,
+        Task.due_date != None,
+        Task.due_date < now,
+        Task.assigned_user_id == current_user.id,
+    ).all() if membership else []
+
+    overdue_count = len(overdue_tasks)
+
+    # Calculate total points at risk (days overdue × 5 per task)
+    total_points_lost = sum(
+        max(0, (now - task.due_date).days) * 5
+        for task in overdue_tasks
+    )
+
+    # Show popup if they have overdue tasks and haven't dismissed it today
+    show_popup = False
+    if overdue_count > 0 and membership:
+        if membership.last_overdue_popup is None or \
+           (now - membership.last_overdue_popup).total_seconds() > 86400:
+            show_popup = True
+
+    import json
+
+    tasks_data = [
+        {
+            "id": t.id,
+            "text": t.title,
+            "done": t.is_completed,
+            "cat": t.category,
+            "assignedTo": t.assignee.display_name if t.assignee else None,
+            "points": t.points_value,
+            "due": t.due_date.isoformat() if t.due_date else None,
+        }
+        for t in db.session.query(Task).filter_by(
+            household_id=membership.household_id
+        ).all()
+    ] if membership else []
+
+    members_data = [
+        {
+            "id": m.user_id,
+            "name": m.user.display_name,
+        }
+        for m in db.session.query(Membership).filter_by(
+            household_id=membership.household_id
+        ).all()
+    ] if membership else []
+
+    return render_template(
+        "home.html",
+        title="Home",
+        members=members,
+        overdue_count=overdue_count,
+        total_points_lost=total_points_lost,
+        show_popup=show_popup,
+        tasks_data=tasks_data,
+        members_data=members_data
+    )
+
+@app.route("/dismiss-overdue-popup", methods=["POST"])
+@login_required
+def dismiss_overdue_popup():
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id
+    ).first()
+    if membership:
+        membership.last_overdue_popup = datetime.utcnow()
+        db.session.commit()
+    return "", 204
 
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
-    members = (
-        db.session.query(Membership)
-        .filter_by(household_id=membership.household_id)
-        .all()
-        if membership else []
-    )
-    return render_template("home.html", title="Dashboard", members=members)
+    return redirect(url_for("home"))
 
 
 @app.route("/my-tasks")
@@ -254,9 +312,18 @@ def signup_create_household():
             db.session.add(user)
             db.session.flush()
 
-            household = Household(name=household_name, join_code=_generate_join_code())
+            household = Household(name=household_name)
             db.session.add(household)
             db.session.flush()
+
+            first_invite = HouseholdInvite(
+                household_id=household.id,
+                created_by_user_id=user.id,
+                code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
+                expires_at=datetime.utcnow() + timedelta(days=7),
+                is_active=True,
+            )
+            db.session.add(first_invite)
 
             db.session.add(Membership(
                 user_id=user.id,
@@ -295,9 +362,14 @@ def signup_join_household():
         elif not join_code:
             error = "Please enter an invite code."
         else:
-            household = db.session.query(Household).filter_by(join_code=join_code).first()
-            if not household:
+            invite = db.session.query(HouseholdInvite).filter_by(
+                code=join_code
+            ).first()
+
+            if not invite:
                 error = "No household found with that code. Check the code and try again."
+            elif not invite.is_valid():
+                error = "This invite code has expired or been deactivated. Ask an admin to regenerate it."
             else:
                 user = User(
                     full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
@@ -331,28 +403,42 @@ def signup_join_household():
 @app.route("/manage-household")
 @login_required
 def manage_household():
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter(
+        Household.id == db.session.query(Membership.household_id).filter_by(
+            user_id=current_user.id
+        ).scalar_subquery()
+    ).first()
+
     current_membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
-        household_id=household.id    ).first() if household else None
-    members = db.session.query(Membership).filter_by(household_id=household.id).all() if household else []
+        household_id=household.id
+    ).first() if household else None
+
+    members = db.session.query(Membership).filter_by(
+        household_id=household.id
+    ).order_by(Membership.points.desc()).all() if household else []
 
     for member in members:
-        completed_chores = db.session.query(Task).filter_by(
+        member.completed_chores = db.session.query(Task).filter_by(
             household_id=household.id,
             assigned_user_id=member.user_id,
             is_completed=True,
         ).count() if household else 0
-        member.completed_chores = completed_chores
+
+    # Get the most recent valid invite
+    invite = db.session.query(HouseholdInvite).filter_by(
+        household_id=household.id,
+        is_active=True,
+    ).order_by(HouseholdInvite.created_at.desc()).first() if household else None
 
     return render_template(
         "manage_household.html",
         title="Manage Household",
-        household=db.session.query(Household).first(),
+        household=household,
         members=members,
-        current_membership=current_membership
+        current_membership=current_membership,
+        invite=invite,
     )
-
 
 @app.route("/household/leave", methods=["POST"])
 def leave_household():
@@ -389,3 +475,124 @@ def remove_member(user_id):
         db.session.delete(membership)
         db.session.commit()
     return redirect(url_for("manage_household"))
+
+
+@app.route("/household/invite/regenerate", methods=["POST"])
+@login_required
+def regenerate_invite():
+    household = db.session.query(Household).filter(
+        Household.id == db.session.query(Membership.household_id).filter_by(
+            user_id=current_user.id
+        ).scalar_subquery()
+    ).first()
+
+    if not household:
+        return redirect(url_for("home"))
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+
+    if not membership or membership.role.lower() != "admin":
+        return redirect(url_for("manage_household"))
+
+    # Deactivate all existing codes for this household
+    db.session.query(HouseholdInvite).filter_by(
+        household_id=household.id
+    ).update({"is_active": False})
+
+    # Generate a new unique code
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        code = "HM-" + "".join(random.choices(chars, k=4))
+        if not db.session.query(HouseholdInvite).filter_by(code=code).first():
+            break
+
+    new_invite = HouseholdInvite(
+        household_id=household.id,
+        created_by_user_id=current_user.id,
+        code=code,
+        expires_at=datetime.utcnow() + timedelta(days=7),
+        is_active=True,
+    )
+    db.session.add(new_invite)
+    db.session.commit()
+
+    return redirect(url_for("manage_household"))
+
+@app.route("/tasks/<int:task_id>/toggle", methods=["POST"])
+@login_required
+def toggle_task(task_id):
+    task = db.session.query(Task).filter_by(id=task_id).first()
+    if not task:
+        return {"error": "Task not found"}, 404
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=task.household_id
+    ).first()
+    if not membership:
+        return {"error": "Unauthorised"}, 403
+
+    task.is_completed = not task.is_completed
+    task.completed_at = datetime.utcnow() if task.is_completed else None
+
+    # Award or deduct points when toggling
+    if task.assignee:
+        assigned_membership = db.session.query(Membership).filter_by(
+            user_id=task.assigned_user_id,
+            household_id=task.household_id
+        ).first()
+        if assigned_membership:
+            if task.is_completed:
+                assigned_membership.points += task.points_value
+            else:
+                assigned_membership.points = max(0, assigned_membership.points - task.points_value)
+
+    db.session.commit()
+    return {"done": task.is_completed, "points": task.points_value}, 200
+
+@app.route("/tasks/create", methods=["POST"])
+@login_required
+def create_task():
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id
+    ).first()
+    if not membership:
+        return {"error": "No household found"}, 403
+
+    data = request.get_json()
+
+    assigned_member = db.session.query(Membership).filter_by(
+        household_id=membership.household_id
+    ).join(User).filter(User.display_name == data.get("assignedTo")).first()
+
+    due_date = None
+    if data.get("due"):
+        try:
+            due_date = datetime.fromisoformat(data["due"])
+        except ValueError:
+            pass
+
+    task = Task(
+        household_id=membership.household_id,
+        assigned_user_id=assigned_member.user_id if assigned_member else None,
+        title=data.get("text", "").strip(),
+        category=data.get("cat", "other"),
+        points_value=int(data.get("points")) if data.get("points") else 10,
+        due_date=due_date,
+        is_completed=False,
+    )
+    db.session.add(task)
+    db.session.commit()
+
+    return {
+        "id": task.id,
+        "text": task.title,
+        "done": task.is_completed,
+        "cat": task.category,
+        "assignedTo": assigned_member.user.display_name if assigned_member else None,
+        "points": task.points_value,
+        "due": task.due_date.isoformat() if task.due_date else None,
+    }, 201
