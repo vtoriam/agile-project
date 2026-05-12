@@ -13,6 +13,13 @@ household_nav %} {% block page_styles %}
   <div class="lb-sub">Points earned from completed tasks this month</div>
 </div>
 
+{% if not first %}
+<div class="lb-empty">
+  <div class="lb-empty-icon"><i data-lucide="users"></i></div>
+  <div class="lb-empty-title">No housemates yet</div>
+  <div class="lb-empty-sub">Complete tasks to start earning points and climb the leaderboard.</div>
+</div>
+{% else %}
 <!-- Podium -->
 <div class="podium">
   <div class="podium-slot second">
@@ -137,6 +144,8 @@ household_nav %} {% block page_styles %}
   </div>
   {% endfor %}
 </div>
+
+{% endif %}
 
 <!-- Person summary popup -->
 <div class="person-overlay" id="personOverlay" onclick="closePersonModal()"></div>

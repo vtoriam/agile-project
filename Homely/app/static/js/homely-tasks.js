@@ -245,6 +245,32 @@ function toggleTask(id) {
     });
 }
 
+<<<<<<< signup-flow
+function showToast(points) {
+  const existing = document.getElementById('pts-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'pts-toast';
+  toast.className = 'pts-toast';
+  toast.innerHTML = `<i data-lucide="zap"></i> +${points} pts earned!`;
+  document.body.appendChild(toast);
+  lucide.createIcons();
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) {
+    const markingDone = !t.done;
+    t.done = markingDone;
+    if (markingDone && t.points) showToast(t.points);
+  }
+  renderTasks();
+=======
 function updateOverdueBanner() {
   const banner = document.getElementById("overdue-banner");
   if (!banner) return;
@@ -264,6 +290,7 @@ function updateOverdueBanner() {
       countText.innerHTML = `${overdueTasks.length} overdue task${overdueTasks.length !== 1 ? "s" : ""}`;
     }
   }
+>>>>>>> main
 }
 
 function deleteTask(id) {

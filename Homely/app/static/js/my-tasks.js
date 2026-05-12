@@ -58,6 +58,22 @@ function formatDue(val) {
 
 function refreshIcons() { lucide.createIcons(); }
 
+function showToast(points) {
+  const existing = document.getElementById('pts-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'pts-toast';
+  toast.className = 'pts-toast';
+  toast.innerHTML = `<i data-lucide="zap"></i> +${points} pts earned!`;
+  document.body.appendChild(toast);
+  lucide.createIcons();
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 // ── Modal ─────────────────────────────────────────
 function openModal() {
   document.getElementById('taskModal').classList.add('open');
@@ -71,7 +87,8 @@ function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
   document.getElementById('modal-task-name').value = '';
   document.getElementById('modal-points').value    = '';
-  document.getElementById('modal-due').value       = '';
+  document.getElementById('modal-due-date').value  = '';
+  document.getElementById('modal-due-time').value  = '';
   document.getElementById('modal-error').textContent = '';
   document.getElementById('modal-cat-select').value = 'cleaning';
   updateCatPreview();
@@ -87,9 +104,11 @@ function updateCatPreview() {
 
 function submitTask() {
   const name   = document.getElementById('modal-task-name').value.trim();
-  const points = document.getElementById('modal-points').value;
-  const due    = document.getElementById('modal-due').value;
-  const cat    = document.getElementById('modal-cat-select').value || 'other';
+  const points  = document.getElementById('modal-points').value;
+  const dueDate = document.getElementById('modal-due-date').value;
+  const dueTime = document.getElementById('modal-due-time').value;
+  const due     = dueDate ? `${dueDate}T${dueTime || '00:00'}` : '';
+  const cat     = document.getElementById('modal-cat-select').value || 'other';
   const errEl  = document.getElementById('modal-error');
 
   if (!name) {
@@ -114,7 +133,11 @@ function submitTask() {
 // ── Toggle / delete ───────────────────────────────
 function toggleTask(id) {
   const t = tasks.find(t => t.id === id);
-  if (t) t.done = !t.done;
+  if (t) {
+    const markingDone = !t.done;
+    t.done = markingDone;
+    if (markingDone && t.points) showToast(t.points);
+  }
   saveTasks();
   renderTasks();
 }
