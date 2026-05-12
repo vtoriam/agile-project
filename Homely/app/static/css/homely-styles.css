@@ -1615,6 +1615,69 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   }
 }
 
+/* ── Points earned toast ───────────────────────── */
+.pts-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  background: var(--accent);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 8px 40px rgba(193, 127, 90, 0.45);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.pts-toast.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.pts-toast svg[data-lucide] {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Leaderboard empty state ───────────────────── */
+.lb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.lb-empty-icon svg[data-lucide] {
+  width: 52px;
+  height: 52px;
+  color: var(--border);
+}
+
+.lb-empty-title {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.lb-empty-sub {
+  font-size: 0.88rem;
+  color: var(--muted);
+  max-width: 320px;
+  line-height: 1.6;
+}
+
 @media (max-width: 600px) {
   .modal {
     top: 50px;
