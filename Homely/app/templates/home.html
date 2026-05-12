@@ -13,7 +13,7 @@ household_nav %} {% block page_styles %}
 {% if overdue_count > 0 %}
 <div class="overdue-banner" id="overdue-banner">
   <i data-lucide="alert-triangle"></i>
-  You have <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing 5 points per task per day.
+  You have <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing <strong>{{ total_points_lost }} points per day</strong>.
 </div>
 {% endif %}
 {% if show_popup %}
@@ -28,10 +28,9 @@ household_nav %} {% block page_styles %}
     </div>
     <p>You have <strong>{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong>.</p>
     <p class="muted-copy" style="font-size: 13px; margin-top: 8px;">
-      You are losing <strong>5 points per task per day</strong>. 
-      So far you have lost a total of 
-      <strong style="color: var(--danger);">{{ total_points_lost }} points</strong> 
-      across your overdue tasks.
+      Your current overdue penalty is <strong>{{ total_points_lost }} points per day</strong>. 
+      After that deduction, your effective total would be 
+      <strong style="color: var(--danger);">{{ effective_points }} points</strong>.
     </p>
   </div>
   <div class="modal-footer">

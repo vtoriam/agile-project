@@ -284,18 +284,6 @@ function updateOverdueBanner() {
   }
 }
 
-function toggleTask(id) {
-  const t = tasks.find((task) => task.id === id);
-  if (!t) return;
-
-  const markingDone = !t.done;
-  t.done = markingDone;
-  if (markingDone && t.points) showToast(t.points);
-
-  renderTasks();
-  updateOverdueBanner();
-}
-
 function deleteTask(id) {
   tasks = tasks.filter((t) => t.id !== id);
   renderTasks();
