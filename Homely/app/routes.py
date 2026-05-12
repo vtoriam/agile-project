@@ -33,13 +33,19 @@ def home():
 
     now = datetime.utcnow()
 
-    # Find overdue tasks assigned to the current user
-    overdue_tasks = db.session.query(Task).filter(
-        Task.is_completed == False,
-        Task.due_date != None,
-        Task.due_date < now,
-        Task.assigned_user_id == current_user.id,
-    ).all() if membership else []
+    # Find overdue tasks in the current household so the refresh state matches the frontend.
+    overdue_tasks = (
+        db.session.query(Task)
+        .filter(
+            Task.household_id == membership.household_id,
+            Task.is_completed == False,
+            Task.due_date != None,
+            Task.due_date < now,
+        )
+        .all()
+        if membership
+        else []
+    )
 
     overdue_count = len(overdue_tasks)
 
@@ -382,7 +388,7 @@ def signup_join_household():
 
                 db.session.add(Membership(
                     user_id=user.id,
-                    household_id=household.id,
+                    household_id=invite.household_id,
                     role="Member",
                     points=0,
                 ))
