@@ -45,17 +45,6 @@ document.querySelectorAll(".btn-delete").forEach((btn) => {
   });
 });
 
-// Icon picker selection
-document.getElementById("rewardIconPicker").addEventListener("click", (e) => {
-  const btn = e.target.closest(".icon-option");
-  if (!btn) return;
-  document
-    .querySelectorAll("#rewardIconPicker .icon-option")
-    .forEach((b) => b.classList.remove("active"));
-  btn.classList.add("active");
-  document.getElementById("rewardIcon").value = btn.dataset.icon;
-  lucide.createIcons();
-});
 
 function openRewardModal() {
   document.getElementById("rewardModal").classList.add("open");
@@ -173,13 +162,10 @@ function submitReward() {
     }, 200);
   });
 
-  document.getElementById("rewardsList").appendChild(newItem);
+  document.getElementById("rewardsList").prepend(newItem);
   lucide.createIcons();
 
   closeRewardModal();
-
-  // Scroll to new item
-  newItem.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 // Highlight invalid field briefly
