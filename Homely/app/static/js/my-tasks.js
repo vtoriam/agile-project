@@ -87,7 +87,8 @@ function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
   document.getElementById('modal-task-name').value = '';
   document.getElementById('modal-points').value    = '';
-  document.getElementById('modal-due').value       = '';
+  document.getElementById('modal-due-date').value  = '';
+  document.getElementById('modal-due-time').value  = '';
   document.getElementById('modal-error').textContent = '';
   document.getElementById('modal-cat-select').value = 'cleaning';
   updateCatPreview();
@@ -103,9 +104,11 @@ function updateCatPreview() {
 
 function submitTask() {
   const name   = document.getElementById('modal-task-name').value.trim();
-  const points = document.getElementById('modal-points').value;
-  const due    = document.getElementById('modal-due').value;
-  const cat    = document.getElementById('modal-cat-select').value || 'other';
+  const points  = document.getElementById('modal-points').value;
+  const dueDate = document.getElementById('modal-due-date').value;
+  const dueTime = document.getElementById('modal-due-time').value;
+  const due     = dueDate ? `${dueDate}T${dueTime || '00:00'}` : '';
+  const cat     = document.getElementById('modal-cat-select').value || 'other';
   const errEl  = document.getElementById('modal-error');
 
   if (!name) {
