@@ -31,7 +31,7 @@ def home():
         if membership else []
     )
 
-    now = datetime.utcnow()
+    now = datetime.now()
 
     # Find overdue tasks in the current household so the refresh state matches the frontend.
     overdue_tasks = (
@@ -107,7 +107,7 @@ def dismiss_overdue_popup():
         user_id=current_user.id
     ).first()
     if membership:
-        membership.last_overdue_popup = datetime.utcnow()
+        membership.last_overdue_popup = datetime.now()
         db.session.commit()
     return "", 204
 
