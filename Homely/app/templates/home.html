@@ -11,9 +11,9 @@ household_nav %} {% block page_styles %}
 {% endblock %} {% block content %} {{ household_nav('dashboard') }}
 <main class="main-content home-main">
 {% if overdue_count > 0 %}
-<div class="overdue-banner">
+<div class="overdue-banner" id="overdue-banner">
   <i data-lucide="alert-triangle"></i>
-  You have <strong>{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing 5 points per task per day!
+  You have <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing 5 points per task per day.
 </div>
 {% endif %}
 {% if show_popup %}
@@ -50,7 +50,7 @@ household_nav %} {% block page_styles %}
 </div>
 
 <div class="add-row">
-  <button class="btn-add-task" onclick="openModal()">
+  <button class="modal-btn-add" id="modal-add-btn" onclick="openModal()">
     <i data-lucide="plus"></i> Add Task
   </button>
 </div>
@@ -73,8 +73,8 @@ household_nav %} {% block page_styles %}
       <label>Assigned To</label>
       <select id="modal-assigned">
         <option value="">Select a housemate…</option>
-        {% for member in members %}
-        <option value="{{ member.user.display_name }}">{{ member.user.display_name }}</option>
+        {% for member in members_data %}
+        <option value="{{ member.name }}">{{ member.name }}</option>
         {% endfor %}
       </select>
     </div>

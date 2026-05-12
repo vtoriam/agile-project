@@ -137,15 +137,15 @@ function openModal() {
 }
 
 function closeModal() {
-  document.getElementById('taskModal').classList.remove('open');
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.getElementById('modal-task-name').value = '';
-  document.getElementById('modal-assigned').value = '';
-  document.getElementById('modal-points').value = '';
-  document.getElementById('modal-due-date').value = '';
-  document.getElementById('modal-due-time').value = '';
-  document.getElementById('modal-error').textContent = '';
-  document.getElementById('modal-cat-select').value = 'cleaning';
+  document.getElementById("taskModal").classList.remove("open");
+  document.getElementById("modalOverlay").classList.remove("open");
+  document.getElementById("modal-task-name").value = "";
+  document.getElementById("modal-assigned").value = "";
+  document.getElementById("modal-points").value = "";
+  document.getElementById("modal-due-date").value = "";
+  document.getElementById("modal-due-time").value = "";
+  document.getElementById("modal-error").textContent = "";
+  document.getElementById("modal-cat-select").value = "cleaning";
   updateCatPreview();
   refreshIcons();
 }
@@ -159,14 +159,20 @@ function updateCatPreview() {
 }
 
 function submitTask() {
-  const name     = document.getElementById('modal-task-name').value.trim();
-  const assigned = document.getElementById('modal-assigned').value;
-  const points   = document.getElementById('modal-points').value;
-  const dueDate  = document.getElementById('modal-due-date').value;
-  const dueTime  = document.getElementById('modal-due-time').value;
-  const due      = dueDate ? `${dueDate}T${dueTime || '00:00'}` : '';
-  const cat      = document.getElementById('modal-cat-select').value || 'other';
-  const errEl    = document.getElementById('modal-error');
+  console.log("modal-task-name:", document.getElementById("modal-task-name"));
+  console.log("modal-assigned:", document.getElementById("modal-assigned"));
+  console.log("modal-points:", document.getElementById("modal-points"));
+  console.log("modal-due:", document.getElementById("modal-due"));
+  console.log("modal-cat-select:", document.getElementById("modal-cat-select"));
+  console.log("modal-error:", document.getElementById("modal-error"));
+  const name = document.getElementById("modal-task-name").value.trim();
+  const assigned = document.getElementById("modal-assigned").value;
+  const points = document.getElementById("modal-points").value;
+  const dueDate = document.getElementById("modal-due-date").value;
+  const dueTime = document.getElementById("modal-due-time").value;
+  const due = dueDate ? `${dueDate}T${dueTime || "00:00"}` : null;
+  const cat = document.getElementById("modal-cat-select").value || "other";
+  const errEl = document.getElementById("modal-error");
 
   if (!name) {
     errEl.textContent = "Please enter a task name.";
@@ -178,31 +184,86 @@ function submitTask() {
     return;
   }
 
-  if (points !== "" && (isNaN(parseInt(points)) || parseInt(points) < 1)) {
-    errEl.textContent = "Points must be a positive number.";
-    document.getElementById("modal-points").focus();
-    return;
-  }
-
   errEl.textContent = "";
-  tasks.unshift({
-    id: nextId++,
-    text: name,
-    done: false,
-    cat,
-    assignedTo: assigned,
-    points: points ? parseInt(points) : null,
-    due,
-  });
 
-  closeModal();
-  renderTasks();
+  // Disable button while saving
+  const addBtn = document.getElementById("modal-add-btn");
+  if (addBtn) addBtn.disabled = true;
+
+  fetch("/tasks/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: name,
+      assignedTo: assigned,
+      points: points || null,
+      due: due || null,
+      cat: cat,
+    }),
+  })
+    .then((res) => res.json())
+    .then((task) => {
+      // Add the returned task (with real database id) to the array
+      tasks.unshift(task);
+      closeModal();
+      renderTasks();
+      updateOverdueBanner();
+    })
+    .catch((err) => {
+      console.error("Failed to create task:", err);
+      errEl.textContent = "Something went wrong — please try again.";
+    })
+    .finally(() => {
+      if (addBtn) addBtn.disabled = false;
+    });
 }
 
 function toggleTask(id) {
   const t = tasks.find((t) => t.id === id);
-  if (t) t.done = !t.done;
+  if (!t) return;
+
+  // Optimistically update the UI immediately
+  t.done = !t.done;
   renderTasks();
+  updateOverdueBanner();
+
+  // Then sync with the database in the background
+  fetch(`/tasks/${id}/toggle`, { method: "POST" })
+    .then((res) => res.json())
+    .then((data) => {
+      // Confirm the server state matches
+      t.done = data.done;
+      renderTasks();
+      updateOverdueBanner();
+    })
+    .catch((err) => {
+      // If the request fails, roll back the optimistic update
+      console.error("Failed to toggle task:", err);
+      t.done = !t.done;
+      renderTasks();
+      updateOverdueBanner();
+    });
+}
+
+function updateOverdueBanner() {
+  const banner = document.getElementById("overdue-banner");
+  if (!banner) return;
+
+  const now = new Date();
+  const overdueTasks = tasks.filter((t) => {
+    if (t.done || !t.due) return false;
+    return new Date(t.due) < now;
+  });
+
+  if (overdueTasks.length === 0) {
+    banner.style.display = "none";
+  } else {
+    banner.style.display = "flex";
+    const countText = document.getElementById("overdue-count-text");
+    if (countText) {
+      countText.innerHTML = `${overdueTasks.length} overdue task${overdueTasks.length !== 1 ? "s" : ""}`;
+    }
+  }
 }
 
 function deleteTask(id) {
