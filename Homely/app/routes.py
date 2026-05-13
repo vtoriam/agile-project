@@ -4,23 +4,24 @@ import string
 from flask import render_template, redirect, url_for, request, session
 from sqlalchemy import func
 
-from app import app, db
+from app import db
+from app.blueprints import main
 from app.models import User, Household, Membership, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta
 
-@app.route("/index")
+@main.route("/index")
 @login_required
 def index():
     return render_template("index.html", title="Homely")
 
 
-@app.route("/")
+@main.route("/")
 def root():
-    return redirect(url_for("login"))
+    return redirect(url_for("main.login"))
 
 
-@app.route("/home")
+@main.route("/home")
 @login_required
 def home():
     membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
@@ -103,7 +104,7 @@ def home():
         members_data=members_data
     )
 
-@app.route("/dismiss-overdue-popup", methods=["POST"])
+@main.route("/dismiss-overdue-popup", methods=["POST"])
 @login_required
 def dismiss_overdue_popup():
     membership = db.session.query(Membership).filter_by(
@@ -114,13 +115,13 @@ def dismiss_overdue_popup():
         db.session.commit()
     return "", 204
 
-@app.route("/dashboard")
+@main.route("/dashboard")
 @login_required
 def dashboard():
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
 
-@app.route("/my-tasks")
+@main.route("/my-tasks")
 @login_required
 def my_tasks():
     membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
@@ -142,7 +143,7 @@ def my_tasks():
     return render_template("my-tasks.html", title="My Tasks", tasks_data=tasks_data)
 
 
-@app.route("/leaderboard")
+@main.route("/leaderboard")
 @login_required
 def leaderboard():
     household = db.session.query(Household).first()
@@ -193,13 +194,13 @@ def leaderboard():
     )
 
 
-@app.route("/edit-profile")
+@main.route("/edit-profile")
 @login_required
 def edit_profile():
     return render_template("edit-profile.html", title="Edit Profile")
 
 
-@app.route("/rewards")
+@main.route("/rewards")
 @login_required
 def rewards():
     household = db.session.query(Household).first()
@@ -250,7 +251,7 @@ def rewards():
     )
 
 
-@app.route("/login", methods=["GET", "POST"])
+@main.route("/login", methods=["GET", "POST"])
 def login():
     error = None
     if request.method == "POST":
@@ -263,17 +264,17 @@ def login():
             error = "Invalid email or password."
         else:
             login_user(user)
-            return redirect(url_for("home"))
+            return redirect(url_for("main.home"))
     return render_template("login.html", title="Login", error=error)
 
 
-@app.route("/logout", methods=["GET", "POST"])
+@main.route("/logout", methods=["GET", "POST"])
 def logout():
     logout_user()
-    return redirect(url_for("login"))
+    return redirect(url_for("main.login"))
 
 
-@app.route("/signup", methods=["GET", "POST"])
+@main.route("/signup", methods=["GET", "POST"])
 def signup():
     error = None
     form_data = {}
@@ -299,23 +300,23 @@ def signup():
                 "email":         form_data["email"].strip().lower(),
                 "password":      form_data["password"],
             }
-            return redirect(url_for("signup_household"))
+            return redirect(url_for("main.signup_household"))
     return render_template("signup.html", title="Sign Up", form_data=form_data, error=error)
 
 
-@app.route("/signup/household")
-@app.route("/signup-household")
+@main.route("/signup/household")
+@main.route("/signup-household")
 def signup_household():
     if not session.get("signup_data"):
-        return redirect(url_for("signup"))
+        return redirect(url_for("main.signup"))
     return render_template("signup_household.html", title="Household Setup")
 
 
-@app.route("/signup/household/create", methods=["GET", "POST"])
+@main.route("/signup/household/create", methods=["GET", "POST"])
 def signup_create_household():
     signup_data = session.get("signup_data")
     if not signup_data:
-        return redirect(url_for("signup"))
+        return redirect(url_for("main.signup"))
 
     error = None
     form_data = {}
@@ -360,7 +361,7 @@ def signup_create_household():
             db.session.commit()
             session.pop("signup_data", None)
             login_user(user)
-            return redirect(url_for("home"))
+            return redirect(url_for("main.home"))
 
     return render_template(
         "signup_create_household.html",
@@ -370,11 +371,11 @@ def signup_create_household():
     )
 
 
-@app.route("/signup/household/join", methods=["GET", "POST"])
+@main.route("/signup/household/join", methods=["GET", "POST"])
 def signup_join_household():
     signup_data = session.get("signup_data")
     if not signup_data:
-        return redirect(url_for("signup"))
+        return redirect(url_for("main.signup"))
 
     error = None
     form_data = {}
@@ -415,7 +416,7 @@ def signup_join_household():
                 db.session.commit()
                 session.pop("signup_data", None)
                 login_user(user)
-                return redirect(url_for("home"))
+                return redirect(url_for("main.home"))
 
     return render_template(
         "signup_join_household.html",
@@ -425,8 +426,8 @@ def signup_join_household():
     )
 
 
-@app.route("/household/manage")
-@app.route("/manage-household")
+@main.route("/household/manage")
+@main.route("/manage-household")
 @login_required
 def manage_household():
     household = db.session.query(Household).filter(
@@ -466,30 +467,30 @@ def manage_household():
         invite=invite,
     )
 
-@app.route("/household/leave", methods=["POST"])
+@main.route("/household/leave", methods=["POST"])
 def leave_household():
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
 
-@app.route("/household/delete", methods=["POST"])
+@main.route("/household/delete", methods=["POST"])
 @login_required
 def delete_household():
     household = db.session.query(Household).first()
     if not household:
-        return redirect(url_for("home"))
+        return redirect(url_for("main.home"))
 
     membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
         household_id=household.id,
     ).first()
     if not membership or membership.role.lower() != "admin":
-        return redirect(url_for("manage_household"))
+        return redirect(url_for("main.manage_household"))
 
     db.session.delete(household)
     db.session.commit()
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
-@app.route("/household/remove/<int:user_id>", methods=["POST"])
+@main.route("/household/remove/<int:user_id>", methods=["POST"])
 @login_required
 def remove_member(user_id):
     household = db.session.query(Household).first()
@@ -500,10 +501,10 @@ def remove_member(user_id):
     if membership:
         db.session.delete(membership)
         db.session.commit()
-    return redirect(url_for("manage_household"))
+    return redirect(url_for("main.manage_household"))
 
 
-@app.route("/household/invite/regenerate", methods=["POST"])
+@main.route("/household/invite/regenerate", methods=["POST"])
 @login_required
 def regenerate_invite():
     household = db.session.query(Household).filter(
@@ -513,7 +514,7 @@ def regenerate_invite():
     ).first()
 
     if not household:
-        return redirect(url_for("home"))
+        return redirect(url_for("main.home"))
 
     membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
@@ -521,7 +522,7 @@ def regenerate_invite():
     ).first()
 
     if not membership or membership.role.lower() != "admin":
-        return redirect(url_for("manage_household"))
+        return redirect(url_for("main.manage_household"))
 
     # Deactivate all existing codes for this household
     db.session.query(HouseholdInvite).filter_by(
@@ -545,9 +546,9 @@ def regenerate_invite():
     db.session.add(new_invite)
     db.session.commit()
 
-    return redirect(url_for("manage_household"))
+    return redirect(url_for("main.manage_household"))
 
-@app.route("/tasks/<int:task_id>/toggle", methods=["POST"])
+@main.route("/tasks/<int:task_id>/toggle", methods=["POST"])
 @login_required
 def toggle_task(task_id):
     task = db.session.query(Task).filter_by(id=task_id).first()
@@ -579,7 +580,7 @@ def toggle_task(task_id):
     db.session.commit()
     return {"done": task.is_completed, "points": task.points_value}, 200
 
-@app.route("/tasks/create", methods=["POST"])
+@main.route("/tasks/create", methods=["POST"])
 @login_required
 def create_task():
     membership = db.session.query(Membership).filter_by(
@@ -627,7 +628,7 @@ def create_task():
     }, 201
 
 
-@app.route("/tasks/<int:task_id>", methods=["DELETE"])
+@main.route("/tasks/<int:task_id>", methods=["DELETE"])
 @login_required
 def delete_task(task_id):
     task = db.session.query(Task).filter_by(id=task_id).first()

@@ -169,7 +169,7 @@ household_nav %} {% block page_styles %}
 {% block scripts %}
 <script>
 {% if show_popup %}
-var dismissUrl = "{{ url_for('dismiss_overdue_popup') }}";
+var dismissUrl = "{{ url_for('main.dismiss_overdue_popup') }}";
 
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('overdueModal').classList.add('open');

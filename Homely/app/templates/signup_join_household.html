@@ -58,7 +58,7 @@
       </div>
       {% endif %}
 
-      <form method="POST" action="{{ url_for('signup_join_household') }}" novalidate>
+      <form method="POST" action="{{ url_for('main.signup_join_household') }}" novalidate>
 
         <div class="login-field">
           <label class="login-label" for="join_code">Invite Code</label>
@@ -87,7 +87,7 @@
       <div class="login-divider"><span></span></div>
 
       <p class="login-signup-link">
-        <a href="{{ url_for('signup_household') }}">← Back to household options</a>
+        <a href="{{ url_for('main.signup_household') }}">← Back to household options</a>
       </p>
 
     </div>

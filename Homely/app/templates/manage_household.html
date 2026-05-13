@@ -74,7 +74,7 @@ page_styles %}
             <i data-lucide="copy"></i> Copy code
           </button>
           {% endif %} {% if current_membership.role == 'admin' %}
-          <form method="post" action="{{ url_for('regenerate_invite') }}">
+          <form method="post" action="{{ url_for('main.regenerate_invite') }}">
             <button
               type="submit"
               class="btn btn-outline-homely btn-sm"
@@ -140,7 +140,7 @@ page_styles %}
                   data-message="Are you sure you want to remove {{ member.user.display_name }} from the household?"
                   data-sub="They will lose access to all tasks, rewards, and household data."
                   data-label="Remove member"
-                  data-action="{{ url_for('remove_member', user_id=member.user_id) }}"
+                  data-action="{{ url_for('main.remove_member', user_id=member.user_id) }}"
                   onclick="openDangerModal(this)"
                 >
                   <i data-lucide="user-minus"></i> Remove
@@ -196,7 +196,7 @@ page_styles %}
           </p>
           <form
             method="post"
-            action="{{ url_for('delete_household') }}"
+            action="{{ url_for('main.delete_household') }}"
             id="deleteHouseholdForm"
           >
             <button
@@ -206,7 +206,7 @@ page_styles %}
               data-message="Are you sure you want to delete this household?"
               data-sub="This will permanently remove all members, tasks, and rewards. This cannot be undone."
               data-label="Delete household"
-              data-action="{{ url_for('delete_household') }}"
+              data-action="{{ url_for('main.delete_household') }}"
               onclick="openDangerModal(this)"
             >
               Delete household
@@ -221,7 +221,7 @@ page_styles %}
           </p>
           <form
             method="post"
-            action="{{ url_for('leave_household') }}"
+            action="{{ url_for('main.leave_household') }}"
             id="leaveHouseholdForm"
           >
             <button
@@ -231,7 +231,7 @@ page_styles %}
               data-message="Are you sure you want to leave this household?"
               data-sub="You will lose access to all tasks, rewards, and member data."
               data-label="Leave household"
-              data-action="{{ url_for('leave_household') }}"
+              data-action="{{ url_for('main.leave_household') }}"
               onclick="openDangerModal(this)"
             >
               Leave household
@@ -254,7 +254,7 @@ page_styles %}
               data-message="Are you sure you want to sign out?"
               data-sub="You'll need to log in again to access your household."
               data-label="Sign out"
-              data-action="{{ url_for('logout') }}"
+              data-action="{{ url_for('main.logout') }}"
               onclick="openDangerModal(this)"
             >
               Logout
