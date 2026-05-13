@@ -130,6 +130,27 @@ def my_tasks():
         household_id=membership.household_id,
         assigned_user_id=current_user.id
     ).all() if membership else []
+
+    now = datetime.now()
+
+    # Find overdue tasks assigned to current user
+    overdue_tasks = (
+        db.session.query(Task)
+        .filter(
+            Task.household_id == membership.household_id,
+            Task.assigned_user_id == current_user.id,
+            Task.is_completed == False,
+            Task.due_date != None,
+            Task.due_date < now,
+        )
+        .all()
+        if membership
+        else []
+    )
+
+    overdue_count = len(overdue_tasks)
+    total_points_lost = overdue_count * 5
+
     tasks_data = [
         {
             "id": task.id,
@@ -141,7 +162,7 @@ def my_tasks():
         }
         for task in tasks
     ]
-    return render_template("my-tasks.html", title="My Tasks", tasks_data=tasks_data)
+    return render_template("my-tasks.html", title="My Tasks", tasks_data=tasks_data, overdue_count=overdue_count, total_points_lost=total_points_lost)
 
 
 @app.route("/leaderboard")
