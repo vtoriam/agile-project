@@ -42,6 +42,25 @@ household_nav %} {% block page_styles %}
   </div>
 </div>
 {% endif %}
+
+{% if due_soon_count > 0 %}
+<div class="reminder-banner" id="due-soon-reminder">
+  <div class="reminder-banner-header">
+    <i data-lucide="bell-ring"></i>
+    <strong>{{ due_soon_count }} task{{ 's' if due_soon_count != 1 }} due soon</strong>
+    <span>within the next {{ due_soon_window_hours }} hours</span>
+  </div>
+  <ul class="reminder-list">
+    {% for task in due_soon_tasks %}
+    <li>
+      <span class="reminder-task-title">{{ task.text }}</span>
+      <span class="reminder-task-due">{{ task.dueLabel }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
 <div class="greeting">
   <div class="greeting-sub" id="time-greeting">Good morning</div>
   <div class="greeting-title">What needs doing?</div>
