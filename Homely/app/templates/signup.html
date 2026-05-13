@@ -55,6 +55,7 @@
       {% endif %}
 
       <form method="POST" action="{{ url_for('signup') }}" id="signupForm" novalidate>
+        {{ form.hidden_tag() }}
 
         <div class="signup-name-row">
           <div class="login-field">
