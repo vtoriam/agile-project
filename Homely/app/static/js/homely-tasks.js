@@ -223,7 +223,9 @@ function toggleTask(id) {
   if (!t) return;
 
   // Optimistically update the UI immediately
-  t.done = !t.done;
+  const markingDone = !t.done;
+  t.done = markingDone;
+  if (markingDone && t.points) showToast(t.points);
   renderTasks();
   updateOverdueBanner();
 
