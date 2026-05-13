@@ -225,6 +225,9 @@ function toggleTask(id) {
   const t = tasks.find((t) => t.id === id);
   if (!t) return;
 
+  // Track the previous state to show toast only on completion
+  const wasDone = t.done;
+
   // Optimistically update the UI immediately
   t.done = !t.done;
   renderTasks();
@@ -241,6 +244,8 @@ function toggleTask(id) {
       t.done = data.done;
       renderTasks();
       updateOverdueBanner();
+      // Show toast when task is newly completed
+      if (!wasDone && t.done && t.points) showToast(t.points);
     })
     .catch((err) => {
       // If the request fails, roll back the optimistic update
