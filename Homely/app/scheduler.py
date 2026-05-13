@@ -8,7 +8,7 @@ def deduct_overdue_points(app):
         from app import db
         from app.models import Task, Membership
 
-        now = datetime.utcnow()
+        now = datetime.now()
 
         # Find all incomplete overdue tasks that have an assigned user
         overdue_tasks = db.session.query(Task).filter(

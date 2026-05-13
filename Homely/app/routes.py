@@ -31,28 +31,36 @@ def home():
         if membership else []
     )
 
-    now = datetime.utcnow()
+    now = datetime.now()
 
-    # Find overdue tasks assigned to the current user
-    overdue_tasks = db.session.query(Task).filter(
-        Task.is_completed == False,
-        Task.due_date != None,
-        Task.due_date < now,
-        Task.assigned_user_id == current_user.id,
-    ).all() if membership else []
+    # Find overdue tasks in the current household so the refresh state matches the frontend.
+    overdue_tasks = (
+        db.session.query(Task)
+        .filter(
+            Task.household_id == membership.household_id,
+            Task.is_completed == False,
+            Task.due_date != None,
+            Task.due_date < now,
+        )
+        .all()
+        if membership
+        else []
+    )
 
     overdue_count = len(overdue_tasks)
 
-    # Calculate total points at risk (days overdue × 5 per task)
-    total_points_lost = sum(
-        max(0, (now - task.due_date).days) * 5
-        for task in overdue_tasks
-    )
+    # Current daily loss is 5 points for each overdue task.
+    total_points_lost = overdue_count * 5
 
-    # Show popup if they have overdue tasks and haven't dismissed it today
+    # Show the user's effective total after accounting for today's overdue tasks.
+    effective_points = max(0, (membership.points if membership else 0) - total_points_lost)
+
+    # Show popup when a task has become overdue since the last dismissal.
     show_popup = False
     if overdue_count > 0 and membership:
+        latest_overdue_due = max(task.due_date for task in overdue_tasks if task.due_date)
         if membership.last_overdue_popup is None or \
+           latest_overdue_due > membership.last_overdue_popup or \
            (now - membership.last_overdue_popup).total_seconds() > 86400:
             show_popup = True
 
@@ -89,6 +97,7 @@ def home():
         members=members,
         overdue_count=overdue_count,
         total_points_lost=total_points_lost,
+        effective_points=effective_points,
         show_popup=show_popup,
         tasks_data=tasks_data,
         members_data=members_data
@@ -101,7 +110,7 @@ def dismiss_overdue_popup():
         user_id=current_user.id
     ).first()
     if membership:
-        membership.last_overdue_popup = datetime.utcnow()
+        membership.last_overdue_popup = datetime.now()
         db.session.commit()
     return "", 204
 
@@ -399,7 +408,7 @@ def signup_join_household():
 
                 db.session.add(Membership(
                     user_id=user.id,
-                    household_id=household.id,
+                    household_id=invite.household_id,
                     role="Member",
                     points=0,
                 ))
