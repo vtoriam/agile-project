@@ -112,8 +112,25 @@ def dashboard():
 
 
 @app.route("/my-tasks")
+@login_required
 def my_tasks():
-    return render_template("my-tasks.html", title="My Tasks")
+    membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
+    tasks = db.session.query(Task).filter_by(
+        household_id=membership.household_id,
+        assigned_user_id=current_user.id
+    ).all() if membership else []
+    tasks_data = [
+        {
+            "id": task.id,
+            "text": task.title,
+            "done": task.is_completed,
+            "cat": task.category,
+            "points": task.points_value,
+            "due": task.due_date.isoformat() if task.due_date else None,
+        }
+        for task in tasks
+    ]
+    return render_template("my-tasks.html", title="My Tasks", tasks_data=tasks_data)
 
 
 @app.route("/leaderboard")
@@ -564,9 +581,12 @@ def create_task():
 
     data = request.get_json()
 
-    assigned_member = db.session.query(Membership).filter_by(
-        household_id=membership.household_id
-    ).join(User).filter(User.display_name == data.get("assignedTo")).first()
+    assigned_member = None
+    assigned_to = (data.get("assignedTo") or "").strip()
+    if assigned_to:
+        assigned_member = db.session.query(Membership).filter_by(
+            household_id=membership.household_id
+        ).join(User).filter(User.display_name == assigned_to).first()
 
     due_date = None
     if data.get("due"):
@@ -577,7 +597,7 @@ def create_task():
 
     task = Task(
         household_id=membership.household_id,
-        assigned_user_id=assigned_member.user_id if assigned_member else None,
+        assigned_user_id=assigned_member.user_id if assigned_member else current_user.id,
         title=data.get("text", "").strip(),
         category=data.get("cat", "other"),
         points_value=int(data.get("points")) if data.get("points") else 10,
@@ -596,3 +616,22 @@ def create_task():
         "points": task.points_value,
         "due": task.due_date.isoformat() if task.due_date else None,
     }, 201
+
+
+@app.route("/tasks/<int:task_id>", methods=["DELETE"])
+@login_required
+def delete_task(task_id):
+    task = db.session.query(Task).filter_by(id=task_id).first()
+    if not task:
+        return {"error": "Task not found"}, 404
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=task.household_id,
+    ).first()
+    if not membership:
+        return {"error": "Unauthorised"}, 403
+
+    db.session.delete(task)
+    db.session.commit()
+    return {"success": True}, 200

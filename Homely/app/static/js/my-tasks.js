@@ -1,8 +1,6 @@
-const STORAGE_KEY = 'homequest.myTasks';
-
 let filter = 'pending';
-let nextId  = 1;
-let tasks   = [];
+let nextId = 1;
+let tasks = [];
 
 const catIcon = {
   cleaning: 'sparkles', kitchen: 'utensils',  garden:   'leaf',
@@ -25,21 +23,20 @@ const catLabel = {
   storage:  'Storage',  other:    'Other',
 };
 
-// ── Persistence ───────────────────────────────────
-function saveTasks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+// ── Database sync ─────────────────────────────────
+// Keep `nextId` aligned with existing task IDs (max + 1)
+function syncNextId() {
+  nextId = tasks.length ? tasks.reduce((m, t) => Math.max(m, t.id), 0) + 1 : 1;
 }
 
 function loadTasks() {
+  const payload = document.getElementById('initial-tasks-data');
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      tasks = JSON.parse(stored);
-      nextId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-    }
+    tasks = payload ? JSON.parse(payload.textContent || '[]') : [];
   } catch (_) {
     tasks = [];
   }
+  syncNextId();
 }
 
 // ── Utilities ─────────────────────────────────────
@@ -101,51 +98,82 @@ function updateCatPreview() {
   document.getElementById('catIconPreview').innerHTML = `<i data-lucide="${icon}"></i>`;
   refreshIcons();
 }
-
-function submitTask() {
-  const name   = document.getElementById('modal-task-name').value.trim();
-  const points  = document.getElementById('modal-points').value;
+// Submit a new task: validate input, POST to server, then update local state
+async function submitTask() {
+  const nameEl = document.getElementById('modal-task-name');
+  const name = nameEl.value.trim();
+  const pointsRaw = document.getElementById('modal-points').value;
   const dueDate = document.getElementById('modal-due-date').value;
   const dueTime = document.getElementById('modal-due-time').value;
-  const due     = dueDate ? `${dueDate}T${dueTime || '00:00'}` : '';
-  const cat     = document.getElementById('modal-cat-select').value || 'other';
-  const errEl  = document.getElementById('modal-error');
+  const cat = document.getElementById('modal-cat-select').value || 'other';
+  const errEl = document.getElementById('modal-error');
 
   if (!name) {
     errEl.textContent = 'Please enter a task name.';
-    document.getElementById('modal-task-name').focus();
+    nameEl.focus();
     return;
   }
 
-  if (points !== '' && (isNaN(parseInt(points)) || parseInt(points) < 1)) {
+  const points = pointsRaw !== '' ? parseInt(pointsRaw, 10) : null;
+  if (points !== null && (!Number.isInteger(points) || points < 1)) {
     errEl.textContent = 'Points must be a positive number.';
     document.getElementById('modal-points').focus();
     return;
   }
 
-  errEl.textContent = '';
-  tasks.unshift({ id: nextId++, text: name, done: false, cat, points: points ? parseInt(points) : null, due });
-  saveTasks();
-  closeModal();
-  renderTasks();
+  const due = dueDate ? `${dueDate}T${dueTime || '00:00'}` : null;
+
+  try {
+    const response = await fetch('/tasks/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: name, cat: cat, points: points, due: due }),
+    });
+
+    if (!response.ok) throw new Error('Failed to create task');
+
+    const created = await response.json();
+    errEl.textContent = '';
+    tasks.unshift(created);
+    syncNextId();
+    closeModal();
+    renderTasks();
+  } catch (error) {
+    console.error('Error creating task:', error);
+    errEl.textContent = 'Failed to create task. Please try again.';
+  }
 }
 
 // ── Toggle / delete ───────────────────────────────
-function toggleTask(id) {
-  const t = tasks.find(t => t.id === id);
-  if (t) {
-    const markingDone = !t.done;
-    t.done = markingDone;
-    if (markingDone && t.points) showToast(t.points);
+async function toggleTask(id) {
+  const t = tasks.find(task => task.id === id);
+  if (!t) return;
+  try {
+    const response = await fetch(`/tasks/${id}/toggle`, { method: 'POST' });
+    if (!response.ok) throw new Error('Failed to toggle task');
+
+    const data = await response.json();
+    const wasDone = t.done;
+    t.done = Boolean(data.done);
+    // If task transitioned to done, show earned points
+    if (!wasDone && t.done && t.points) showToast(t.points);
+    renderTasks();
+  } catch (error) {
+    console.error('Error toggling task:', error);
   }
-  saveTasks();
-  renderTasks();
 }
 
-function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
-  saveTasks();
-  renderTasks();
+async function deleteTask(id) {
+  try {
+    const response = await fetch(`/tasks/${id}`, { method: 'DELETE' });
+    if (!response.ok) throw new Error('Failed to delete task');
+
+    tasks = tasks.filter(t => t.id !== id);
+    syncNextId();
+    renderTasks();
+  } catch (error) {
+    console.error('Error deleting task:', error);
+  }
 }
 
 function setFilter(f) { filter = f; renderTasks(); }
@@ -154,21 +182,22 @@ function setFilter(f) { filter = f; renderTasks(); }
 function renderFilters() {
   const row = document.getElementById('cat-row');
   const activeCats = [...new Set(tasks.filter(t => !t.done).map(t => t.cat))];
+  // Helper to build a filter button
+  const makeBtn = (value, icon, label) =>
+    `<button class="cat-btn ${filter === value ? 'active' : ''}" onclick="setFilter('${value}')"><i data-lucide="${icon}"></i> ${label}</button>`;
 
-  let html = `
-    <button class="cat-btn ${filter === 'all'     ? 'active' : ''}" onclick="setFilter('all')"><i data-lucide="layout-grid"></i> All</button>
-    <button class="cat-btn ${filter === 'pending' ? 'active' : ''}" onclick="setFilter('pending')"><i data-lucide="clock"></i> Pending</button>`;
+  const buttons = [];
+  buttons.push(makeBtn('all', 'layout-grid', 'All'));
+  buttons.push(makeBtn('pending', 'clock', 'Pending'));
 
   activeCats.forEach(cat => {
-    const icon  = catIcon[cat]  || 'clipboard-list';
+    const icon = catIcon[cat] || 'clipboard-list';
     const label = catLabel[cat] || cat;
-    html += `<button class="cat-btn ${filter === cat ? 'active' : ''}" onclick="setFilter('${cat}')">
-      <i data-lucide="${icon}"></i> ${label}
-    </button>`;
+    buttons.push(makeBtn(cat, icon, label));
   });
 
-  html += `<button class="cat-btn ${filter === 'done' ? 'active' : ''}" onclick="setFilter('done')"><i data-lucide="check-circle"></i> Done</button>`;
-  row.innerHTML = html;
+  buttons.push(makeBtn('done', 'check-circle', 'Done'));
+  row.innerHTML = buttons.join('');
   refreshIcons();
 }
 
