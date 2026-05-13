@@ -1,7 +1,7 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session
+from flask import render_template, redirect, url_for, request, session, jsonify, jsonify
 from sqlalchemy import func
 
 from app import db
@@ -9,6 +9,46 @@ from app.blueprints import main
 from app.models import User, Household, Membership, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta
+
+
+REMINDER_WINDOW_HOURS = 24
+
+
+def serialize_task_reminder(task):
+    """Return lightweight task data for due-soon reminder UI/API."""
+    return {
+        "id": task.id,
+        "text": task.title,
+        "cat": task.category,
+        "points": task.points_value,
+        "due": task.due_date.isoformat() if task.due_date else None,
+        "dueLabel": task.due_date.strftime("%a %d %b, %I:%M %p") if task.due_date else "No due date",
+    }
+
+
+def due_soon_tasks_for_user(user_id, hours=REMINDER_WINDOW_HOURS):
+    """Return incomplete tasks assigned to a user and due within the reminder window."""
+    membership = db.session.query(Membership).filter_by(user_id=user_id).first()
+
+    if not membership:
+        return []
+
+    now = datetime.now()
+    window_end = now + timedelta(hours=hours)
+
+    return (
+        db.session.query(Task)
+        .filter(
+            Task.household_id == membership.household_id,
+            Task.assigned_user_id == user_id,
+            Task.is_completed == False,
+            Task.due_date != None,
+            Task.due_date >= now,
+            Task.due_date <= window_end,
+        )
+        .order_by(Task.due_date.asc())
+        .all()
+    )
 
 @main.route("/index")
 @login_required
@@ -49,6 +89,9 @@ def home():
     )
 
     overdue_count = len(overdue_tasks)
+
+    due_soon_tasks = due_soon_tasks_for_user(current_user.id) if membership else []
+    due_soon_data = [serialize_task_reminder(task) for task in due_soon_tasks]
 
     # Current daily loss is 5 points for each overdue task.
     total_points_lost = overdue_count * 5
@@ -96,6 +139,9 @@ def home():
         "home.html",
         title="Home",
         members=members,
+        due_soon_count=len(due_soon_data),
+        due_soon_tasks=due_soon_data,
+        due_soon_window_hours=REMINDER_WINDOW_HOURS,
         overdue_count=overdue_count,
         total_points_lost=total_points_lost,
         effective_points=effective_points,
@@ -114,6 +160,17 @@ def dismiss_overdue_popup():
         membership.last_overdue_popup = datetime.now()
         db.session.commit()
     return "", 204
+
+
+@main.route("/tasks/reminders")
+@login_required
+def task_reminders():
+    due_soon_tasks = due_soon_tasks_for_user(current_user.id)
+    return jsonify({
+        "count": len(due_soon_tasks),
+        "windowHours": REMINDER_WINDOW_HOURS,
+        "tasks": [serialize_task_reminder(task) for task in due_soon_tasks],
+    })
 
 @main.route("/dashboard")
 @login_required
