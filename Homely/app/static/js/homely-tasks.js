@@ -192,7 +192,10 @@ function submitTask() {
 
   fetch("/tasks/create", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken(),
+    },
     body: JSON.stringify({
       text: name,
       assignedTo: assigned,
@@ -228,7 +231,10 @@ function toggleTask(id) {
   updateOverdueBanner();
 
   // Then sync with the database in the background
-  fetch(`/tasks/${id}/toggle`, { method: "POST" })
+  fetch(`/tasks/${id}/toggle`, {
+    method: "POST",
+    headers: { "X-CSRFToken": getCsrfToken() },
+  })
     .then((res) => res.json())
     .then((data) => {
       // Confirm the server state matches
