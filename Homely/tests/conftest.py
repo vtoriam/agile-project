@@ -2,32 +2,20 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from app import app as flask_app, db
-from app.models import User, Household, Membership, Task, HouseholdInvite
-
-
-flask_app.config.update(
-    TESTING=True,
-    SECRET_KEY="test-secret-key",
-    SQLALCHEMY_DATABASE_URI="sqlite:///:memory:",
-    WTF_CSRF_ENABLED=False,
-)
-
-
-@pytest.fixture(autouse=True)
-def clean_database():
-    with flask_app.app_context():
-        db.session.remove()
-        db.drop_all()
-        db.create_all()
-        yield
-        db.session.remove()
-        db.drop_all()
+from app import create_app, db
+from app.config import TestingConfig
+from app.models import User, Household, Membership, HouseholdInvite
 
 
 @pytest.fixture()
 def app():
-    return flask_app
+    test_app = create_app(TestingConfig)
+
+    with test_app.app_context():
+        db.create_all()
+        yield test_app
+        db.session.remove()
+        db.drop_all()
 
 
 @pytest.fixture()

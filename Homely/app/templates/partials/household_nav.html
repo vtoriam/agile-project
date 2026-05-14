@@ -17,25 +17,25 @@
 
     <a
       class="nav-item-custom {% if active_page == 'dashboard' %}active{% endif %}"
-      href="{{ url_for('home') }}"
+      href="{{ url_for('main.home') }}"
     >
       <i data-lucide="layout-dashboard"></i> Dashboard
     </a>
     <a
       class="nav-item-custom {% if active_page == 'my_tasks' %}active{% endif %}"
-      href="{{ url_for('my_tasks') }}"
+      href="{{ url_for('main.my_tasks') }}"
     >
       <i data-lucide="clipboard-list"></i> My Tasks
     </a>
     <a
       class="nav-item-custom {% if active_page == 'rewards' %}active{% endif %}"
-      href="{{ url_for('rewards') }}"
+      href="{{ url_for('main.rewards') }}"
     >
       <i data-lucide="gift"></i> Rewards
     </a>
     <a
       class="nav-item-custom {% if active_page == 'leaderboard' %}active{% endif %}"
-      href="{{ url_for('leaderboard') }}"
+      href="{{ url_for('main.leaderboard') }}"
     >
       <i data-lucide="trophy"></i> Leaderboard
     </a>
@@ -43,13 +43,13 @@
     <div class="nav-section-label">Account</div>
     <a
       class="nav-item-custom {% if active_page == 'profile' %}active{% endif %}"
-      href="{{ url_for('edit_profile') }}"
+      href="{{ url_for('main.edit_profile') }}"
     >
       <i data-lucide="user"></i> Profile
     </a>
     <a
       class="nav-item-custom {% if active_page == 'settings' %}active{% endif %}"
-      href="{{ url_for('manage_household') }}"
+      href="{{ url_for('main.manage_household') }}"
     >
       <i data-lucide="settings"></i> Settings
     </a>

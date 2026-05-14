@@ -1,28 +1,69 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session
+from flask import render_template, redirect, url_for, request, session, jsonify, jsonify
 from sqlalchemy import func
 
 from app import app, db
 from app.forms import SignupForm
 from app.utils import require_valid_form
+from app.blueprints import main
 from app.models import User, Household, Membership, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta
 
-@app.route("/index")
+
+REMINDER_WINDOW_HOURS = 24
+
+
+def serialize_task_reminder(task):
+    """Return lightweight task data for due-soon reminder UI/API."""
+    return {
+        "id": task.id,
+        "text": task.title,
+        "cat": task.category,
+        "points": task.points_value,
+        "due": task.due_date.isoformat() if task.due_date else None,
+        "dueLabel": task.due_date.strftime("%a %d %b, %I:%M %p") if task.due_date else "No due date",
+    }
+
+
+def due_soon_tasks_for_user(user_id, hours=REMINDER_WINDOW_HOURS):
+    """Return incomplete tasks assigned to a user and due within the reminder window."""
+    membership = db.session.query(Membership).filter_by(user_id=user_id).first()
+
+    if not membership:
+        return []
+
+    now = datetime.now()
+    window_end = now + timedelta(hours=hours)
+
+    return (
+        db.session.query(Task)
+        .filter(
+            Task.household_id == membership.household_id,
+            Task.assigned_user_id == user_id,
+            Task.is_completed == False,
+            Task.due_date != None,
+            Task.due_date >= now,
+            Task.due_date <= window_end,
+        )
+        .order_by(Task.due_date.asc())
+        .all()
+    )
+
+@main.route("/index")
 @login_required
 def index():
     return render_template("index.html", title="Homely")
 
 
-@app.route("/")
+@main.route("/")
 def root():
-    return redirect(url_for("login"))
+    return redirect(url_for("main.login"))
 
 
-@app.route("/home")
+@main.route("/home")
 @login_required
 def home():
     membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
@@ -50,6 +91,9 @@ def home():
     )
 
     overdue_count = len(overdue_tasks)
+
+    due_soon_tasks = due_soon_tasks_for_user(current_user.id) if membership else []
+    due_soon_data = [serialize_task_reminder(task) for task in due_soon_tasks]
 
     # Current daily loss is 5 points for each overdue task.
     total_points_lost = overdue_count * 5
@@ -97,6 +141,9 @@ def home():
         "home.html",
         title="Home",
         members=members,
+        due_soon_count=len(due_soon_data),
+        due_soon_tasks=due_soon_data,
+        due_soon_window_hours=REMINDER_WINDOW_HOURS,
         overdue_count=overdue_count,
         total_points_lost=total_points_lost,
         effective_points=effective_points,
@@ -105,7 +152,7 @@ def home():
         members_data=members_data
     )
 
-@app.route("/dismiss-overdue-popup", methods=["POST"])
+@main.route("/dismiss-overdue-popup", methods=["POST"])
 @login_required
 def dismiss_overdue_popup():
     membership = db.session.query(Membership).filter_by(
@@ -116,13 +163,24 @@ def dismiss_overdue_popup():
         db.session.commit()
     return "", 204
 
-@app.route("/dashboard")
+
+@main.route("/tasks/reminders")
+@login_required
+def task_reminders():
+    due_soon_tasks = due_soon_tasks_for_user(current_user.id)
+    return jsonify({
+        "count": len(due_soon_tasks),
+        "windowHours": REMINDER_WINDOW_HOURS,
+        "tasks": [serialize_task_reminder(task) for task in due_soon_tasks],
+    })
+
+@main.route("/dashboard")
 @login_required
 def dashboard():
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
 
-@app.route("/my-tasks")
+@main.route("/my-tasks")
 @login_required
 def my_tasks():
     membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
@@ -165,10 +223,10 @@ def my_tasks():
     return render_template("my-tasks.html", title="My Tasks", tasks_data=tasks_data, overdue_count=overdue_count, total_points_lost=total_points_lost)
 
 
-@app.route("/leaderboard")
+@main.route("/leaderboard")
 @login_required
 def leaderboard():
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     member_stats = {}
     if household:
         members = db.session.query(Membership).filter_by(household_id=household.id).all()
@@ -216,16 +274,19 @@ def leaderboard():
     )
 
 
-@app.route("/edit-profile")
+@main.route("/edit-profile")
 @login_required
 def edit_profile():
-    return render_template("edit-profile.html", title="Edit Profile")
+    member = db.session.query(Membership).filter_by(user_id=current_user.id).first()
+    households = db.session.query(Household).join(Membership).filter(Membership.user_id == current_user.id).all()
+    # member = db.session.query(Membership).filter_by(household_id=current_user.current_household_id, user_id=current_user.id).first()
+    return render_template("edit-profile.html", title="Edit Profile", member=member, households=households)
 
 
-@app.route("/rewards")
+@main.route("/rewards")
 @login_required
 def rewards():
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     current_membership = None
     user_points = 0
     household_rank = None
@@ -273,7 +334,7 @@ def rewards():
     )
 
 
-@app.route("/login", methods=["GET", "POST"])
+@main.route("/login", methods=["GET", "POST"])
 def login():
     error = None
     if request.method == "POST":
@@ -286,17 +347,17 @@ def login():
             error = "Invalid email or password."
         else:
             login_user(user)
-            return redirect(url_for("home"))
+            return redirect(url_for("main.home"))
     return render_template("login.html", title="Login", error=error)
 
 
-@app.route("/logout", methods=["GET", "POST"])
+@main.route("/logout", methods=["GET", "POST"])
 def logout():
     logout_user()
-    return redirect(url_for("login"))
+    return redirect(url_for("main.login"))
 
 
-@app.route("/signup", methods=["GET", "POST"])
+@main.route("/signup", methods=["GET", "POST"])
 @require_valid_form(SignupForm, 'signup.html', title="Sign Up")
 def signup(form):
     # At this point `form` has passed `validate_on_submit()` (CSRF + field validators)
@@ -315,19 +376,19 @@ def signup(form):
     return redirect(url_for("signup_household"))
 
 
-@app.route("/signup/household")
-@app.route("/signup-household")
+@main.route("/signup/household")
+@main.route("/signup-household")
 def signup_household():
     if not session.get("signup_data"):
-        return redirect(url_for("signup"))
+        return redirect(url_for("main.signup"))
     return render_template("signup_household.html", title="Household Setup")
 
 
-@app.route("/signup/household/create", methods=["GET", "POST"])
+@main.route("/signup/household/create", methods=["GET", "POST"])
 def signup_create_household():
     signup_data = session.get("signup_data")
     if not signup_data:
-        return redirect(url_for("signup"))
+        return redirect(url_for("main.signup"))
 
     error = None
     form_data = {}
@@ -372,7 +433,7 @@ def signup_create_household():
             db.session.commit()
             session.pop("signup_data", None)
             login_user(user)
-            return redirect(url_for("home"))
+            return redirect(url_for("main.home"))
 
     return render_template(
         "signup_create_household.html",
@@ -382,11 +443,11 @@ def signup_create_household():
     )
 
 
-@app.route("/signup/household/join", methods=["GET", "POST"])
+@main.route("/signup/household/join", methods=["GET", "POST"])
 def signup_join_household():
     signup_data = session.get("signup_data")
     if not signup_data:
-        return redirect(url_for("signup"))
+        return redirect(url_for("main.signup"))
 
     error = None
     form_data = {}
@@ -427,7 +488,7 @@ def signup_join_household():
                 db.session.commit()
                 session.pop("signup_data", None)
                 login_user(user)
-                return redirect(url_for("home"))
+                return redirect(url_for("main.home"))
 
     return render_template(
         "signup_join_household.html",
@@ -437,15 +498,11 @@ def signup_join_household():
     )
 
 
-@app.route("/household/manage")
-@app.route("/manage-household")
+@main.route("/household/manage")
+@main.route("/manage-household")
 @login_required
 def manage_household():
-    household = db.session.query(Household).filter(
-        Household.id == db.session.query(Membership.household_id).filter_by(
-            user_id=current_user.id
-        ).scalar_subquery()
-    ).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
 
     current_membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
@@ -455,6 +512,8 @@ def manage_household():
     members = db.session.query(Membership).filter_by(
         household_id=household.id
     ).order_by(Membership.points.desc()).all() if household else []
+
+    households = db.session.query(Household).join(Membership).filter(Membership.user_id == current_user.id).all()
 
     for member in members:
         member.completed_chores = db.session.query(Task).filter_by(
@@ -472,39 +531,53 @@ def manage_household():
     return render_template(
         "manage_household.html",
         title="Manage Household",
-        household=household,
+        current_household=household,
         members=members,
         current_membership=current_membership,
         invite=invite,
+        households=households,
     )
 
-@app.route("/household/leave", methods=["POST"])
-def leave_household():
+@main.route("/household/switch", methods=["POST"])
+@login_required
+def switch_household():
+    household_id = request.form.get("household_id")
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household_id,
+    ).first()
+    if membership:
+        current_user.current_household = household_id
+        db.session.commit()
     return redirect(url_for("home"))
 
+@main.route("/household/leave", methods=["POST"])
+def leave_household():
+    return redirect(url_for("main.home"))
 
-@app.route("/household/delete", methods=["POST"])
+
+@main.route("/household/delete", methods=["POST"])
 @login_required
 def delete_household():
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     if not household:
-        return redirect(url_for("home"))
+        return redirect(url_for("main.home"))
 
     membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
         household_id=household.id,
     ).first()
     if not membership or membership.role.lower() != "admin":
-        return redirect(url_for("manage_household"))
+        return redirect(url_for("main.manage_household"))
 
     db.session.delete(household)
     db.session.commit()
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
-@app.route("/household/remove/<int:user_id>", methods=["POST"])
+@main.route("/household/remove/<int:user_id>", methods=["POST"])
 @login_required
 def remove_member(user_id):
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     membership = db.session.query(Membership).filter_by(
         user_id=user_id,
         household_id=household.id
@@ -512,20 +585,16 @@ def remove_member(user_id):
     if membership:
         db.session.delete(membership)
         db.session.commit()
-    return redirect(url_for("manage_household"))
+    return redirect(url_for("main.manage_household"))
 
 
-@app.route("/household/invite/regenerate", methods=["POST"])
+@main.route("/household/invite/regenerate", methods=["POST"])
 @login_required
 def regenerate_invite():
-    household = db.session.query(Household).filter(
-        Household.id == db.session.query(Membership.household_id).filter_by(
-            user_id=current_user.id
-        ).scalar_subquery()
-    ).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
 
     if not household:
-        return redirect(url_for("home"))
+        return redirect(url_for("main.home"))
 
     membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
@@ -533,7 +602,7 @@ def regenerate_invite():
     ).first()
 
     if not membership or membership.role.lower() != "admin":
-        return redirect(url_for("manage_household"))
+        return redirect(url_for("main.manage_household"))
 
     # Deactivate all existing codes for this household
     db.session.query(HouseholdInvite).filter_by(
@@ -557,9 +626,9 @@ def regenerate_invite():
     db.session.add(new_invite)
     db.session.commit()
 
-    return redirect(url_for("manage_household"))
+    return redirect(url_for("main.manage_household"))
 
-@app.route("/tasks/<int:task_id>/toggle", methods=["POST"])
+@main.route("/tasks/<int:task_id>/toggle", methods=["POST"])
 @login_required
 def toggle_task(task_id):
     task = db.session.query(Task).filter_by(id=task_id).first()
@@ -591,7 +660,7 @@ def toggle_task(task_id):
     db.session.commit()
     return {"done": task.is_completed, "points": task.points_value}, 200
 
-@app.route("/tasks/create", methods=["POST"])
+@main.route("/tasks/create", methods=["POST"])
 @login_required
 def create_task():
     membership = db.session.query(Membership).filter_by(
@@ -639,7 +708,7 @@ def create_task():
     }, 201
 
 
-@app.route("/tasks/<int:task_id>", methods=["DELETE"])
+@main.route("/tasks/<int:task_id>", methods=["DELETE"])
 @login_required
 def delete_task(task_id):
     task = db.session.query(Task).filter_by(id=task_id).first()

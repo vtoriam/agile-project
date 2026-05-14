@@ -1782,3 +1782,60 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   height: 16px;
   flex-shrink: 0;
 }
+
+
+/* Due-soon task reminders */
+.reminder-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(193, 127, 90, 0.28);
+  border-left: 4px solid var(--accent);
+  border-radius: 18px;
+  background: rgba(255, 250, 245, 0.92);
+  box-shadow: 0 10px 30px rgba(78, 52, 46, 0.08);
+}
+
+.reminder-banner-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text);
+}
+
+.reminder-banner-header svg {
+  color: var(--accent);
+}
+
+.reminder-banner-header span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.reminder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.reminder-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.reminder-task-title {
+  font-weight: 700;
+}
+
+.reminder-task-due {
+  color: var(--muted);
+  white-space: nowrap;
+}
