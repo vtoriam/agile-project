@@ -1,7 +1,7 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session, jsonify
+from flask import render_template, redirect, url_for, request, session, jsonify, current_app
 from sqlalchemy import func
 
 from app import db
@@ -521,6 +521,8 @@ def signup_join_household():
                         email=signup_data["email"],
                     )
                     user.set_password(signup_data["password"])
+                    # Ensure the user's current household is set when joining
+                    user.current_household = invite.household_id
                     db.session.add(user)
                     db.session.flush()
 
@@ -633,13 +635,32 @@ def delete_household():
 @login_required
 def remove_member(user_id):
     household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+
+    if not household:
+        current_app.logger.info(f"remove_member: no household for current_user {current_user.id}")
+        return redirect(url_for("main.manage_household"))
+
+    # Ensure the requester is an admin in this household
+    requester_membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not requester_membership or requester_membership.role.lower() != "admin":
+        current_app.logger.info(f"remove_member: unauthorised request by user {current_user.id}")
+        return redirect(url_for("main.manage_household"))
+
     membership = db.session.query(Membership).filter_by(
         user_id=user_id,
-        household_id=household.id
+        household_id=household.id,
     ).first()
+
     if membership:
+        current_app.logger.info(f"remove_member: deleting membership {membership.id} user={user_id} household={household.id}")
         db.session.delete(membership)
         db.session.commit()
+    else:
+        current_app.logger.info(f"remove_member: membership not found for user={user_id} household={household.id}")
+
     return redirect(url_for("main.manage_household"))
 
 
