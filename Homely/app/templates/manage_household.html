@@ -185,6 +185,36 @@ page_styles %}
       </section>
 
       <div class="household-footer-grid">
+        <section class="content-card logout-zone">
+          <div class="section-kicker">households</div>
+          <h2>Switch Household</h2>
+          <div class="modal-actions">
+            <div class="modal-field household-select">
+              <label for="householdSelect" value="Select a household..."></label>
+              <select id="householdSelect">
+                <option value="" disabled selected>Select a household...</option>
+                {% for household in households if household.id != current_household.id %}
+                  <option value="{{ household.id }}">
+                    {{ household.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+              <button type="button" class="btn btn-outline-homely btn-sm" onclick="switchHousehold()">
+                Switch
+              </button>
+          </div>  
+        </section>
+
+        <!-- Yet to implement -->
+        <section class="content-card">
+          <div class="section-kicker">Household settings</div>
+          <h2>Create new household</h2>
+          <button class="btn btn-outline-homely btn-sm">
+            <i data-lucide="plus"></i> New household
+          </button>
+        </section>
+
         <section class="content-card danger-zone">
           {% set is_admin = current_membership and current_membership.role|lower
           == 'admin' %} {% if is_admin %}
@@ -303,23 +333,8 @@ page_styles %}
     </div>
   </div>
 </div>
+{% endblock %}
 
-<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
-
-{% endblock %} {% block scripts %}
-<script>
-  function copyCode() {
-    const code = document.getElementById("joinCodeText").textContent.trim();
-    navigator.clipboard.writeText(code).then(() => {
-      const btn = document.querySelector('[onclick="copyCode()"]');
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i data-lucide="check"></i> Copied!';
-      lucide.createIcons();
-      setTimeout(() => {
-        btn.innerHTML = original;
-        lucide.createIcons();
-      }, 2000);
-    });
-  }
-</script>
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}
