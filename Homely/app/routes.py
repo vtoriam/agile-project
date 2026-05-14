@@ -274,13 +274,51 @@ def leaderboard():
     )
 
 
-@main.route("/edit-profile")
+@main.route("/edit-profile", methods=["GET", "POST"])
 @login_required
 def edit_profile():
+    if request.method == "POST":
+        # Update display name if provided
+        display_name = request.form.get("display_name", "").strip()
+        if display_name:
+            current_user.display_name = display_name
+        
+        # Update avatar if provided
+        avatar = request.form.get("avatar", "").strip()
+        if avatar:
+            current_user.avatar = avatar
+        
+        db.session.commit()
+        return redirect(url_for("main.edit_profile"))
+    
+    # GET request
     member = db.session.query(Membership).filter_by(user_id=current_user.id).first()
     households = db.session.query(Household).join(Membership).filter(Membership.user_id == current_user.id).all()
-    # member = db.session.query(Membership).filter_by(household_id=current_user.current_household_id, user_id=current_user.id).first()
-    return render_template("edit-profile.html", title="Edit Profile", member=member, households=households)
+    
+    # Calculate rank in current household
+    household_rank = None
+    completed_tasks_count = 0
+    if member:
+        ranked_members = db.session.query(Membership).filter_by(
+            household_id=member.household_id
+        ).order_by(Membership.points.desc()).all()
+        household_rank = next((i + 1 for i, m in enumerate(ranked_members) if m.user_id == current_user.id), None)
+        
+        # Count completed tasks
+        completed_tasks_count = db.session.query(Task).filter_by(
+            assigned_user_id=current_user.id,
+            household_id=member.household_id,
+            is_completed=True
+        ).count()
+    
+    return render_template(
+        "edit-profile.html", 
+        title="Edit Profile", 
+        member=member, 
+        households=households,
+        household_rank=household_rank,
+        completed_tasks_count=completed_tasks_count
+    )
 
 
 @main.route("/rewards")
