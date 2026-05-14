@@ -80,7 +80,7 @@
               name="join_code"
               id="join_code"
               placeholder="e.g. HM-72QA"
-              value="{{ form_data.get('join_code', '') }}"
+              value="{{ form.join_code.data or '' }}"
               required
               autofocus
             />

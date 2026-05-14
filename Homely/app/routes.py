@@ -413,7 +413,7 @@ def signup(form):
         "email": form.email.data.strip().lower(),
         "password": form.password.data,
     }
-    return redirect(url_for("signup_household"))
+    return redirect(url_for("main.signup_household"))
 
 
 @main.route("/signup/household")

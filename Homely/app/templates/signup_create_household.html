@@ -75,7 +75,7 @@
               name="household_name"
               id="household_name"
               placeholder="e.g. The Clean Machine"
-              value="{{ form_data.get('household_name', '') }}"
+              value="{{ form.household_name.data or '' }}"
               required
               autofocus
             />

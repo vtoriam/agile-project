@@ -30,8 +30,13 @@ def create_app(config_class=Config):
     flask_app.register_blueprint(main)
 
     # Exempt login and logout from CSRF protection
-    csrf.exempt("main.login")
-    csrf.exempt("main.logout")
+    # Pass the view functions so CSRFProtect can match them correctly
+    try:
+        csrf.exempt(routes.login)
+        csrf.exempt(routes.logout)
+    except Exception:
+        # Fallback: exempt the whole blueprint if functions aren't available
+        csrf.exempt(main)
 
     # Start scheduler if not in testing mode
     if not flask_app.config.get("TESTING"):
