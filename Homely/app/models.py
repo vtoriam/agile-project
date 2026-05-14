@@ -40,6 +40,8 @@ class User(UserMixin, db.Model):
     avatar = db.Column(db.String(50), default="avatar1")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+    current_household = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
+
     memberships = db.relationship(
         "Membership",
         back_populates="user",

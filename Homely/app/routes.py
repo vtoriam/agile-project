@@ -146,7 +146,7 @@ def my_tasks():
 @main.route("/leaderboard")
 @login_required
 def leaderboard():
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     member_stats = {}
     if household:
         members = db.session.query(Membership).filter_by(household_id=household.id).all()
@@ -197,13 +197,16 @@ def leaderboard():
 @main.route("/edit-profile")
 @login_required
 def edit_profile():
-    return render_template("edit-profile.html", title="Edit Profile")
+    member = db.session.query(Membership).filter_by(user_id=current_user.id).first()
+    households = db.session.query(Household).join(Membership).filter(Membership.user_id == current_user.id).all()
+    # member = db.session.query(Membership).filter_by(household_id=current_user.current_household_id, user_id=current_user.id).first()
+    return render_template("edit-profile.html", title="Edit Profile", member=member, households=households)
 
 
 @main.route("/rewards")
 @login_required
 def rewards():
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     current_membership = None
     user_points = 0
     household_rank = None
@@ -430,11 +433,7 @@ def signup_join_household():
 @main.route("/manage-household")
 @login_required
 def manage_household():
-    household = db.session.query(Household).filter(
-        Household.id == db.session.query(Membership.household_id).filter_by(
-            user_id=current_user.id
-        ).scalar_subquery()
-    ).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
 
     current_membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
@@ -444,6 +443,8 @@ def manage_household():
     members = db.session.query(Membership).filter_by(
         household_id=household.id
     ).order_by(Membership.points.desc()).all() if household else []
+
+    households = db.session.query(Household).join(Membership).filter(Membership.user_id == current_user.id).all()
 
     for member in members:
         member.completed_chores = db.session.query(Task).filter_by(
@@ -461,11 +462,25 @@ def manage_household():
     return render_template(
         "manage_household.html",
         title="Manage Household",
-        household=household,
+        current_household=household,
         members=members,
         current_membership=current_membership,
         invite=invite,
+        households=households,
     )
+
+@main.route("/household/switch", methods=["POST"])
+@login_required
+def switch_household():
+    household_id = request.form.get("household_id")
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household_id,
+    ).first()
+    if membership:
+        current_user.current_household = household_id
+        db.session.commit()
+    return redirect(url_for("home"))
 
 @main.route("/household/leave", methods=["POST"])
 def leave_household():
@@ -475,7 +490,7 @@ def leave_household():
 @main.route("/household/delete", methods=["POST"])
 @login_required
 def delete_household():
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     if not household:
         return redirect(url_for("main.home"))
 
@@ -493,7 +508,7 @@ def delete_household():
 @main.route("/household/remove/<int:user_id>", methods=["POST"])
 @login_required
 def remove_member(user_id):
-    household = db.session.query(Household).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     membership = db.session.query(Membership).filter_by(
         user_id=user_id,
         household_id=household.id
@@ -507,11 +522,7 @@ def remove_member(user_id):
 @main.route("/household/invite/regenerate", methods=["POST"])
 @login_required
 def regenerate_invite():
-    household = db.session.query(Household).filter(
-        Household.id == db.session.query(Membership.household_id).filter_by(
-            user_id=current_user.id
-        ).scalar_subquery()
-    ).first()
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
 
     if not household:
         return redirect(url_for("main.home"))

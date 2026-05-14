@@ -288,6 +288,13 @@ span {
   margin-bottom: 0;
 }
 
+.content-card > h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 6px 0 8px;
+}
+
 .content-card-header {
   display: flex;
   justify-content: space-between;
@@ -576,6 +583,12 @@ span {
   border: none;
   font-family: "Nunito", sans-serif;
   padding: 0;
+}
+
+.household-select {
+  flex: 1 1 auto;
+  flex-direction: row;
+  gap: 0px;
 }
 
 /* ════════════════════════════
