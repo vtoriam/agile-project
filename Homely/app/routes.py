@@ -1,10 +1,10 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session, jsonify, jsonify
+from flask import render_template, redirect, url_for, request, session, jsonify
 from sqlalchemy import func
 
-from app import app, db
+from app import db, csrf
 from app.forms import SignupForm
 from app.utils import require_valid_form
 from app.blueprints import main
@@ -154,6 +154,7 @@ def home():
 
 @main.route("/dismiss-overdue-popup", methods=["POST"])
 @login_required
+@csrf.protect()
 def dismiss_overdue_popup():
     membership = db.session.query(Membership).filter_by(
         user_id=current_user.id
@@ -335,6 +336,7 @@ def rewards():
 
 
 @main.route("/login", methods=["GET", "POST"])
+@csrf.exempt()
 def login():
     error = None
     if request.method == "POST":
@@ -352,6 +354,7 @@ def login():
 
 
 @main.route("/logout", methods=["GET", "POST"])
+@csrf.exempt()
 def logout():
     logout_user()
     return redirect(url_for("main.login"))
@@ -385,6 +388,7 @@ def signup_household():
 
 
 @main.route("/signup/household/create", methods=["GET", "POST"])
+@csrf.protect()
 def signup_create_household():
     signup_data = session.get("signup_data")
     if not signup_data:
@@ -444,6 +448,7 @@ def signup_create_household():
 
 
 @main.route("/signup/household/join", methods=["GET", "POST"])
+@csrf.protect()
 def signup_join_household():
     signup_data = session.get("signup_data")
     if not signup_data:
@@ -540,6 +545,7 @@ def manage_household():
 
 @main.route("/household/switch", methods=["POST"])
 @login_required
+@csrf.protect()
 def switch_household():
     household_id = request.form.get("household_id")
     membership = db.session.query(Membership).filter_by(
@@ -552,12 +558,15 @@ def switch_household():
     return redirect(url_for("home"))
 
 @main.route("/household/leave", methods=["POST"])
+@login_required
+@csrf.protect()
 def leave_household():
     return redirect(url_for("main.home"))
 
 
 @main.route("/household/delete", methods=["POST"])
 @login_required
+@csrf.protect()
 def delete_household():
     household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     if not household:
@@ -576,6 +585,7 @@ def delete_household():
 
 @main.route("/household/remove/<int:user_id>", methods=["POST"])
 @login_required
+@csrf.protect()
 def remove_member(user_id):
     household = db.session.query(Household).filter_by(id=current_user.current_household).first()
     membership = db.session.query(Membership).filter_by(
@@ -590,6 +600,7 @@ def remove_member(user_id):
 
 @main.route("/household/invite/regenerate", methods=["POST"])
 @login_required
+@csrf.protect()
 def regenerate_invite():
     household = db.session.query(Household).filter_by(id=current_user.current_household).first()
 
@@ -630,6 +641,7 @@ def regenerate_invite():
 
 @main.route("/tasks/<int:task_id>/toggle", methods=["POST"])
 @login_required
+@csrf.protect()
 def toggle_task(task_id):
     task = db.session.query(Task).filter_by(id=task_id).first()
     if not task:
@@ -662,6 +674,7 @@ def toggle_task(task_id):
 
 @main.route("/tasks/create", methods=["POST"])
 @login_required
+@csrf.protect()
 def create_task():
     membership = db.session.query(Membership).filter_by(
         user_id=current_user.id
@@ -710,6 +723,7 @@ def create_task():
 
 @main.route("/tasks/<int:task_id>", methods=["DELETE"])
 @login_required
+@csrf.protect()
 def delete_task(task_id):
     task = db.session.query(Task).filter_by(id=task_id).first()
     if not task:
