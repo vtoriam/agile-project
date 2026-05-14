@@ -1,3 +1,46 @@
+function copyCode() {
+  const code = document.getElementById("joinCodeText").textContent.trim();
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('[onclick="copyCode()"]');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="check"></i> Copied!';
+    lucide.createIcons();
+    setTimeout(() => {
+      btn.innerHTML = original;
+      lucide.createIcons();
+    }, 2000);
+  });
+}
+
+function switchHousehold() {
+  const select = document.getElementById("householdSelect");
+  const householdId = select.value;
+  if (!householdId) {
+    return;
+  } else {
+    fetch("/household/switch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `household_id=${householdId}`,
+    })
+      .then((response) => {
+        if (response.redirected) {
+          window.location.href = response.url;
+        } else if (response.ok) {
+          window.location.href = "/home";
+        } else {
+          alert("Error: " + response.status);
+        }
+      })
+      .catch((error) => {
+        alert("Error: " + error.message);
+      });
+  }
+}
+
+
 // Store the current action URL globally
 let currentDangerAction = null;
 
