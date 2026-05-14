@@ -26,11 +26,8 @@ function syncInitialState() {
     displayNameInput.value = initialDisplayName;
   }
 
-  if (
-    window.HomeQuestAvatar &&
-    typeof window.HomeQuestAvatar.set === "function"
-  ) {
-    window.HomeQuestAvatar.set(initialAvatar);
+  if (window.HomelyAvatar && typeof window.HomelyAvatar.set === "function") {
+    window.HomelyAvatar.set(initialAvatar);
   } else if (window.localStorage) {
     window.localStorage.setItem("homely.selectedAvatar", initialAvatar);
   }

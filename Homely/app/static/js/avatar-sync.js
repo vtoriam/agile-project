@@ -65,8 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
   applyAvatar(getSavedAvatar());
 });
 
-window.HomeQuestAvatar = {
+window.HomelyAvatar = {
   get: getSavedAvatar,
   set: saveAvatar,
   apply: applyAvatar,
 };
+
+window.HomeQuestAvatar = window.HomelyAvatar;
