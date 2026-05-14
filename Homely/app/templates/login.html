@@ -41,7 +41,7 @@
 
       <form
         method="POST"
-        action="{{ url_for('login') }}"
+        action="{{ url_for('main.login') }}"
         id="loginForm"
         novalidate
       >
@@ -104,7 +104,7 @@
 
       <p class="login-signup-link">
         Don't have an account?
-        <a href="{{ url_for('signup') }}">Create one</a>
+        <a href="{{ url_for('main.signup') }}">Create one</a>
       </p>
     </div>
   </div>
