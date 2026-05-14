@@ -3,11 +3,19 @@
 
 {% block page_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/homely-styles.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mascot.css') }}" />
 {% endblock %}
 
 {% block content %}
 {{ household_nav('my_tasks') }}
 <main class="main-content home-main">
+
+{% if overdue_count > 0 %}
+<div class="overdue-banner" id="overdue-banner">
+  <i data-lucide="alert-triangle"></i>
+  You have <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing <strong>{{ total_points_lost }} points per day</strong>.
+</div>
+{% endif %}
 
   <div class="greeting">
     <div class="greeting-sub" id="time-greeting">Good morning</div>
@@ -99,6 +107,14 @@
     <div class="stat"><i data-lucide="list"></i> Tasks: <span id="stat-total">0</span></div>
     <div class="stat"><i data-lucide="check"></i> Done: <span id="stat-done">0</span></div>
     <div class="stat"><i data-lucide="clock"></i> To do: <span id="stat-rem">0</span></div>
+  </div>
+
+<div class="Character">
+    <img
+      class="Character_spritesheet pixelart"
+      src="{{ url_for('static', filename='images/sprite_sheet.png') }}"
+      alt="Character"
+      />
   </div>
 
 </main>

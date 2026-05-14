@@ -4,7 +4,9 @@ import string
 from flask import render_template, redirect, url_for, request, session, jsonify, jsonify
 from sqlalchemy import func
 
-from app import db
+from app import app, db
+from app.forms import SignupForm
+from app.utils import require_valid_form
 from app.blueprints import main
 from app.models import User, Household, Membership, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
@@ -186,6 +188,27 @@ def my_tasks():
         household_id=membership.household_id,
         assigned_user_id=current_user.id
     ).all() if membership else []
+
+    now = datetime.now()
+
+    # Find overdue tasks assigned to current user
+    overdue_tasks = (
+        db.session.query(Task)
+        .filter(
+            Task.household_id == membership.household_id,
+            Task.assigned_user_id == current_user.id,
+            Task.is_completed == False,
+            Task.due_date != None,
+            Task.due_date < now,
+        )
+        .all()
+        if membership
+        else []
+    )
+
+    overdue_count = len(overdue_tasks)
+    total_points_lost = overdue_count * 5
+
     tasks_data = [
         {
             "id": task.id,
@@ -197,7 +220,7 @@ def my_tasks():
         }
         for task in tasks
     ]
-    return render_template("my-tasks.html", title="My Tasks", tasks_data=tasks_data)
+    return render_template("my-tasks.html", title="My Tasks", tasks_data=tasks_data, overdue_count=overdue_count, total_points_lost=total_points_lost)
 
 
 @main.route("/leaderboard")
@@ -335,33 +358,22 @@ def logout():
 
 
 @main.route("/signup", methods=["GET", "POST"])
-def signup():
-    error = None
-    form_data = {}
-    if request.method == "POST":
-        form_data = request.form.to_dict()
-        if not all([
-            form_data.get("first_name"),
-            form_data.get("last_name"),
-            form_data.get("display_name"),
-            form_data.get("email"),
-            form_data.get("password"),
-        ]):
-            error = "Please fill in all required fields."
-        elif form_data.get("password") != form_data.get("confirm_password"):
-            error = "Passwords do not match."
-        elif db.session.query(User).filter_by(email=form_data["email"].strip().lower()).first():
-            error = "An account with that email already exists."
-        else:
-            session["signup_data"] = {
-                "first_name":    form_data["first_name"].strip(),
-                "last_name":     form_data["last_name"].strip(),
-                "display_name":  form_data["display_name"].strip(),
-                "email":         form_data["email"].strip().lower(),
-                "password":      form_data["password"],
-            }
-            return redirect(url_for("main.signup_household"))
-    return render_template("signup.html", title="Sign Up", form_data=form_data, error=error)
+@require_valid_form(SignupForm, 'signup.html', title="Sign Up")
+def signup(form):
+    # At this point `form` has passed `validate_on_submit()` (CSRF + field validators)
+    existing = db.session.query(User).filter_by(email=form.email.data.strip().lower()).first()
+    if existing:
+        error = "An account with that email already exists."
+        return render_template('signup.html', form=form, error=error, title="Sign Up")
+
+    session["signup_data"] = {
+        "first_name": form.first_name.data.strip(),
+        "last_name": form.last_name.data.strip(),
+        "display_name": form.display_name.data.strip(),
+        "email": form.email.data.strip().lower(),
+        "password": form.password.data,
+    }
+    return redirect(url_for("signup_household"))
 
 
 @main.route("/signup/household")
