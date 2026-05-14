@@ -24,10 +24,15 @@ def client(app):
 
 
 def create_user(email="aisha@example.com", password="password123", display_name="Aisha"):
+    household = Household(name=f"{display_name} Household")
+    db.session.add(household)
+    db.session.flush()
+
     user = User(
         full_name=f"{display_name} Khan",
         display_name=display_name,
         email=email,
+        current_household=household.id,
     )
     user.set_password(password)
     db.session.add(user)

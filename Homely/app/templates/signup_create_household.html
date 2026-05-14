@@ -1,17 +1,22 @@
-{% extends 'base.html' %}
-
-{% block page_styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}" />
-{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block page_styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/signup.css') }}"
+/>
+{% endblock %} {% block content %}
 <div class="login-page">
-
   <!-- Left hero panel -->
   <div class="login-hero">
     <div class="login-hero-inner">
-      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
+      <img
+        class="login-logo"
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        alt="Homely"
+      />
 
       <div class="auth-steps">
         <div class="auth-step done">
@@ -25,9 +30,10 @@
         </div>
       </div>
 
-      <h1 class="login-hero-title">Create your<br>household.</h1>
+      <h1 class="login-hero-title">Create your<br />household.</h1>
       <p class="login-hero-sub">
-        Give your household a name. We'll generate a unique invite code so you can bring housemates on board.
+        Give your household a name. We'll generate a unique invite code so you
+        can bring housemates on board.
       </p>
       <ul class="login-feature-list">
         <li><i data-lucide="home"></i> Name your household</li>
@@ -41,7 +47,6 @@
   <!-- Right form panel -->
   <div class="login-form-panel">
     <div class="login-form-wrap">
-
       <div class="login-form-header">
         <div class="login-form-title">Create a household</div>
         <p class="login-form-sub">Step 2 of 2 — name your new household.</p>
@@ -53,7 +58,12 @@
       </div>
       {% endif %}
 
-      <form method="POST" action="{{ url_for('main.signup_create_household') }}" novalidate>
+      <form
+        method="POST"
+        action="{{ url_for('main.signup_create_household') }}"
+        novalidate
+      >
+        {{ form.hidden_tag() }}
 
         <div class="login-field">
           <label class="login-label" for="household_name">Household Name</label>
@@ -76,21 +86,20 @@
         <button type="submit" class="login-btn" style="margin-top: 1.25rem">
           <i data-lucide="check-circle"></i> Create household
         </button>
-
       </form>
 
       <div class="login-divider"><span></span></div>
 
       <p class="login-signup-link">
-        <a href="{{ url_for('main.signup_household') }}">← Back to household options</a>
+        <a href="{{ url_for('main.signup_household') }}"
+          >← Back to household options</a
+        >
       </p>
-
     </div>
   </div>
-
 </div>
-{% endblock %}
-
-{% block scripts %}
-    <script>lucide.createIcons();</script>
+{% endblock %} {% block scripts %}
+<script>
+  lucide.createIcons();
+</script>
 {% endblock %}

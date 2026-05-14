@@ -21,7 +21,7 @@ def create_app(config_class=Config):
     migrate.init_app(flask_app, db)
     csrf.init_app(flask_app)
     login.init_app(flask_app)
-    login.login_view = 'login'
+    login.login_view = 'main.login'
 
     # Register blueprints and import models
     from app.blueprints import main
