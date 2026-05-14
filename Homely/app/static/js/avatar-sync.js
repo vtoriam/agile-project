@@ -1,4 +1,4 @@
-const AVATAR_STORAGE_KEY = "homequest.selectedAvatar";
+const AVATAR_STORAGE_KEY = "homely.selectedAvatar";
 const DEFAULT_AVATAR = "user-round";
 
 const allowedAvatars = new Set([
