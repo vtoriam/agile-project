@@ -15,7 +15,7 @@ from app.forms import (
 )
 from app.utils import require_valid_form
 from app.blueprints import main
-from app.models import User, Household, Membership, Task, HouseholdInvite
+from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta
 
@@ -364,9 +364,17 @@ def rewards():
             )
         )
 
-    claimed_reward_keys = set(
-        session.get(f"claimed_rewards_{current_user.id}_{household.id if household else 'none'}", [])
-    )
+    claimed_reward_keys = set()
+    if household:
+        claimed_reward_keys = {
+            claim.reward_key
+            for claim in db.session.query(RewardClaim.reward_key)
+            .filter(
+                RewardClaim.user_id == current_user.id,
+                RewardClaim.household_id == household.id,
+            )
+            .all()
+        }
 
     reward_catalog = [
         {
@@ -501,11 +509,27 @@ def claim_reward(reward_key):
     if not unlocked:
         return jsonify({"success": False, "message": "This reward is not unlocked yet."}), 400
 
-    session_key = f"claimed_rewards_{current_user.id}_{household.id}"
-    claimed_reward_keys = set(session.get(session_key, []))
-    claimed_reward_keys.add(reward_key)
-    session[session_key] = sorted(claimed_reward_keys)
-    session.modified = True
+    existing_claim = db.session.query(RewardClaim).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+        reward_key=reward_key,
+    ).first()
+    if existing_claim:
+        return jsonify({
+            "success": True,
+            "claimed": True,
+            "rewardKey": reward_key,
+            "title": reward["title"],
+        })
+
+    db.session.add(
+        RewardClaim(
+            user_id=current_user.id,
+            household_id=household.id,
+            reward_key=reward_key,
+        )
+    )
+    db.session.commit()
 
     return jsonify({
         "success": True,
