@@ -145,7 +145,8 @@ def my_tasks():
 @app.route("/leaderboard")
 @login_required
 def leaderboard():
-    household = db.session.query(Household).first()
+    membership = db.session.query(Membership).filter_by(user_id=current_user.id).first()
+    household = membership.household if membership else None
     member_stats = {}
     if household:
         members = db.session.query(Membership).filter_by(household_id=household.id).all()
