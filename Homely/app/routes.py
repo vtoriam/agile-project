@@ -17,10 +17,14 @@ from app.utils import require_valid_form
 from app.blueprints import main
 from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 REMINDER_WINDOW_HOURS = 24
+
+
+def utcnow_naive():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def serialize_task_reminder(task):
@@ -42,7 +46,7 @@ def due_soon_tasks_for_user(user_id, hours=REMINDER_WINDOW_HOURS):
     if not membership:
         return []
 
-    now = datetime.utcnow()
+    now = utcnow_naive()
     window_end = now + timedelta(hours=hours)
 
     return (
@@ -81,7 +85,7 @@ def home():
         if membership else []
     )
 
-    now = datetime.utcnow()
+    now = utcnow_naive()
 
     # Find overdue tasks in the current household so the refresh state matches the frontend.
     overdue_tasks = (
@@ -166,7 +170,7 @@ def dismiss_overdue_popup():
         user_id=current_user.id
     ).first()
     if membership:
-        membership.last_overdue_popup = datetime.utcnow()
+        membership.last_overdue_popup = utcnow_naive()
         db.session.commit()
     return "", 204
 
@@ -196,7 +200,7 @@ def my_tasks():
         assigned_user_id=current_user.id
     ).all() if membership else []
 
-    now = datetime.utcnow()
+    now = utcnow_naive()
 
     # Find overdue tasks assigned to current user
     overdue_tasks = (
@@ -625,7 +629,7 @@ def signup_create_household():
                     household_id=household.id,
                     created_by_user_id=user.id,
                     code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
-                    expires_at=datetime.utcnow() + timedelta(days=7),
+                    expires_at=utcnow_naive() + timedelta(days=7),
                     is_active=True,
                 )
                 db.session.add(first_invite)
@@ -862,7 +866,7 @@ def regenerate_invite():
         household_id=household.id,
         created_by_user_id=current_user.id,
         code=code,
-        expires_at=datetime.utcnow() + timedelta(days=7),
+        expires_at=utcnow_naive() + timedelta(days=7),
         is_active=True,
     )
     db.session.add(new_invite)
@@ -885,7 +889,7 @@ def toggle_task(task_id):
         return {"error": "Unauthorised"}, 403
 
     task.is_completed = not task.is_completed
-    task.completed_at = datetime.utcnow() if task.is_completed else None
+    task.completed_at = utcnow_naive() if task.is_completed else None
 
     # Award or deduct points when toggling
     if task.assignee:

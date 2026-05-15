@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import os
 import sys
@@ -12,6 +12,10 @@ if ROOT not in sys.path:
 from app import create_app, db
 from app.config import TestingConfig
 from app.models import User, Household, Membership, HouseholdInvite
+
+
+def utcnow_naive():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 @pytest.fixture()
@@ -69,7 +73,7 @@ def create_invite(household, user, code="HM-TEST", days_valid=1, is_active=True)
         household_id=household.id,
         created_by_user_id=user.id,
         code=code,
-        expires_at=datetime.utcnow() + timedelta(days=days_valid),
+        expires_at=utcnow_naive() + timedelta(days=days_valid),
         is_active=is_active,
     )
     db.session.add(invite)
