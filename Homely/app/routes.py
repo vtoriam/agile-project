@@ -5,6 +5,7 @@ from flask import render_template, redirect, url_for, request, session, jsonify,
 from sqlalchemy import func
 
 from app import db
+from app import socketio
 from app.forms import (
     SignupForm,
     LoginForm,
@@ -18,6 +19,7 @@ from app.blueprints import main
 from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta, timezone
+from flask_socketio import emit, join_room, leave_room
 
 
 REMINDER_WINDOW_HOURS = 24
@@ -282,6 +284,7 @@ def leaderboard():
         first=first, second=second, third=third,
         other_members=other_members,
         member_stats=member_stats,
+        household_id=household.id if household else None,
     )
 
 
@@ -904,6 +907,43 @@ def toggle_task(task_id):
                 assigned_membership.points = max(0, assigned_membership.points - task.points_value)
 
     db.session.commit()
+    # Emit updated leaderboard stats to connected clients
+    try:
+        household = db.session.query(Household).filter_by(id=task.household_id).first()
+        member_stats = {}
+        if household:
+            members = db.session.query(Membership).filter_by(household_id=household.id).all()
+            members.sort(key=lambda m: m.points, reverse=True)
+            rank_icons = ['crown', 'medal', 'award']
+            rank_colors = ['#c49a2a', '#9e9087', '#b07248']
+            for i, m in enumerate(members):
+                done_tasks = db.session.query(Task).filter_by(
+                    household_id=household.id,
+                    assigned_user_id=m.user_id,
+                    is_completed=True,
+                ).all()
+                completed = len(done_tasks)
+                on_time = sum(
+                    1 for t in done_tasks
+                    if t.completed_at and t.due_date and t.completed_at <= t.due_date
+                )
+                late = sum(
+                    1 for t in done_tasks
+                    if t.completed_at and t.due_date and t.completed_at > t.due_date
+                )
+                member_stats[m.user.display_name] = {
+                    'rank':      i + 1,
+                    'points':    m.points,
+                    'completed': completed,
+                    'on_time':   on_time,
+                    'late':      late,
+                    'avatar':    rank_icons[i] if i < 3 else 'user',
+                    'rankColor': rank_colors[i] if i < 3 else '#888888',
+                }
+        socketio.emit('leaderboard:update', {'member_stats': member_stats, 'household_id': task.household_id}, broadcast=True)
+    except Exception:
+        pass
+
     return {"done": task.is_completed, "points": task.points_value}, 200
 
 @main.route("/tasks/create", methods=["POST"])
@@ -971,3 +1011,27 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
     return {"success": True}, 200
+
+
+# Socket.IO event handlers
+@socketio.on('join')
+def handle_join(data):
+    try:
+        hid = data.get('household_id')
+        if hid:
+            room = f"household_{hid}"
+            join_room(room)
+            emit('joined', {'room': room})
+    except Exception:
+        pass
+
+@socketio.on('leave')
+def handle_leave(data):
+    try:
+        hid = data.get('household_id')
+        if hid:
+            room = f"household_{hid}"
+            leave_room(room)
+            emit('left', {'room': room})
+    except Exception:
+        pass
