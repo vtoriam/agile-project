@@ -206,8 +206,11 @@ household_nav %} {% block page_styles %}
     socket.on('leaderboard:update', data => {
       try {
         if (!data || !data.household_id || data.household_id !== householdId) return;
-        // simple approach: reload to refresh rendered leaderboard
-        location.reload();
+        if (window.updateLeaderboardFromStats) {
+          window.updateLeaderboardFromStats(data.member_stats || {});
+        } else {
+          location.reload();
+        }
       } catch (e) { console.error(e); }
     });
   }

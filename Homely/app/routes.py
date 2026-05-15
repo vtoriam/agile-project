@@ -940,7 +940,8 @@ def toggle_task(task_id):
                     'avatar':    rank_icons[i] if i < 3 else 'user',
                     'rankColor': rank_colors[i] if i < 3 else '#888888',
                 }
-        socketio.emit('leaderboard:update', {'member_stats': member_stats, 'household_id': task.household_id}, broadcast=True)
+        room = f"household_{task.household_id}"
+        socketio.emit('leaderboard:update', {'member_stats': member_stats, 'household_id': task.household_id}, room=room)
     except Exception:
         pass
 
