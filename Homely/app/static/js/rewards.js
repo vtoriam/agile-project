@@ -157,7 +157,14 @@ async function claimReward(button) {
 function attachRewardControls(item) {
   const deleteButton = item.querySelector(".btn-delete");
   if (deleteButton) {
-    deleteButton.addEventListener("click", () => {
+    deleteButton.addEventListener("click", async () => {
+      const rewardId = item.dataset.rewardId;
+      if (rewardId) {
+        await fetch(`/rewards/custom/${rewardId}`, {
+          method: "DELETE",
+          headers: { "X-CSRFToken": getCsrfToken() },
+        }).catch(console.error);
+      }
       item.style.transition = "opacity 0.2s, transform 0.2s";
       item.style.opacity = "0";
       item.style.transform = "translateX(10px)";
@@ -211,7 +218,7 @@ function buildCustomRewardCard({
   threshold,
   icon,
   isUnlocked,
-  rewardKey,
+  rewardId,
 }) {
   const progressPct = Math.min(
     100,
@@ -244,7 +251,7 @@ function buildCustomRewardCard({
     `;
 
   return `
-    <div class="reward-item custom-reward ${isUnlocked ? "unlocked" : "locked"}" data-type="custom" data-reward-key="${escapeHtml(rewardKey)}" data-claimed="false">
+    <div class="reward-item custom-reward ${isUnlocked ? "unlocked" : "locked"}" data-type="custom" data-reward-id="${escapeHtml(String(rewardId))}" data-claimed="false">
       <div class="reward-icon-wrap">
         <div class="reward-icon ${isUnlocked ? "" : "muted"}"><i data-lucide="${escapeHtml(icon)}"></i></div>
       </div>
@@ -264,7 +271,7 @@ function buildCustomRewardCard({
   `;
 }
 
-function submitReward() {
+async function submitReward() {
   const title = document.getElementById("rewardTitle").value.trim();
   const desc = document.getElementById("rewardDesc").value.trim();
   const threshold = Number.parseInt(
@@ -286,24 +293,42 @@ function submitReward() {
     return;
   }
 
-  const rewardKey = `custom-${Date.now()}`;
-  const isUnlocked = USER_POINTS >= threshold;
-  const newItem = document.createElement("div");
-  newItem.innerHTML = buildCustomRewardCard({
-    title,
-    desc,
-    threshold,
-    icon,
-    isUnlocked,
-    rewardKey,
-  });
+  const addBtn = document.querySelector("#rewardModal .modal-btn-add");
+  if (addBtn) addBtn.disabled = true;
 
-  const rewardElement = newItem.firstElementChild;
-  rewardsList.prepend(rewardElement);
-  attachRewardControls(rewardElement);
-  lucide.createIcons();
-  closeRewardModal();
-  checkEmptyState();
+  try {
+    const res = await fetch("/rewards/custom/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken(),
+      },
+      body: JSON.stringify({ title, desc, threshold, icon }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      errEl.textContent = data.error || "Something went wrong.";
+      return;
+    }
+
+    const { id } = await res.json();
+    const isUnlocked = USER_POINTS >= threshold;
+    const newItem = document.createElement("div");
+    newItem.innerHTML = buildCustomRewardCard({ rewardId: id, title, desc, threshold, icon, isUnlocked });
+
+    const rewardElement = newItem.firstElementChild;
+    rewardsList.prepend(rewardElement);
+    attachRewardControls(rewardElement);
+    lucide.createIcons();
+    closeRewardModal();
+    checkEmptyState();
+  } catch (err) {
+    console.error(err);
+    errEl.textContent = "Something went wrong — please try again.";
+  } finally {
+    if (addBtn) addBtn.disabled = false;
+  }
 }
 
 function highlight(id) {

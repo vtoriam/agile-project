@@ -50,6 +50,45 @@
 
         <!-- Rewards List -->
         <div class="rewards-list" id="rewardsList">
+          {% for cr in custom_rewards %}
+          {% set unlocked = cr.points_threshold <= user_points %}
+          <div class="reward-item custom-reward {{ 'unlocked' if unlocked else 'locked' }}"
+               data-type="custom"
+               data-reward-id="{{ cr.id }}"
+               data-claimed="false">
+            <div class="reward-icon-wrap">
+              <div class="reward-icon{{ '' if unlocked else ' muted' }}"><i data-lucide="{{ cr.icon }}"></i></div>
+            </div>
+            <div class="reward-body">
+              <div class="reward-title-row">
+                <div class="reward-title">{{ cr.title }}</div>
+                <span class="custom-tag">Custom</span>
+              </div>
+              <p class="reward-desc">{{ cr.description or "No description provided." }}</p>
+              <div class="reward-condition">
+                <span class="condition-badge points-badge"><i data-lucide="zap"></i> {{ "{:,}".format(cr.points_threshold) }} pts</span>
+              </div>
+              {% if not unlocked %}
+              <div class="progress-wrap">
+                <div class="progress-bar-custom">
+                  <div class="progress-fill" style="width: {{ [100, (user_points * 100 // cr.points_threshold)]|min }}%"></div>
+                </div>
+                <span class="progress-label">{{ "{:,}".format(user_points) }} / {{ "{:,}".format(cr.points_threshold) }} pts</span>
+              </div>
+              {% endif %}
+            </div>
+            <div class="reward-status">
+              {% if unlocked %}
+              <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
+              <button class="reward-claim-btn" type="button">Claim</button>
+              {% else %}
+              <div class="status-locked"><i data-lucide="lock"></i> {{ "{:,}".format(cr.points_threshold - user_points) }} pts away</div>
+              {% endif %}
+              <button class="btn-delete" type="button" title="Delete reward"><i data-lucide="x"></i></button>
+            </div>
+          </div>
+          {% endfor %}
+
           {% for reward in rewards %}
           <div
             class="reward-item {% if reward.claimed %}claimed{% elif reward.unlocked %}unlocked{% else %}locked{% endif %}"
