@@ -37,8 +37,10 @@ class User(UserMixin, db.Model):
     display_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    avatar = db.Column(db.String(50), default="avatar1")
+    avatar = db.Column(db.String(50), default="user-round")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    current_household = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
 
     memberships = db.relationship(
         "Membership",

@@ -1,4 +1,4 @@
-const AVATAR_STORAGE_KEY = "homequest.selectedAvatar";
+const AVATAR_STORAGE_KEY = "homely.selectedAvatar";
 const DEFAULT_AVATAR = "user-round";
 
 const allowedAvatars = new Set([
@@ -65,8 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
   applyAvatar(getSavedAvatar());
 });
 
-window.HomeQuestAvatar = {
+window.HomelyAvatar = {
   get: getSavedAvatar,
   set: saveAvatar,
   apply: applyAvatar,
 };
+
+window.HomeQuestAvatar = window.HomelyAvatar;

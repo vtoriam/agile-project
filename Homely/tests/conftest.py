@@ -2,32 +2,20 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from app import app as flask_app, db
-from app.models import User, Household, Membership, Task, HouseholdInvite
-
-
-flask_app.config.update(
-    TESTING=True,
-    SECRET_KEY="test-secret-key",
-    SQLALCHEMY_DATABASE_URI="sqlite:///:memory:",
-    WTF_CSRF_ENABLED=False,
-)
-
-
-@pytest.fixture(autouse=True)
-def clean_database():
-    with flask_app.app_context():
-        db.session.remove()
-        db.drop_all()
-        db.create_all()
-        yield
-        db.session.remove()
-        db.drop_all()
+from app import create_app, db
+from app.config import TestingConfig
+from app.models import User, Household, Membership, HouseholdInvite
 
 
 @pytest.fixture()
 def app():
-    return flask_app
+    test_app = create_app(TestingConfig)
+
+    with test_app.app_context():
+        db.create_all()
+        yield test_app
+        db.session.remove()
+        db.drop_all()
 
 
 @pytest.fixture()
@@ -36,10 +24,15 @@ def client(app):
 
 
 def create_user(email="aisha@example.com", password="password123", display_name="Aisha"):
+    household = Household(name=f"{display_name} Household")
+    db.session.add(household)
+    db.session.flush()
+
     user = User(
         full_name=f"{display_name} Khan",
         display_name=display_name,
         email=email,
+        current_household=household.id,
     )
     user.set_password(password)
     db.session.add(user)

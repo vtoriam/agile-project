@@ -1,17 +1,22 @@
-{% extends 'base.html' %}
-
-{% block page_styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}" />
-{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block page_styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/signup.css') }}"
+/>
+{% endblock %} {% block content %}
 <div class="login-page">
-
   <!-- Left hero panel -->
   <div class="login-hero">
     <div class="login-hero-inner">
-      <img class="login-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Homely" />
+      <img
+        class="login-logo"
+        src="{{ url_for('static', filename='images/logo.png') }}"
+        alt="Homely"
+      />
 
       <!-- Step indicator -->
       <div class="auth-steps">
@@ -26,14 +31,17 @@
         </div>
       </div>
 
-      <h1 class="login-hero-title">Create your<br>account.</h1>
+      <h1 class="login-hero-title">Create your<br />account.</h1>
       <p class="login-hero-sub">
-        Join your household in two simple steps. Start with your personal details.
+        Join your household in two simple steps. Start with your personal
+        details.
       </p>
       <ul class="login-feature-list">
         <li><i data-lucide="user"></i> Personal profile</li>
         <li><i data-lucide="home"></i> Link to your household</li>
-        <li><i data-lucide="trophy"></i> Earn points &amp; climb the leaderboard</li>
+        <li>
+          <i data-lucide="trophy"></i> Earn points &amp; climb the leaderboard
+        </li>
         <li><i data-lucide="gift"></i> Unlock household rewards</li>
       </ul>
     </div>
@@ -42,7 +50,6 @@
   <!-- Right form panel -->
   <div class="login-form-panel">
     <div class="login-form-wrap">
-
       <div class="login-form-header">
         <div class="login-form-title">Personal details</div>
         <p class="login-form-sub">Step 1 of 2 — tell us about yourself.</p>
@@ -54,7 +61,13 @@
       </div>
       {% endif %}
 
-      <form method="POST" action="{{ url_for('signup') }}" id="signupForm" novalidate>
+      <form
+        method="POST"
+        action="{{ url_for('main.signup') }}"
+        id="signupForm"
+        novalidate
+      >
+        {{ form.hidden_tag() }}
 
         <div class="signup-name-row">
           <div class="login-field">
@@ -67,7 +80,7 @@
                 name="first_name"
                 id="first_name"
                 placeholder="Alex"
-                value="{{ form_data.get('first_name', '') }}"
+                value="{{ form.first_name.data or '' }}"
                 required
               />
             </div>
@@ -83,7 +96,7 @@
                 name="last_name"
                 id="last_name"
                 placeholder="Smith"
-                value="{{ form_data.get('last_name', '') }}"
+                value="{{ form.last_name.data or '' }}"
                 required
               />
             </div>
@@ -101,7 +114,7 @@
               name="display_name"
               id="display_name"
               placeholder="How housemates see you, e.g. Alex"
-              value="{{ form_data.get('display_name', '') }}"
+              value="{{ form.display_name.data or '' }}"
               required
             />
           </div>
@@ -118,7 +131,7 @@
               name="email"
               id="email"
               placeholder="you@example.com"
-              value="{{ form_data.get('email', '') }}"
+              value="{{ form.email.data or '' }}"
               autocomplete="email"
               required
             />
@@ -139,7 +152,12 @@
               autocomplete="new-password"
               required
             />
-            <button type="button" class="login-pw-toggle" id="pwToggle" aria-label="Show password">
+            <button
+              type="button"
+              class="login-pw-toggle"
+              id="pwToggle"
+              aria-label="Show password"
+            >
               <i data-lucide="eye"></i>
             </button>
           </div>
@@ -153,7 +171,9 @@
         </div>
 
         <div class="login-field">
-          <label class="login-label" for="confirm_password">Confirm Password</label>
+          <label class="login-label" for="confirm_password"
+            >Confirm Password</label
+          >
           <div class="login-input-wrap">
             <span class="login-input-icon"><i data-lucide="lock"></i></span>
             <input
@@ -165,7 +185,12 @@
               autocomplete="new-password"
               required
             />
-            <button type="button" class="login-pw-toggle" id="confirmPwToggle" aria-label="Show password">
+            <button
+              type="button"
+              class="login-pw-toggle"
+              id="confirmPwToggle"
+              aria-label="Show password"
+            >
               <i data-lucide="eye"></i>
             </button>
           </div>
@@ -175,22 +200,20 @@
         <button type="submit" class="login-btn" style="margin-top: 1.25rem">
           Continue <i data-lucide="arrow-right"></i>
         </button>
-
       </form>
 
       <div class="login-divider"><span>or</span></div>
 
       <p class="login-signup-link">
-        Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+        Already have an account?
+        <a href="{{ url_for('main.login') }}">Sign in</a>
       </p>
-
     </div>
   </div>
-
 </div>
-{% endblock %}
-
-{% block scripts %}
-    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
-    <script>lucide.createIcons();</script>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+<script>
+  lucide.createIcons();
+</script>
 {% endblock %}

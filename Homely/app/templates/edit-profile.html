@@ -15,37 +15,40 @@
           Update your personal details and how housemates see you.
         </p>
 
+        <form method="POST" id="editProfileForm" data-display-name="{{ current_user.display_name }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
         <!-- Profile Header Card -->
         <div class="profile-header-card">
           <div class="profile-header-banner"></div>
           <div class="profile-header-body">
             <div class="profile-header-avatar-wrap">
               <div class="profile-header-avatar" data-user-avatar-slot>
-                <i data-lucide="user-round"></i>
+                <i data-lucide="{% if current_user.avatar in ['cat', 'dog', 'bird', 'fish', 'rabbit', 'bug', 'turtle', 'squirrel', 'snail'] %}{{ current_user.avatar }}{% else %}user-round{% endif %}"></i>
               </div>
             </div>
             <div class="profile-header-info">
-              <div class="profile-header-name">John Smith</div>
+              <div class="profile-header-name">{{ current_user.display_name }}</div>
               <div class="profile-header-meta">
-                <span class="profile-role-badge admin">
-                  <i data-lucide="shield-check"></i> Admin
+                <span class="profile-role-badge {{ member.role.lower() if member else 'member' }}">
+                  <i data-lucide="{{ 'shield-check' if member and member.role.lower() == 'admin' else 'user' }}"></i> {{ member.role if member else 'Member' }}
                 </span>
               </div>
             </div>
           </div>
           <div class="profile-header-stats">
             <div class="profile-stat">
-              <div class="profile-stat-value">1,240</div>
+              <div class="profile-stat-value">{{ member.points if member else 0 }}</div>
               <div class="profile-stat-label"><i data-lucide="zap"></i> Total Points</div>
             </div>
             <div class="profile-stat-divider"></div>
             <div class="profile-stat">
-              <div class="profile-stat-value">#2</div>
+              <div class="profile-stat-value">#{{ household_rank if household_rank else '-' }}</div>
               <div class="profile-stat-label"><i data-lucide="medal"></i> Household Rank</div>
             </div>
             <div class="profile-stat-divider"></div>
             <div class="profile-stat">
-              <div class="profile-stat-value">26</div>
+              <div class="profile-stat-value">{{ completed_tasks_count }}</div>
               <div class="profile-stat-label"><i data-lucide="check-circle"></i> Tasks Done</div>
             </div>
           </div>
@@ -58,18 +61,20 @@
 
           <div class="form-label-custom mb-2">Default Avatars</div>
           <div class="default-avatars">
-            <button class="avatar-option selected" type="button" data-avatar-option="user-round" aria-pressed="true">
+            <input type="hidden" id="selectedAvatar" name="avatar" value="{% if current_user.avatar in ['cat', 'dog', 'bird', 'fish', 'rabbit', 'bug', 'turtle', 'squirrel', 'snail'] %}{{ current_user.avatar }}{% else %}user-round{% endif %}" />
+            <input type="hidden" id="initialAvatar" value="{% if current_user.avatar in ['cat', 'dog', 'bird', 'fish', 'rabbit', 'bug', 'turtle', 'squirrel', 'snail'] %}{{ current_user.avatar }}{% else %}user-round{% endif %}" />
+            <button class="avatar-option{% if current_user.avatar in ['cat', 'dog', 'bird', 'fish', 'rabbit', 'bug', 'turtle', 'squirrel', 'snail'] %}{% else %} selected{% endif %}" type="button" data-avatar-option="user-round" aria-pressed="{% if current_user.avatar in ['cat', 'dog', 'bird', 'fish', 'rabbit', 'bug', 'turtle', 'squirrel', 'snail'] %}false{% else %}true{% endif %}">
               <i data-lucide="user-round"></i>
             </button>
-            <button class="avatar-option" type="button" data-avatar-option="cat" aria-pressed="false"><i data-lucide="cat"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="dog" aria-pressed="false"><i data-lucide="dog"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="bird" aria-pressed="false"><i data-lucide="bird"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="fish" aria-pressed="false"><i data-lucide="fish"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="rabbit" aria-pressed="false"><i data-lucide="rabbit"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="bug" aria-pressed="false"><i data-lucide="bug"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="turtle" aria-pressed="false"><i data-lucide="turtle"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="squirrel" aria-pressed="false"><i data-lucide="squirrel"></i></button>
-            <button class="avatar-option" type="button" data-avatar-option="snail" aria-pressed="false"><i data-lucide="snail"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'cat' else '' }}" type="button" data-avatar-option="cat" aria-pressed="{{ 'true' if current_user.avatar == 'cat' else 'false' }}"><i data-lucide="cat"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'dog' else '' }}" type="button" data-avatar-option="dog" aria-pressed="{{ 'true' if current_user.avatar == 'dog' else 'false' }}"><i data-lucide="dog"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'bird' else '' }}" type="button" data-avatar-option="bird" aria-pressed="{{ 'true' if current_user.avatar == 'bird' else 'false' }}"><i data-lucide="bird"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'fish' else '' }}" type="button" data-avatar-option="fish" aria-pressed="{{ 'true' if current_user.avatar == 'fish' else 'false' }}"><i data-lucide="fish"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'rabbit' else '' }}" type="button" data-avatar-option="rabbit" aria-pressed="{{ 'true' if current_user.avatar == 'rabbit' else 'false' }}"><i data-lucide="rabbit"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'bug' else '' }}" type="button" data-avatar-option="bug" aria-pressed="{{ 'true' if current_user.avatar == 'bug' else 'false' }}"><i data-lucide="bug"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'turtle' else '' }}" type="button" data-avatar-option="turtle" aria-pressed="{{ 'true' if current_user.avatar == 'turtle' else 'false' }}"><i data-lucide="turtle"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'squirrel' else '' }}" type="button" data-avatar-option="squirrel" aria-pressed="{{ 'true' if current_user.avatar == 'squirrel' else 'false' }}"><i data-lucide="squirrel"></i></button>
+            <button class="avatar-option{{ ' selected' if current_user.avatar == 'snail' else '' }}" type="button" data-avatar-option="snail" aria-pressed="{{ 'true' if current_user.avatar == 'snail' else 'false' }}"><i data-lucide="snail"></i></button>
           </div>
         </div>
 
@@ -86,7 +91,8 @@
                 <input
                   class="form-control-custom"
                   type="text"
-                  value="John Smith"
+                  name="display_name"
+                  value="{{ current_user.display_name }}"
                 />
               </div>
               <p class="field-hint">
@@ -94,24 +100,6 @@
                 chore board.
               </p>
             </div>
-
-            <!-- Age -->
-            <div class="col-sm-4">
-              <label class="form-label-custom">Age</label>
-              <div class="input-with-icon">
-                <span class="input-icon"><i data-lucide="cake"></i></span>
-                <input
-                  class="form-control-custom"
-                  type="number"
-                  value="24"
-                  min="16"
-                  max="99"
-                />
-              </div>
-            </div>
-
-            <!-- Spacer -->
-            <div class="col-sm-8"></div>
 
             <div class="col-12"><hr class="divider" /></div>
 
@@ -123,7 +111,7 @@
                 <input
                   class="form-control-custom readonly"
                   type="email"
-                  value="johnsmith@example.com"
+                  value="{{ current_user.email }}"
                   readonly
                 />
               </div>
@@ -155,17 +143,16 @@
           class="d-flex align-items-center justify-content-between flex-wrap gap-3"
         >
           <div class="d-flex gap-2">
-            <button class="btn-primary-custom">Save Changes</button>
-            <button class="btn-ghost">Cancel</button>
+            <button type="submit" class="btn-primary-custom">Save Changes</button>
+            <button type="button" class="btn-ghost" onclick="resetForm()">Cancel</button>
           </div>
         </div>
+        </form>
       </main>
     </div>
 
 {% endblock %}
 
 {% block scripts %}
-    <script>
-      lucide.createIcons();
-    </script>
+    <script src="{{ url_for('static', filename='js/edit-profile.js') }}"></script>
 {% endblock %}
