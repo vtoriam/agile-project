@@ -187,20 +187,20 @@ household_nav %} {% block page_styles %}
 {% endblock %}
 {% block scripts %}
 <script>
-{% if show_popup %}
-var dismissUrl = "{{ url_for('main.dismiss_overdue_popup') }}";
+  {% if show_popup %}
+  var dismissUrl = "{{ url_for('main.dismiss_overdue_popup') }}";
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('overdueModal').classList.add('open');
-  document.getElementById('overdueOverlay').classList.add('open');
-  lucide.createIcons();
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('overdueModal').classList.add('open');
+    document.getElementById('overdueOverlay').classList.add('open');
+    lucide.createIcons();
 
-  document.getElementById('dismissOverdueBtn').addEventListener('click', function() {
-    fetch(dismissUrl, { method: 'POST' });
-    document.getElementById('overdueModal').classList.remove('open');
-    document.getElementById('overdueOverlay').classList.remove('open');
+    document.getElementById('dismissOverdueBtn').addEventListener('click', function() {
+      fetch(dismissUrl, { method: 'POST' });
+      document.getElementById('overdueModal').classList.remove('open');
+      document.getElementById('overdueOverlay').classList.remove('open');
+    });
   });
-});
-{% endif %}
+  {% endif %}
 </script>
 {% endblock %}
