@@ -1,50 +1,180 @@
-// Current user stats provided by the server
 const rewardsPage = document.getElementById("rewardsPage");
 const USER_POINTS = Number(rewardsPage?.dataset.userPoints || 0);
-
-// Filter tabs
+const rewardsList = document.getElementById("rewardsList");
 const filterTabs = document.querySelectorAll(".filter-tab");
-const rewardItems = document.querySelectorAll(".reward-item");
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function visibleRewardItems() {
+  return [...document.querySelectorAll(".reward-item")].filter(
+    (item) => item.style.display !== "none",
+  );
+}
+
+function checkEmptyState() {
+  const existing = rewardsList?.querySelector(".empty-state");
+  if (existing) existing.remove();
+
+  if (!rewardsList) {
+    return;
+  }
+
+  if (visibleRewardItems().length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.innerHTML = `<div class="empty-icon"><i data-lucide="gift"></i></div><p>No rewards in this category yet.</p>`;
+    rewardsList.appendChild(empty);
+    lucide.createIcons();
+  }
+}
+
+function applyRewardFilter(filter) {
+  document.querySelectorAll(".reward-item").forEach((item) => {
+    const type = item.dataset.type;
+    const isUnlocked =
+      item.classList.contains("unlocked") || item.classList.contains("claimed");
+
+    if (filter === "all") {
+      item.style.display = "flex";
+    } else if (filter === "unlocked") {
+      item.style.display = isUnlocked ? "flex" : "none";
+    } else {
+      item.style.display = type === filter ? "flex" : "none";
+    }
+  });
+
+  checkEmptyState();
+}
 
 filterTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
-    // Update active tab
-    filterTabs.forEach((t) => t.classList.remove("active"));
+    filterTabs.forEach((button) => button.classList.remove("active"));
     tab.classList.add("active");
+    applyRewardFilter(tab.dataset.filter || "all");
+  });
+});
 
-    const filter = tab.dataset.filter;
+function launchConfetti(anchorElement) {
+  const host =
+    anchorElement.closest(".reward-item") || anchorElement.parentElement;
+  if (!host) {
+    return;
+  }
 
-    rewardItems.forEach((item) => {
-      const type = item.dataset.type;
-      const isUnlocked = item.classList.contains("unlocked");
+  const existing = host.querySelector(".confetti-burst");
+  if (existing) existing.remove();
 
-      if (filter === "all") {
-        item.style.display = "flex";
-      } else if (filter === "unlocked") {
-        item.style.display = isUnlocked ? "flex" : "none";
-      } else {
-        item.style.display = type === filter ? "flex" : "none";
-      }
+  const confetti = document.createElement("div");
+  confetti.className = "confetti-burst";
+  const colors = ["#c17f5a", "#9a6ab8", "#8a9e7a", "#d9b35e", "#de7f6f"];
+
+  for (let index = 0; index < 20; index += 1) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = `${8 + Math.random() * 84}%`;
+    piece.style.backgroundColor = colors[index % colors.length];
+    piece.style.setProperty(
+      "--confetti-x",
+      `${(Math.random() * 2 - 1) * 150}px`,
+    );
+    piece.style.setProperty("--confetti-y", `${-110 - Math.random() * 80}px`);
+    piece.style.setProperty(
+      "--confetti-rotate",
+      `${360 + Math.random() * 540}deg`,
+    );
+    piece.style.animationDelay = `${Math.random() * 0.12}s`;
+    confetti.appendChild(piece);
+  }
+
+  host.appendChild(confetti);
+  window.setTimeout(() => confetti.remove(), 1400);
+}
+
+function markRewardClaimed(item, button) {
+  item.classList.add("claimed");
+  item.classList.remove("locked");
+  item.dataset.claimed = "true";
+
+  const status = item.querySelector(".reward-status");
+  if (status) {
+    status.innerHTML =
+      '<div class="status-claimed"><i data-lucide="badge-check"></i> Claimed</div>';
+  }
+
+  if (button) {
+    button.disabled = true;
+  }
+
+  launchConfetti(item);
+  lucide.createIcons();
+}
+
+async function claimReward(button) {
+  const item = button.closest(".reward-item");
+  const claimUrl = button.dataset.claimUrl;
+
+  if (!item) {
+    return;
+  }
+
+  if (!claimUrl) {
+    markRewardClaimed(item, button);
+    return;
+  }
+
+  button.disabled = true;
+  const originalLabel = button.textContent;
+  button.textContent = "Claiming...";
+
+  try {
+    const response = await fetch(claimUrl, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCsrfToken(),
+      },
     });
+    const payload = await response.json();
 
-    checkEmptyState();
-  });
-});
+    if (!response.ok || !payload.success) {
+      throw new Error(payload.message || "Unable to claim reward.");
+    }
 
-// Delete custom rewards
-document.querySelectorAll(".btn-delete").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const item = btn.closest(".reward-item");
-    item.style.transition = "opacity 0.2s, transform 0.2s";
-    item.style.opacity = "0";
-    item.style.transform = "translateX(10px)";
-    setTimeout(() => {
-      item.remove();
-      checkEmptyState();
-    }, 200);
-  });
-});
+    markRewardClaimed(item, button);
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = originalLabel;
+    window.alert(error.message || "Unable to claim reward.");
+  }
+}
 
+function attachRewardControls(item) {
+  const deleteButton = item.querySelector(".btn-delete");
+  if (deleteButton) {
+    deleteButton.addEventListener("click", () => {
+      item.style.transition = "opacity 0.2s, transform 0.2s";
+      item.style.opacity = "0";
+      item.style.transform = "translateX(10px)";
+      window.setTimeout(() => {
+        item.remove();
+        checkEmptyState();
+      }, 200);
+    });
+  }
+
+  const claimButton = item.querySelector(".reward-claim-btn");
+  if (claimButton) {
+    claimButton.addEventListener("click", () => claimReward(claimButton));
+  }
+}
+
+document.querySelectorAll(".reward-item").forEach(attachRewardControls);
 
 function openRewardModal() {
   document.getElementById("rewardModal").classList.add("open");
@@ -59,7 +189,6 @@ function closeRewardModal() {
   document.getElementById("rewardModalOverlay").classList.remove("open");
   document.getElementById("rewardTitle").value = "";
   document.getElementById("rewardDesc").value = "";
-  document.getElementById("rewardType").value = "points";
   document.getElementById("thresholdValue").value = "";
   document.getElementById("rewardIcon").value = "star";
   document.getElementById("rewardModalError").textContent = "";
@@ -76,122 +205,112 @@ function updateRewardIconPreview() {
   lucide.createIcons();
 }
 
-// Add custom reward
+function buildCustomRewardCard({
+  title,
+  desc,
+  threshold,
+  icon,
+  isUnlocked,
+  rewardKey,
+}) {
+  const progressPct = Math.min(
+    100,
+    Math.round((USER_POINTS / threshold) * 100),
+  );
+  const remaining = Math.max(threshold - USER_POINTS, 0);
+  const statusMarkup = isUnlocked
+    ? `
+      <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
+      <button class="reward-claim-btn" type="button">Claim</button>
+    `
+    : `<div class="status-locked"><i data-lucide="lock"></i> ${remaining.toLocaleString()} pts away</div>`;
+
+  const conditionMarkup = isUnlocked
+    ? `
+      <div class="reward-condition">
+        <span class="condition-badge points-badge"><i data-lucide="zap"></i> ${threshold.toLocaleString()} pts</span>
+      </div>
+    `
+    : `
+      <div class="reward-condition">
+        <span class="condition-badge points-badge"><i data-lucide="zap"></i> ${threshold.toLocaleString()} pts</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-custom">
+          <div class="progress-fill" style="width: ${progressPct}%"></div>
+        </div>
+        <span class="progress-label">${Math.min(USER_POINTS, threshold).toLocaleString()} / ${threshold.toLocaleString()} pts</span>
+      </div>
+    `;
+
+  return `
+    <div class="reward-item custom-reward ${isUnlocked ? "unlocked" : "locked"}" data-type="custom" data-reward-key="${escapeHtml(rewardKey)}" data-claimed="false">
+      <div class="reward-icon-wrap">
+        <div class="reward-icon ${isUnlocked ? "" : "muted"}"><i data-lucide="${escapeHtml(icon)}"></i></div>
+      </div>
+      <div class="reward-body">
+        <div class="reward-title-row">
+          <div class="reward-title">${escapeHtml(title)}</div>
+          <span class="custom-tag">Custom</span>
+        </div>
+        <p class="reward-desc">${escapeHtml(desc || "No description provided.")}</p>
+        ${conditionMarkup}
+      </div>
+      <div class="reward-status">
+        ${statusMarkup}
+        <button class="btn-delete" type="button" title="Delete reward"><i data-lucide="x"></i></button>
+      </div>
+    </div>
+  `;
+}
+
 function submitReward() {
   const title = document.getElementById("rewardTitle").value.trim();
   const desc = document.getElementById("rewardDesc").value.trim();
-  const type = document.getElementById("rewardType").value || "points";
-  const threshold = parseInt(document.getElementById("thresholdValue").value);
+  const threshold = Number.parseInt(
+    document.getElementById("thresholdValue").value,
+    10,
+  );
   const icon = document.getElementById("rewardIcon").value || "star";
   const errEl = document.getElementById("rewardModalError");
 
-  // Basic validation
   if (!title) {
     errEl.textContent = "Please enter a reward title.";
     highlight("rewardTitle");
     return;
   }
+
   if (!threshold || threshold < 1) {
     errEl.textContent = "Points must be a positive number.";
     highlight("thresholdValue");
     return;
   }
 
-  if (type !== "points") {
-    errEl.textContent = "Only point-based rewards are supported right now.";
-    return;
-  }
-
-  // Determine if unlocked
-  let isUnlocked = false;
-  let statusText = "";
-  let conditionHTML = "";
-
-  isUnlocked = USER_POINTS >= threshold;
-  const remaining = threshold - USER_POINTS;
-  statusText = isUnlocked
-    ? "✓ Unlocked"
-    : `<i data-lucide="lock"></i> ${remaining.toLocaleString()} pts away`;
-  const progressPct = Math.min(
-    100,
-    Math.round((USER_POINTS / threshold) * 100),
-  );
-  conditionHTML = `<span class="condition-badge points-badge"><i data-lucide="zap"></i> ${threshold.toLocaleString()} pts</span>`;
-  if (!isUnlocked) {
-    conditionHTML += `
-      <div class="progress-wrap">
-        <div class="progress-bar-custom">
-          <div class="progress-fill" style="width:${progressPct}%"></div>
-        </div>
-        <span class="progress-label">${USER_POINTS.toLocaleString()} / ${threshold.toLocaleString()} pts</span>
-      </div>`;
-  }
-
-  const statusClass = isUnlocked ? "status-unlocked" : "status-locked";
-  const itemClass = isUnlocked ? "unlocked" : "locked";
-
+  const rewardKey = `custom-${Date.now()}`;
+  const isUnlocked = USER_POINTS >= threshold;
   const newItem = document.createElement("div");
-  newItem.className = `reward-item custom-reward ${itemClass}`;
-  newItem.dataset.type = "custom";
-  newItem.innerHTML = `
-    <div class="reward-icon-wrap">
-      <div class="reward-icon ${isUnlocked ? "" : "muted"}"><i data-lucide="${icon}"></i></div>
-    </div>
-    <div class="reward-body">
-      <div class="reward-title-row">
-        <div class="reward-title">${title}</div>
-        <span class="custom-tag">Custom</span>
-      </div>
-      <p class="reward-desc">${desc || "No description provided."}</p>
-      <div class="reward-condition">${conditionHTML}</div>
-    </div>
-    <div class="reward-status">
-      <div class="${statusClass}">${statusText}</div>
-      <button class="btn-delete" title="Delete reward">✕</button>
-    </div>
-  `;
-
-  // Attach delete handler to new item
-  newItem.querySelector(".btn-delete").addEventListener("click", () => {
-    newItem.style.transition = "opacity 0.2s, transform 0.2s";
-    newItem.style.opacity = "0";
-    newItem.style.transform = "translateX(10px)";
-    setTimeout(() => {
-      newItem.remove();
-      checkEmptyState();
-    }, 200);
+  newItem.innerHTML = buildCustomRewardCard({
+    title,
+    desc,
+    threshold,
+    icon,
+    isUnlocked,
+    rewardKey,
   });
 
-  document.getElementById("rewardsList").prepend(newItem);
+  const rewardElement = newItem.firstElementChild;
+  rewardsList.prepend(rewardElement);
+  attachRewardControls(rewardElement);
   lucide.createIcons();
-
   closeRewardModal();
+  checkEmptyState();
 }
 
-// Highlight invalid field briefly
 function highlight(id) {
   const el = document.getElementById(id);
   el.style.borderColor = "#e05c5c";
   el.focus();
-  setTimeout(() => (el.style.borderColor = ""), 1500);
-}
-
-// Check if filtered list is empty and show empty state
-function checkEmptyState() {
-  const list = document.getElementById("rewardsList");
-  const visible = [...list.querySelectorAll(".reward-item")].filter(
-    (i) => i.style.display !== "none",
-  );
-
-  const existing = list.querySelector(".empty-state");
-  if (existing) existing.remove();
-
-  if (visible.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "empty-state";
-    empty.innerHTML = `<div class="empty-icon"><i data-lucide="gift"></i></div><p>No rewards in this category yet.</p>`;
-    list.appendChild(empty);
-  }
+  window.setTimeout(() => (el.style.borderColor = ""), 1500);
 }
 
 window.openRewardModal = openRewardModal;

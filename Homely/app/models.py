@@ -89,6 +89,27 @@ class Membership(db.Model):
     def __repr__(self):
         return f"<Membership user={self.user_id} household={self.household_id}>"
 
+
+class RewardClaim(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
+    reward_key = db.Column(db.String(80), nullable=False)
+    claimed_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    user = db.relationship("User")
+    household = db.relationship("Household")
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "household_id", "reward_key", name="uq_reward_claim_user_household_key"),
+    )
+
+    def __repr__(self):
+        return (
+            f"<RewardClaim user={self.user_id} household={self.household_id} "
+            f"reward_key={self.reward_key}>"
+        )
+
 class HouseholdInvite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
