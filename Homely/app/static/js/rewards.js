@@ -127,7 +127,7 @@ function markRewardClaimed(item, button) {
 
 async function claimReward(button) {
   const item = button.closest(".reward-item");
-  const claimUrl = button.dataset.claimUrl;
+  const claimUrl = button.dataset.claimUrl || item.dataset.claimUrl;
 
   if (!item) {
     return;

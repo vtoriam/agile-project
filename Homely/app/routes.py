@@ -462,6 +462,10 @@ def rewards():
         if household else []
     )
 
+    claimed_custom_ids = {
+        int(key[7:]) for key in claimed_reward_keys if key.startswith("custom-")
+    }
+
     return render_template(
         "rewards.html",
         title="Rewards",
@@ -470,6 +474,7 @@ def rewards():
         household_rank=household_rank,
         rewards=rewards,
         custom_rewards=custom_rewards,
+        claimed_custom_ids=claimed_custom_ids,
         claimed_count=len(claimed_reward_keys),
     )
 
@@ -605,6 +610,44 @@ def delete_custom_reward(reward_id):
     db.session.delete(reward)
     db.session.commit()
     return jsonify({"success": True}), 200
+
+
+@main.route("/rewards/custom/<int:reward_id>/claim", methods=["POST"])
+@login_required
+def claim_custom_reward(reward_id):
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+    if not household:
+        return jsonify({"success": False, "message": "No active household found."}), 400
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not membership:
+        return jsonify({"success": False, "message": "Not a member of this household."}), 403
+
+    reward = db.session.query(CustomReward).filter_by(id=reward_id, household_id=household.id).first()
+    if not reward:
+        return jsonify({"success": False, "message": "Reward not found."}), 404
+
+    if (membership.points or 0) < reward.points_threshold:
+        return jsonify({"success": False, "message": "This reward is not unlocked yet."}), 400
+
+    reward_key = f"custom-{reward_id}"
+    existing = db.session.query(RewardClaim).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+        reward_key=reward_key,
+    ).first()
+    if not existing:
+        db.session.add(RewardClaim(
+            user_id=current_user.id,
+            household_id=household.id,
+            reward_key=reward_key,
+        ))
+        db.session.commit()
+
+    return jsonify({"success": True, "claimed": True})
 
 
 @main.route("/login", methods=["GET", "POST"])
