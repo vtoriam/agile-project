@@ -470,6 +470,7 @@ def rewards():
         household_rank=household_rank,
         rewards=rewards,
         custom_rewards=custom_rewards,
+        claimed_count=len(claimed_reward_keys),
     )
 
 

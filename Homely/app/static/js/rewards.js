@@ -35,16 +35,24 @@ function checkEmptyState() {
   }
 }
 
+function updateClaimedCount() {
+  const count = document.querySelectorAll(".reward-item.claimed").length;
+  const badge = document.getElementById("claimed-count");
+  if (badge) badge.textContent = count;
+}
+
 function applyRewardFilter(filter) {
   document.querySelectorAll(".reward-item").forEach((item) => {
     const type = item.dataset.type;
-    const isUnlocked =
-      item.classList.contains("unlocked") || item.classList.contains("claimed");
+    const isClaimed = item.classList.contains("claimed");
+    const isUnlocked = item.classList.contains("unlocked") || isClaimed;
 
     if (filter === "all") {
       item.style.display = "flex";
     } else if (filter === "unlocked") {
       item.style.display = isUnlocked ? "flex" : "none";
+    } else if (filter === "claimed") {
+      item.style.display = isClaimed ? "flex" : "none";
     } else {
       item.style.display = type === filter ? "flex" : "none";
     }
@@ -114,6 +122,7 @@ function markRewardClaimed(item, button) {
 
   launchConfetti(item);
   lucide.createIcons();
+  updateClaimedCount();
 }
 
 async function claimReward(button) {
