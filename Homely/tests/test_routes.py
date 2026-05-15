@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from app import db
-from app.models import Task, Membership
+from app.models import Task, Membership, RewardClaim
 from tests.conftest import create_user, create_household_with_member, login
 
 
@@ -155,3 +155,31 @@ def test_task_reminders_returns_only_current_user_due_soon_tasks(client, app):
     assert data["windowHours"] == 24
     assert data["tasks"][0]["text"] == "Pay power bill"
     assert data["tasks"][0]["points"] == 20
+
+
+def test_reward_claim_persists_across_sessions(client, app):
+    user = create_user(email="aisha@example.com", password="password123", display_name="Aisha")
+    household, membership = create_household_with_member(user, points=1200)
+    user.current_household = household.id
+    db.session.commit()
+
+    login(client, email="aisha@example.com", password="password123")
+    response = client.post("/rewards/claim/skip-your-chore")
+
+    assert response.status_code == 200
+    assert response.get_json()["claimed"] is True
+
+    db.session.refresh(membership)
+    assert db.session.query(RewardClaim).filter_by(
+        user_id=user.id,
+        household_id=household.id,
+        reward_key="skip-your-chore",
+    ).count() == 1
+
+    fresh_client = app.test_client()
+    login(fresh_client, email="aisha@example.com", password="password123")
+    rewards_response = fresh_client.get("/rewards")
+
+    assert rewards_response.status_code == 200
+    assert b'data-reward-key="skip-your-chore"' in rewards_response.data
+    assert b"status-claimed" in rewards_response.data

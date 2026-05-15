@@ -50,128 +50,47 @@
 
         <!-- Rewards List -->
         <div class="rewards-list" id="rewardsList">
-
-          <!-- Unlocked reward -->
-          <div class="reward-item unlocked" data-type="points">
+          {% for reward in rewards %}
+          <div
+            class="reward-item {% if reward.claimed %}claimed{% elif reward.unlocked %}unlocked{% else %}locked{% endif %}"
+            data-type="points"
+            data-reward-key="{{ reward.key }}"
+            data-claim-url="{{ reward.claim_url }}"
+            data-reward-title="{{ reward.title }}"
+            data-claimed="{{ 'true' if reward.claimed else 'false' }}"
+          >
             <div class="reward-icon-wrap">
-              <div class="reward-icon"><i data-lucide="sofa"></i></div>
+              <div class="reward-icon{% if not reward.unlocked and not reward.claimed %} muted{% endif %}"><i data-lucide="{{ reward.icon }}"></i></div>
             </div>
             <div class="reward-body">
-              <div class="reward-title">Skip Your Chore for the Week</div>
-              <p class="reward-desc">
-                Take a well-earned break — skip one assigned chore this week, no
-                questions asked.
-              </p>
+              <div class="reward-title">{{ reward.title }}</div>
+              <p class="reward-desc">{{ reward.description }}</p>
               <div class="reward-condition">
-                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 1,000 pts</span>
+                <span class="condition-badge points-badge">
+                  <i data-lucide="{{ reward.condition_icon }}"></i> {{ reward.condition_label }}
+                </span>
               </div>
+              {% if reward.progress_label %}
+              <div class="progress-wrap">
+                <div class="progress-bar-custom">
+                  <div class="progress-fill" style="width: {{ reward.progress_pct }}%"></div>
+                </div>
+                <span class="progress-label">{{ reward.progress_label }}</span>
+              </div>
+              {% endif %}
             </div>
             <div class="reward-status">
+              {% if reward.claimed %}
+              <div class="status-claimed"><i data-lucide="badge-check"></i> Claimed</div>
+              {% elif reward.unlocked %}
               <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
+              <button class="reward-claim-btn" type="button">Claim</button>
+              {% else %}
+              <div class="status-locked"><i data-lucide="lock"></i> {{ reward.status_text }}</div>
+              {% endif %}
             </div>
           </div>
-
-          <!-- Locked reward -->
-          <div class="reward-item locked" data-type="points">
-            <div class="reward-icon-wrap">
-              <div class="reward-icon muted"><i data-lucide="pizza"></i></div>
-            </div>
-            <div class="reward-body">
-              <div class="reward-title">Choose Tonight's Takeaway</div>
-              <p class="reward-desc">
-                You get the final say on what the household orders for dinner
-                tonight.
-              </p>
-              <div class="reward-condition">
-                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 1,500 pts</span>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-bar-custom">
-                  <div class="progress-fill" style="width: 82%"></div>
-                </div>
-                <span class="progress-label">1,240 / 1,500 pts</span>
-              </div>
-            </div>
-            <div class="reward-status">
-              <div class="status-locked"><i data-lucide="lock"></i> 260 pts away</div>
-            </div>
-          </div>
-
-          <!-- Locked reward -->
-          <div class="reward-item locked" data-type="points">
-            <div class="reward-icon-wrap">
-              <div class="reward-icon muted"><i data-lucide="tv"></i></div>
-            </div>
-            <div class="reward-body">
-              <div class="reward-title">TV Remote for the Evening</div>
-              <p class="reward-desc">
-                Full control of the TV for one evening — no debates, no
-                compromises.
-              </p>
-              <div class="reward-condition">
-                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 2,000 pts</span>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-bar-custom">
-                  <div class="progress-fill" style="width: 62%"></div>
-                </div>
-                <span class="progress-label">1,240 / 2,000 pts</span>
-              </div>
-            </div>
-            <div class="reward-status">
-              <div class="status-locked"><i data-lucide="lock"></i> 760 pts away</div>
-            </div>
-          </div>
-
-          <!-- Locked reward -->
-          <div class="reward-item locked" data-type="points">
-            <div class="reward-icon-wrap">
-              <div class="reward-icon muted"><i data-lucide="bath"></i></div>
-            </div>
-            <div class="reward-body">
-              <div class="reward-title">First Shower Rights for a Week</div>
-              <p class="reward-desc">
-                Priority bathroom access every morning for a full week — no more
-                cold showers.
-              </p>
-              <div class="reward-condition">
-                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 3,000 pts</span>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-bar-custom">
-                  <div class="progress-fill" style="width: 41%"></div>
-                </div>
-                <span class="progress-label">1,240 / 3,000 pts</span>
-              </div>
-            </div>
-            <div class="reward-status">
-              <div class="status-locked"><i data-lucide="lock"></i> 1,760 pts away</div>
-            </div>
-          </div>
-
-          <!-- Custom reward -->
-          <div class="reward-item custom-reward unlocked" data-type="custom">
-            <div class="reward-icon-wrap">
-              <div class="reward-icon"><i data-lucide="gamepad-2"></i></div>
-            </div>
-            <div class="reward-body">
-              <div class="reward-title-row">
-                <div class="reward-title">Game Night Host</div>
-                <span class="custom-tag">Custom</span>
-              </div>
-              <p class="reward-desc">
-                You get to pick the game and make the rules for the next
-                household game night.
-              </p>
-              <div class="reward-condition">
-                <span class="condition-badge points-badge"><i data-lucide="zap"></i> 800 pts</span>
-              </div>
-            </div>
-            <div class="reward-status">
-              <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
-              <button class="btn-delete" title="Delete reward"><i data-lucide="x"></i></button>
-            </div>
-          </div>
+          {% endfor %}
 
         </div>
 
@@ -201,13 +120,6 @@
                 rows="2"
                 placeholder="Describe what this reward gives the person..."
               ></textarea>
-            </div>
-
-            <div class="modal-field">
-              <label>Reward Type</label>
-              <select id="rewardType">
-                <option value="points">Points threshold</option>
-              </select>
             </div>
 
             <div class="modal-row">

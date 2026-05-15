@@ -15,7 +15,7 @@ from app.forms import (
 )
 from app.utils import require_valid_form
 from app.blueprints import main
-from app.models import User, Household, Membership, Task, HouseholdInvite
+from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta
 
@@ -364,13 +364,179 @@ def rewards():
             )
         )
 
+    claimed_reward_keys = set()
+    if household:
+        claimed_reward_keys = {
+            claim.reward_key
+            for claim in db.session.query(RewardClaim.reward_key)
+            .filter(
+                RewardClaim.user_id == current_user.id,
+                RewardClaim.household_id == household.id,
+            )
+            .all()
+        }
+
+    reward_catalog = [
+        {
+            "key": "skip-your-chore",
+            "title": "Skip Your Chore for the Week",
+            "description": "Take a well-earned break and skip one assigned chore this week.",
+            "icon": "sofa",
+            "threshold": 1000,
+        },
+        {
+            "key": "choose-takeaway",
+            "title": "Choose Tonight's Takeaway",
+            "description": "You get the final say on what the household orders for dinner tonight.",
+            "icon": "pizza",
+            "threshold": 1500,
+        },
+        {
+            "key": "tv-remote",
+            "title": "TV Remote for the Evening",
+            "description": "Full control of the TV for one evening, no debates, no compromises.",
+            "icon": "tv",
+            "threshold": 2000,
+        },
+        {
+            "key": "first-shower",
+            "title": "First Shower Rights for a Week",
+            "description": "Priority bathroom access every morning for a full week.",
+            "icon": "bath",
+            "threshold": 3000,
+        },
+        {
+            "key": "household-champion",
+            "title": "Household Champion",
+            "description": "Hold the #1 spot on the household leaderboard.",
+            "icon": "crown",
+            "threshold": 1,
+        },
+    ]
+
+    rewards = []
+    for reward in reward_catalog:
+        threshold = reward["threshold"]
+        is_rank_reward = reward["key"] == "household-champion"
+
+        if not is_rank_reward:
+            unlocked = user_points >= threshold
+            remaining_points = max(threshold - user_points, 0)
+            progress_pct = 100 if threshold <= 0 else min(100, round((user_points / threshold) * 100))
+            progress_points = min(user_points, threshold)
+            status_text = "Unlocked" if unlocked else f"{remaining_points:,} pts away"
+            condition_label = f"{threshold:,} pts"
+            condition_icon = "zap"
+            progress_label = f"{progress_points:,} / {threshold:,} pts"
+        else:
+            unlocked = household_rank == threshold
+            status_text = "Unlocked" if unlocked else f"#{threshold} spot required"
+            condition_label = f"#{threshold} household rank"
+            condition_icon = "medal"
+            progress_pct = None
+            progress_label = None
+
+        rewards.append(
+            {
+                **reward,
+                "unlocked": unlocked,
+                "claimed": reward["key"] in claimed_reward_keys,
+                "status_text": status_text,
+                "condition_label": condition_label,
+                "condition_icon": condition_icon,
+                "progress_pct": progress_pct,
+                "progress_label": progress_label,
+                "claim_url": url_for("main.claim_reward", reward_key=reward["key"]),
+            }
+        )
+
     return render_template(
         "rewards.html",
         title="Rewards",
         user_points=user_points,
         current_membership=current_membership,
         household_rank=household_rank,
+        rewards=rewards,
     )
+
+
+@main.route("/rewards/claim/<reward_key>", methods=["POST"])
+@login_required
+def claim_reward(reward_key):
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+    if not household:
+        return jsonify({"success": False, "message": "No active household found."}), 400
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not membership:
+        return jsonify({"success": False, "message": "You are not a member of this household."}), 403
+
+    user_points = membership.points or 0
+    household_points = (
+        db.session.query(func.coalesce(func.sum(Membership.points), 0))
+        .filter(Membership.household_id == household.id)
+        .scalar()
+        or 0
+    )
+
+    ranked_households = (
+        db.session.query(
+            Household.id.label("household_id"),
+            func.coalesce(func.sum(Membership.points), 0).label("total_points"),
+        )
+        .outerjoin(Membership, Membership.household_id == Household.id)
+        .group_by(Household.id)
+        .all()
+    )
+    household_rank = 1 + sum(1 for item in ranked_households if item.total_points > household_points)
+
+    reward_lookup = {
+        "skip-your-chore": {"threshold": 1000, "title": "Skip Your Chore for the Week"},
+        "choose-takeaway": {"threshold": 1500, "title": "Choose Tonight's Takeaway"},
+        "tv-remote": {"threshold": 2000, "title": "TV Remote for the Evening"},
+        "first-shower": {"threshold": 3000, "title": "First Shower Rights for a Week"},
+        "household-champion": {"threshold": 1, "title": "Household Champion"},
+    }
+
+    reward = reward_lookup.get(reward_key)
+    if not reward:
+        return jsonify({"success": False, "message": "Unknown reward."}), 404
+
+    unlocked = household_rank == reward["threshold"] if reward_key == "household-champion" else user_points >= reward["threshold"]
+    if not unlocked:
+        return jsonify({"success": False, "message": "This reward is not unlocked yet."}), 400
+
+    existing_claim = db.session.query(RewardClaim).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+        reward_key=reward_key,
+    ).first()
+    if existing_claim:
+        return jsonify({
+            "success": True,
+            "claimed": True,
+            "rewardKey": reward_key,
+            "title": reward["title"],
+        })
+
+    db.session.add(
+        RewardClaim(
+            user_id=current_user.id,
+            household_id=household.id,
+            reward_key=reward_key,
+        )
+    )
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "claimed": True,
+        "rewardKey": reward_key,
+        "title": reward["title"],
+    })
 
 
 @main.route("/login", methods=["GET", "POST"])
