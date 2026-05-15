@@ -1,6 +1,13 @@
 from datetime import datetime, timedelta
 
+import os
+import sys
 import pytest
+
+# Ensure project root is on PYTHONPATH so `import app` works when pytest runs
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 
 from app import create_app, db
 from app.config import TestingConfig
