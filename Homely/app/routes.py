@@ -1,11 +1,18 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session, jsonify
+from flask import render_template, redirect, url_for, request, session, jsonify, current_app
 from sqlalchemy import func
 
 from app import db
-from app.forms import SignupForm
+from app.forms import (
+    SignupForm,
+    LoginForm,
+    EditProfileForm,
+    CreateHouseholdForm,
+    JoinHouseholdForm,
+    SwitchHouseholdForm,
+)
 from app.utils import require_valid_form
 from app.blueprints import main
 from app.models import User, Household, Membership, Task, HouseholdInvite
@@ -35,7 +42,7 @@ def due_soon_tasks_for_user(user_id, hours=REMINDER_WINDOW_HOURS):
     if not membership:
         return []
 
-    now = datetime.now()
+    now = datetime.utcnow()
     window_end = now + timedelta(hours=hours)
 
     return (
@@ -74,7 +81,7 @@ def home():
         if membership else []
     )
 
-    now = datetime.now()
+    now = datetime.utcnow()
 
     # Find overdue tasks in the current household so the refresh state matches the frontend.
     overdue_tasks = (
@@ -159,7 +166,7 @@ def dismiss_overdue_popup():
         user_id=current_user.id
     ).first()
     if membership:
-        membership.last_overdue_popup = datetime.now()
+        membership.last_overdue_popup = datetime.utcnow()
         db.session.commit()
     return "", 204
 
@@ -189,7 +196,7 @@ def my_tasks():
         assigned_user_id=current_user.id
     ).all() if membership else []
 
-    now = datetime.now()
+    now = datetime.utcnow()
 
     # Find overdue tasks assigned to current user
     overdue_tasks = (
@@ -277,17 +284,11 @@ def leaderboard():
 @main.route("/edit-profile", methods=["GET", "POST"])
 @login_required
 def edit_profile():
-    if request.method == "POST":
-        # Update display name if provided
-        display_name = request.form.get("display_name", "").strip()
-        if display_name:
-            current_user.display_name = display_name
-        
-        # Update avatar if provided
-        avatar = request.form.get("avatar", "").strip()
-        if avatar:
-            current_user.avatar = avatar
-        
+    form = EditProfileForm()
+
+    if form.validate_on_submit():
+        current_user.display_name = form.display_name.data.strip()
+        current_user.avatar = form.avatar.data.strip()
         db.session.commit()
         return redirect(url_for("main.edit_profile"))
     
@@ -374,19 +375,20 @@ def rewards():
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
+    form = LoginForm()
     error = None
-    if request.method == "POST":
-        email    = request.form.get("email", "").strip()
-        password = request.form.get("password", "")
-        if not email or not password:
-            error = "Please fill in all fields."
+    if form.validate_on_submit():
+        email = form.email.data.strip().lower()
+        password = form.password.data
         user = db.session.query(User).filter_by(email=email).first()
-        if not user or not user.check_password(request.form["password"]):
+        if not user or not user.check_password(password):
             error = "Invalid email or password."
         else:
             login_user(user)
             return redirect(url_for("main.home"))
-    return render_template("login.html", title="Login", error=error)
+    elif request.method == "POST":
+        error = "Please fill in all fields."
+    return render_template("login.html", title="Login", error=error, form=form)
 
 
 @main.route("/logout", methods=["GET", "POST"])
@@ -411,7 +413,7 @@ def signup(form):
         "email": form.email.data.strip().lower(),
         "password": form.password.data,
     }
-    return redirect(url_for("signup_household"))
+    return redirect(url_for("main.signup_household"))
 
 
 @main.route("/signup/household")
@@ -421,61 +423,66 @@ def signup_household():
         return redirect(url_for("main.signup"))
     return render_template("signup_household.html", title="Household Setup")
 
-
 @main.route("/signup/household/create", methods=["GET", "POST"])
 def signup_create_household():
     signup_data = session.get("signup_data")
     if not signup_data:
         return redirect(url_for("main.signup"))
 
+    form = CreateHouseholdForm()
     error = None
     form_data = {}
 
     if request.method == "POST":
         form_data = request.form.to_dict()
-        household_name = form_data.get("household_name", "").strip()
+        if form.validate_on_submit():
+            household_name = form.household_name.data.strip()
 
-        if db.session.query(User).filter_by(email=signup_data["email"]).first():
-            error = "An account with that email already exists. Please sign in."
-        elif not household_name:
+            if db.session.query(User).filter_by(email=signup_data["email"]).first():
+                error = "An account with that email already exists. Please sign in."
+            else:
+                user = User(
+                    full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
+                    display_name=signup_data["display_name"],
+                    email=signup_data["email"],
+                )
+                user.set_password(signup_data["password"])
+                db.session.add(user)
+                db.session.flush()
+
+                household = Household(name=household_name)
+                db.session.add(household)
+                db.session.flush()
+
+                user.current_household = household.id
+                first_invite = HouseholdInvite(
+                    household_id=household.id,
+                    created_by_user_id=user.id,
+                    code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
+                    expires_at=datetime.utcnow() + timedelta(days=7),
+                    is_active=True,
+                )
+                db.session.add(first_invite)
+
+                db.session.add(Membership(
+                    user_id=user.id,
+                    household_id=household.id,
+                    role="Admin",
+                    points=0,
+                ))
+                db.session.commit()
+                session.pop("signup_data", None)
+                login_user(user)
+                return redirect(url_for("main.home"))
+        elif not form.household_name.data or not form.household_name.data.strip():
             error = "Please enter a household name."
         else:
-            user = User(
-                full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
-                display_name=signup_data["display_name"],
-                email=signup_data["email"],
-            )
-            user.set_password(signup_data["password"])
-            db.session.add(user)
-            db.session.flush()
-
-            household = Household(name=household_name)
-            db.session.add(household)
-            db.session.flush()
-
-            first_invite = HouseholdInvite(
-                household_id=household.id,
-                created_by_user_id=user.id,
-                code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
-                expires_at=datetime.utcnow() + timedelta(days=7),
-                is_active=True,
-            )
-            db.session.add(first_invite)
-
-            db.session.add(Membership(
-                user_id=user.id,
-                household_id=household.id,
-                role="Admin",
-                points=0,
-            ))
-            db.session.commit()
-            session.pop("signup_data", None)
-            login_user(user)
-            return redirect(url_for("main.home"))
+            error = "Please enter a household name."
 
     return render_template(
         "signup_create_household.html",
         title="Create Household",
+        form=form,
         form_data=form_data,
         error=error,
     )
@@ -487,50 +494,57 @@ def signup_join_household():
     if not signup_data:
         return redirect(url_for("main.signup"))
 
+    form = JoinHouseholdForm()
     error = None
     form_data = {}
 
     if request.method == "POST":
         form_data = request.form.to_dict()
-        join_code = form_data.get("join_code", "").strip().upper()
+        if form.validate_on_submit():
+            join_code = form.join_code.data.strip().upper()
 
-        if db.session.query(User).filter_by(email=signup_data["email"]).first():
-            error = "An account with that email already exists. Please sign in."
-        elif not join_code:
+            if db.session.query(User).filter_by(email=signup_data["email"]).first():
+                error = "An account with that email already exists. Please sign in."
+            else:
+                invite = db.session.query(HouseholdInvite).filter_by(
+                    code=join_code
+                ).first()
+
+                if not invite:
+                    error = "No household found with that code. Check the code and try again."
+                elif not invite.is_valid():
+                    error = "This invite code has expired or been deactivated. Ask an admin to regenerate it."
+                else:
+                    user = User(
+                        full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
+                        display_name=signup_data["display_name"],
+                        email=signup_data["email"],
+                    )
+                    user.set_password(signup_data["password"])
+                    # Ensure the user's current household is set when joining
+                    user.current_household = invite.household_id
+                    db.session.add(user)
+                    db.session.flush()
+
+                    db.session.add(Membership(
+                        user_id=user.id,
+                        household_id=invite.household_id,
+                        role="Member",
+                        points=0,
+                    ))
+                    db.session.commit()
+                    session.pop("signup_data", None)
+                    login_user(user)
+                    return redirect(url_for("main.home"))
+        elif not form.join_code.data or not form.join_code.data.strip():
             error = "Please enter an invite code."
         else:
-            invite = db.session.query(HouseholdInvite).filter_by(
-                code=join_code
-            ).first()
-
-            if not invite:
-                error = "No household found with that code. Check the code and try again."
-            elif not invite.is_valid():
-                error = "This invite code has expired or been deactivated. Ask an admin to regenerate it."
-            else:
-                user = User(
-                    full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
-                    display_name=signup_data["display_name"],
-                    email=signup_data["email"],
-                )
-                user.set_password(signup_data["password"])
-                db.session.add(user)
-                db.session.flush()
-
-                db.session.add(Membership(
-                    user_id=user.id,
-                    household_id=invite.household_id,
-                    role="Member",
-                    points=0,
-                ))
-                db.session.commit()
-                session.pop("signup_data", None)
-                login_user(user)
-                return redirect(url_for("main.home"))
+            error = "Please enter an invite code."
 
     return render_template(
         "signup_join_household.html",
         title="Join Household",
+        form=form,
         form_data=form_data,
         error=error,
     )
@@ -579,7 +593,11 @@ def manage_household():
 @main.route("/household/switch", methods=["POST"])
 @login_required
 def switch_household():
-    household_id = request.form.get("household_id")
+    form = SwitchHouseholdForm(meta={"csrf": False})
+    if not form.validate_on_submit():
+        return redirect(url_for("main.manage_household"))
+
+    household_id = form.household_id.data
     membership = db.session.query(Membership).filter_by(
         user_id=current_user.id,
         household_id=household_id,
@@ -587,7 +605,7 @@ def switch_household():
     if membership:
         current_user.current_household = household_id
         db.session.commit()
-    return redirect(url_for("home"))
+    return redirect(url_for("main.home"))
 
 @main.route("/household/leave", methods=["POST"])
 @login_required
@@ -617,13 +635,32 @@ def delete_household():
 @login_required
 def remove_member(user_id):
     household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+
+    if not household:
+        current_app.logger.info(f"remove_member: no household for current_user {current_user.id}")
+        return redirect(url_for("main.manage_household"))
+
+    # Ensure the requester is an admin in this household
+    requester_membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not requester_membership or requester_membership.role.lower() != "admin":
+        current_app.logger.info(f"remove_member: unauthorised request by user {current_user.id}")
+        return redirect(url_for("main.manage_household"))
+
     membership = db.session.query(Membership).filter_by(
         user_id=user_id,
-        household_id=household.id
+        household_id=household.id,
     ).first()
+
     if membership:
+        current_app.logger.info(f"remove_member: deleting membership {membership.id} user={user_id} household={household.id}")
         db.session.delete(membership)
         db.session.commit()
+    else:
+        current_app.logger.info(f"remove_member: membership not found for user={user_id} household={household.id}")
+
     return redirect(url_for("main.manage_household"))
 
 
