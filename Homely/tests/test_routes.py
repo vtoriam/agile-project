@@ -1,8 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app import db
 from app.models import Task, Membership, RewardClaim
 from tests.conftest import create_user, create_household_with_member, login
+
+
+def utcnow_naive():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def test_home_requires_login(client):
@@ -46,7 +50,7 @@ def test_create_task_adds_task_to_user_household(client, app):
             "cat": "kitchen",
             "assignedTo": user.display_name,
             "points": 20,
-            "due": (datetime.utcnow() + timedelta(days=1)).isoformat(),
+            "due": (utcnow_naive() + timedelta(days=1)).isoformat(),
         },
     )
 
@@ -94,7 +98,7 @@ def test_task_reminders_returns_only_current_user_due_soon_tasks(client, app):
     db.session.add(Membership(user_id=other_user.id, household_id=household.id, role="Member", points=0))
     db.session.commit()
 
-    now = datetime.utcnow()
+    now = utcnow_naive()
 
     due_soon = Task(
         household_id=household.id,
