@@ -4,6 +4,10 @@ from app import db, login
 from flask_login import UserMixin
 
 
+def utcnow_naive():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 class Household(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -127,7 +131,7 @@ class HouseholdInvite(db.Model):
     )
 
     def is_valid(self):
-        return self.is_active and datetime.utcnow() < self.expires_at
+        return self.is_active and utcnow_naive() < self.expires_at
     def __repr__(self):
         return f"<HouseholdInvite {self.code}>"
 
@@ -182,7 +186,7 @@ def create_sample_data():
     db.session.add_all([membership1, membership2, membership3])
     db.session.commit()
 
-    now = datetime.now(timezone.utc)
+    now = utcnow_naive()
     d = lambda days: now - timedelta(days=days)
 
     # Sample tasks: mix of on-time completions and late completions
@@ -219,7 +223,7 @@ def create_sample_data():
         household_id=household.id,
         created_by_user_id=user1.id,
         code="HM-SAMPLE",
-        expires_at=datetime.utcnow() + timedelta(days=7),
+        expires_at=utcnow_naive() + timedelta(days=7),
     )
     db.session.add(invite)
     db.session.commit()
