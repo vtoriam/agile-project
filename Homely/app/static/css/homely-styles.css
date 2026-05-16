@@ -1783,7 +1783,6 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   flex-shrink: 0;
 }
 
-
 /* Due-soon task reminders */
 .reminder-banner {
   display: flex;
@@ -1840,7 +1839,6 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   white-space: nowrap;
 }
 
-
 /* Email reminder opt-in card */
 .email-reminder-card {
   display: flex;
@@ -1857,11 +1855,15 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
 
 .email-reminder-card h3 {
   margin: 0 0 0.25rem 0;
+  font-size: large;
+  font-family: var(--serif);
+  font-weight: bold;
 }
 
 .email-reminder-card p {
   margin: 0;
   color: var(--muted);
+  font-size: small;
 }
 
 .email-reminder-actions {
@@ -1881,6 +1883,7 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   padding: 0.7rem 1rem;
   border-radius: 999px;
   font-weight: 700;
+  font-size: 0.8rem;
 }
 
 .email-reminder-actions .btn-primary {
