@@ -296,8 +296,27 @@ function updateOverdueBanner() {
 }
 
 function deleteTask(id) {
-  tasks = tasks.filter((t) => t.id !== id);
-  renderTasks();
+  if (!window.confirm("Delete this task? This cannot be undone.")) return;
+
+  fetch(`/tasks/${id}`, {
+    method: "DELETE",
+    headers: { "X-CSRFToken": getCsrfToken() },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.json().catch(() => ({})).then((data) => {
+          throw new Error(data.error || "Could not delete task.");
+        });
+      }
+
+      tasks = tasks.filter((t) => t.id !== id);
+      renderTasks();
+      updateOverdueBanner();
+    })
+    .catch((err) => {
+      console.error("Failed to delete task:", err);
+      alert(err.message || "Could not delete task. Please try again.");
+    });
 }
 
 function setFilter(f) {
