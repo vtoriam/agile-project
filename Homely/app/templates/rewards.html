@@ -46,10 +46,54 @@
           <button class="filter-tab" data-filter="points">Points</button>
           <button class="filter-tab" data-filter="unlocked">Unlocked</button>
           <button class="filter-tab" data-filter="custom">Custom</button>
+          <button class="filter-tab" data-filter="claimed">Claimed <span class="tab-count" id="claimed-count">{{ claimed_count }}</span></button>
         </div>
 
         <!-- Rewards List -->
         <div class="rewards-list" id="rewardsList">
+          {% for cr in custom_rewards %}
+          {% set unlocked = cr.points_threshold <= user_points %}
+          {% set cr_claimed = cr.id in claimed_custom_ids %}
+          <div class="reward-item custom-reward {{ 'claimed' if cr_claimed else ('unlocked' if unlocked else 'locked') }}"
+               data-type="custom"
+               data-reward-id="{{ cr.id }}"
+               data-claim-url="{{ url_for('main.claim_custom_reward', reward_id=cr.id) }}"
+               data-claimed="{{ 'true' if cr_claimed else 'false' }}">
+            <div class="reward-icon-wrap">
+              <div class="reward-icon{{ '' if (unlocked or cr_claimed) else ' muted' }}"><i data-lucide="{{ cr.icon }}"></i></div>
+            </div>
+            <div class="reward-body">
+              <div class="reward-title-row">
+                <div class="reward-title">{{ cr.title }}</div>
+                <span class="custom-tag">Custom</span>
+              </div>
+              <p class="reward-desc">{{ cr.description or "No description provided." }}</p>
+              <div class="reward-condition">
+                <span class="condition-badge points-badge"><i data-lucide="zap"></i> {{ "{:,}".format(cr.points_threshold) }} pts</span>
+              </div>
+              {% if not unlocked and not cr_claimed %}
+              <div class="progress-wrap">
+                <div class="progress-bar-custom">
+                  <div class="progress-fill" style="width: {{ [100, (user_points * 100 // cr.points_threshold)]|min }}%"></div>
+                </div>
+                <span class="progress-label">{{ "{:,}".format(user_points) }} / {{ "{:,}".format(cr.points_threshold) }} pts</span>
+              </div>
+              {% endif %}
+            </div>
+            <div class="reward-status">
+              {% if cr_claimed %}
+              <div class="status-claimed"><i data-lucide="badge-check"></i> Claimed</div>
+              {% elif unlocked %}
+              <div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div>
+              <button class="reward-claim-btn" type="button">Claim</button>
+              {% else %}
+              <div class="status-locked"><i data-lucide="lock"></i> {{ "{:,}".format(cr.points_threshold - user_points) }} pts away</div>
+              {% endif %}
+              <button class="btn-delete" type="button" title="Delete reward"><i data-lucide="x"></i></button>
+            </div>
+          </div>
+          {% endfor %}
+
           {% for reward in rewards %}
           <div
             class="reward-item {% if reward.claimed %}claimed{% elif reward.unlocked %}unlocked{% else %}locked{% endif %}"

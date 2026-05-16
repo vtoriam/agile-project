@@ -13,7 +13,7 @@ household_nav %} {% block page_styles %}
 {% if overdue_count > 0 %}
 <div class="overdue-banner" id="overdue-banner">
   <i data-lucide="alert-triangle"></i>
-  You have <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing <strong>{{ total_points_lost }} points per day</strong>.
+  Your household is losing <strong>{{ total_points_lost }} points per day</strong> — <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> overdue.
 </div>
 {% endif %}
 {% if show_popup %}

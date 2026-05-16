@@ -148,6 +148,19 @@
   color: #fff;
 }
 
+.tab-count {
+  display: inline-block;
+  background: rgba(0,0,0,0.12);
+  color: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0 6px;
+  border-radius: 10px;
+  margin-left: 4px;
+  min-width: 18px;
+  text-align: center;
+}
+
 /* ── Rewards list ──────────────────────────────── */
 .rewards-list {
   display: flex;
