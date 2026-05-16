@@ -1005,7 +1005,7 @@ def toggle_email_reminders():
 
     status = "enabled" if current_user.email_reminders_enabled else "disabled"
     flash(f"Email reminders {status}.", "success")
-    return redirect(url_for("main.home"))
+    return redirect(url_for("main.manage_household"))
 
 
 @main.route("/email-reminders/send-now", methods=["POST"])
@@ -1014,20 +1014,20 @@ def send_email_reminder_now():
     """Send a due-task reminder email immediately for demo/testing."""
     if not current_user.email_reminders_enabled:
         flash("Turn on email reminders before sending a reminder email.", "warning")
-        return redirect(url_for("main.home"))
+        return redirect(url_for("main.manage_household"))
 
     due_soon_tasks = due_soon_tasks_for_user(current_user.id)
 
     if not due_soon_tasks:
         flash("No due-soon tasks found for your account.", "info")
-        return redirect(url_for("main.home"))
+        return redirect(url_for("main.manage_household"))
 
     subject = f"Homely reminder: {len(due_soon_tasks)} task(s) due soon"
     body = format_due_task_email(current_user, due_soon_tasks)
     send_email(current_app, current_user.email, subject, body)
 
     flash("Reminder email sent.", "success")
-    return redirect(url_for("main.home"))
+    return redirect(url_for("main.manage_household"))
 
 @main.route("/tasks/<int:task_id>/toggle", methods=["POST"])
 @login_required
