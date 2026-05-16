@@ -197,5 +197,23 @@ household_nav %} {% block page_styles %}
 
 {% block scripts %}
 <script>window.memberStats = {{ member_stats | tojson }};</script>
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  const householdId = {{ household_id | tojson }};
+  if (householdId) {
+    socket.emit('join', { household_id: householdId });
+    socket.on('leaderboard:update', data => {
+      try {
+        if (!data || !data.household_id || data.household_id !== householdId) return;
+        if (window.updateLeaderboardFromStats) {
+          window.updateLeaderboardFromStats(data.member_stats || {});
+        } else {
+          location.reload();
+        }
+      } catch (e) { console.error(e); }
+    });
+  }
+</script>
 <script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
 {% endblock %}

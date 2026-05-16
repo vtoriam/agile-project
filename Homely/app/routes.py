@@ -5,6 +5,7 @@ from flask import render_template, redirect, url_for, request, session, jsonify,
 from sqlalchemy import func
 
 from app import db
+from app import socketio
 from app.email_utils import send_email
 from app.scheduler import format_due_task_email
 from app.forms import (
@@ -20,6 +21,7 @@ from app.blueprints import main
 from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite, CustomReward
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta, timezone
+from flask_socketio import emit, join_room, leave_room
 
 
 REMINDER_WINDOW_HOURS = 24
@@ -27,6 +29,46 @@ REMINDER_WINDOW_HOURS = 24
 
 def utcnow_naive():
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def emit_leaderboard_update(household_id):
+    try:
+        household = db.session.query(Household).filter_by(id=household_id).first()
+        if not household:
+            return
+        member_stats = {}
+        members = db.session.query(Membership).filter_by(household_id=household.id).all()
+        members.sort(key=lambda m: m.points, reverse=True)
+        rank_icons = ['crown', 'medal', 'award']
+        rank_colors = ['#c49a2a', '#9e9087', '#b07248']
+        for i, m in enumerate(members):
+            done_tasks = db.session.query(Task).filter_by(
+                household_id=household.id,
+                assigned_user_id=m.user_id,
+                is_completed=True,
+            ).all()
+            completed = len(done_tasks)
+            on_time = sum(
+                1 for t in done_tasks
+                if t.completed_at and t.due_date and t.completed_at <= t.due_date
+            )
+            late = sum(
+                1 for t in done_tasks
+                if t.completed_at and t.due_date and t.completed_at > t.due_date
+            )
+            member_stats[m.user.display_name] = {
+                'rank':      i + 1,
+                'points':    m.points,
+                'completed': completed,
+                'on_time':   on_time,
+                'late':      late,
+                'avatar':    rank_icons[i] if i < 3 else 'user',
+                'rankColor': rank_colors[i] if i < 3 else '#888888',
+            }
+        room = f"household_{household_id}"
+        socketio.emit('leaderboard:update', {'member_stats': member_stats, 'household_id': household_id}, room=room)
+    except Exception:
+        current_app.logger.exception('emit_leaderboard_update failed')
 
 
 def serialize_task_reminder(task):
@@ -284,6 +326,7 @@ def leaderboard():
         first=first, second=second, third=third,
         other_members=other_members,
         member_stats=member_stats,
+        household_id=household.id if household else None,
     )
 
 
@@ -562,6 +605,11 @@ def claim_reward(reward_key):
 
     db.session.commit()
 
+    try:
+        emit_leaderboard_update(household.id)
+    except Exception:
+        current_app.logger.exception('failed emitting leaderboard update from claim_reward')
+
     return jsonify({
         "success": True,
         "claimed": True,
@@ -742,42 +790,11 @@ def signup_create_household():
 
                 household = Household(name=household_name)
                 db.session.add(household)
-                db.session.flush()
-
-                user.current_household = household.id
-                first_invite = HouseholdInvite(
-                    household_id=household.id,
-                    created_by_user_id=user.id,
-                    code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
-                    expires_at=utcnow_naive() + timedelta(days=7),
-                    is_active=True,
-                )
-                db.session.add(first_invite)
-
-                db.session.add(Membership(
-                    user_id=user.id,
-                    household_id=household.id,
-                    role="Admin",
-                    points=0,
-                ))
-                db.session.commit()
-                session.pop("signup_data", None)
-                login_user(user)
-                return redirect(url_for("main.home"))
-        elif not form.household_name.data or not form.household_name.data.strip():
-            error = "Please enter a household name."
-        else:
-            error = "Please enter a household name."
-
-    return render_template(
-        "signup_create_household.html",
-        title="Create Household",
-        form=form,
-        form_data=form_data,
-        error=error,
-    )
-
-
+                # Emit updated leaderboard stats to household room
+                try:
+                    emit_leaderboard_update(task.household_id)
+                except Exception:
+                    current_app.logger.exception('failed emitting leaderboard update from toggle_task')
 @main.route("/signup/household/join", methods=["GET", "POST"])
 def signup_join_household():
     signup_data = session.get("signup_data")
@@ -1059,6 +1076,44 @@ def toggle_task(task_id):
                 assigned_membership.points = max(0, assigned_membership.points - task.points_value)
 
     db.session.commit()
+    # Emit updated leaderboard stats to connected clients
+    try:
+        household = db.session.query(Household).filter_by(id=task.household_id).first()
+        member_stats = {}
+        if household:
+            members = db.session.query(Membership).filter_by(household_id=household.id).all()
+            members.sort(key=lambda m: m.points, reverse=True)
+            rank_icons = ['crown', 'medal', 'award']
+            rank_colors = ['#c49a2a', '#9e9087', '#b07248']
+            for i, m in enumerate(members):
+                done_tasks = db.session.query(Task).filter_by(
+                    household_id=household.id,
+                    assigned_user_id=m.user_id,
+                    is_completed=True,
+                ).all()
+                completed = len(done_tasks)
+                on_time = sum(
+                    1 for t in done_tasks
+                    if t.completed_at and t.due_date and t.completed_at <= t.due_date
+                )
+                late = sum(
+                    1 for t in done_tasks
+                    if t.completed_at and t.due_date and t.completed_at > t.due_date
+                )
+                member_stats[m.user.display_name] = {
+                    'rank':      i + 1,
+                    'points':    m.points,
+                    'completed': completed,
+                    'on_time':   on_time,
+                    'late':      late,
+                    'avatar':    rank_icons[i] if i < 3 else 'user',
+                    'rankColor': rank_colors[i] if i < 3 else '#888888',
+                }
+        room = f"household_{task.household_id}"
+        socketio.emit('leaderboard:update', {'member_stats': member_stats, 'household_id': task.household_id}, room=room)
+    except Exception:
+        pass
+
     return {"done": task.is_completed, "points": task.points_value}, 200
 
 @main.route("/tasks/create", methods=["POST"])
@@ -1098,6 +1153,11 @@ def create_task():
     db.session.add(task)
     db.session.commit()
 
+    try:
+        emit_leaderboard_update(task.household_id)
+    except Exception:
+        current_app.logger.exception('failed emitting leaderboard update from create_task')
+
     return {
         "id": task.id,
         "text": task.title,
@@ -1123,6 +1183,35 @@ def delete_task(task_id):
     if not membership:
         return {"error": "Unauthorised"}, 403
 
+    hid = task.household_id
     db.session.delete(task)
     db.session.commit()
+    try:
+        emit_leaderboard_update(hid)
+    except Exception:
+        current_app.logger.exception('failed emitting leaderboard update from delete_task')
     return {"success": True}, 200
+
+
+# Socket.IO event handlers
+@socketio.on('join')
+def handle_join(data):
+    try:
+        hid = data.get('household_id')
+        if hid:
+            room = f"household_{hid}"
+            join_room(room)
+            emit('joined', {'room': room})
+    except Exception:
+        pass
+
+@socketio.on('leave')
+def handle_leave(data):
+    try:
+        hid = data.get('household_id')
+        if hid:
+            room = f"household_{hid}"
+            leave_room(room)
+            emit('left', {'room': room})
+    except Exception:
+        pass
