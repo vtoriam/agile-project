@@ -13,7 +13,9 @@ Homely is a web application where a household can be created, household members 
 | 24033453 | Mohammad Saeed | Debravco        |
 
 <br>
+
 ## How to run the application
+
 Activate the virtual environment
 
 `& .\venv\Scripts\Activate.ps1`
