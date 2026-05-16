@@ -48,7 +48,7 @@ function applyRewardFilter(filter) {
     const isUnlocked = item.classList.contains("unlocked") || isClaimed;
 
     if (filter === "all") {
-      item.style.display = "flex";
+      item.style.display = isClaimed ? "none" : "flex";
     } else if (filter === "unlocked") {
       item.style.display = isUnlocked ? "flex" : "none";
     } else if (filter === "claimed") {
