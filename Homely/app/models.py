@@ -31,6 +31,12 @@ class Household(db.Model):
         cascade="all, delete-orphan"
     )
 
+    custom_rewards = db.relationship(
+        "CustomReward",
+        back_populates="household",
+        cascade="all, delete-orphan"
+    )
+
     def __repr__(self):
         return f"<Household {self.name}>"
 
@@ -40,6 +46,7 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(120), nullable=False)
     display_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    email_reminders_enabled = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     password_hash = db.Column(db.String(255), nullable=False)
     avatar = db.Column(db.String(50), default="user-round")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -155,6 +162,23 @@ class Task(db.Model):
 
     def __repr__(self):
         return f"<Task {self.title}>"
+
+class CustomReward(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    title = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    points_threshold = db.Column(db.Integer, default=100, nullable=False)
+    icon = db.Column(db.String(50), default="star")
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    household = db.relationship("Household", back_populates="custom_rewards")
+    created_by = db.relationship("User", foreign_keys=[created_by_user_id])
+
+    def __repr__(self):
+        return f"<CustomReward {self.title}>"
+
 
 @login.user_loader
 def load_user(user_id):

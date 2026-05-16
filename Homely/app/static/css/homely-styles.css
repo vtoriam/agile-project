@@ -1868,3 +1868,68 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   color: var(--muted);
   white-space: nowrap;
 }
+
+
+/* Email reminder opt-in card */
+.email-reminder-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(193, 127, 90, 0.25);
+  border-radius: 18px;
+  background: rgba(255, 250, 245, 0.94);
+  box-shadow: 0 10px 30px rgba(78, 52, 46, 0.08);
+}
+
+.email-reminder-card h3 {
+  margin: 0 0 0.25rem 0;
+}
+
+.email-reminder-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.email-reminder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.email-reminder-actions form {
+  margin: 0;
+}
+
+.email-reminder-actions button {
+  border: none;
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.email-reminder-actions .btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.email-reminder-actions .btn-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  border: 1px solid rgba(78, 52, 46, 0.16);
+}
+
+@media (max-width: 760px) {
+  .email-reminder-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .email-reminder-actions {
+    justify-content: flex-start;
+  }
+}

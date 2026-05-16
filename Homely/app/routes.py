@@ -1,11 +1,13 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session, jsonify, current_app
+from flask import render_template, redirect, url_for, request, session, jsonify, current_app, flash, current_app
 from sqlalchemy import func
 
 from app import db
 from app import socketio
+from app.email_utils import send_email
+from app.scheduler import format_due_task_email
 from app.forms import (
     SignupForm,
     LoginForm,
@@ -16,7 +18,7 @@ from app.forms import (
 )
 from app.utils import require_valid_form
 from app.blueprints import main
-from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite
+from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite, CustomReward
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timedelta, timezone
 from flask_socketio import emit, join_room, leave_room
@@ -497,6 +499,18 @@ def rewards():
             }
         )
 
+    custom_rewards = (
+        db.session.query(CustomReward)
+        .filter_by(household_id=household.id)
+        .order_by(CustomReward.created_at.desc())
+        .all()
+        if household else []
+    )
+
+    claimed_custom_ids = {
+        int(key[7:]) for key in claimed_reward_keys if key.startswith("custom-")
+    }
+
     return render_template(
         "rewards.html",
         title="Rewards",
@@ -504,6 +518,9 @@ def rewards():
         current_membership=current_membership,
         household_rank=household_rank,
         rewards=rewards,
+        custom_rewards=custom_rewards,
+        claimed_custom_ids=claimed_custom_ids,
+        claimed_count=len(claimed_reward_keys),
     )
 
 
@@ -576,6 +593,16 @@ def claim_reward(reward_key):
             reward_key=reward_key,
         )
     )
+
+    # Deduct points for non-rank rewards
+    if reward_key != "household-champion":
+        claiming_membership = db.session.query(Membership).filter_by(
+            user_id=current_user.id,
+            household_id=household.id,
+        ).first()
+        if claiming_membership:
+            claiming_membership.points = max(0, claiming_membership.points - reward["threshold"])
+
     db.session.commit()
 
     try:
@@ -589,6 +616,99 @@ def claim_reward(reward_key):
         "rewardKey": reward_key,
         "title": reward["title"],
     })
+
+
+@main.route("/rewards/custom/create", methods=["POST"])
+@login_required
+def create_custom_reward():
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+    if not household:
+        return jsonify({"error": "No household found"}), 403
+
+    data = request.get_json()
+    title = (data.get("title") or "").strip()
+    desc = (data.get("desc") or "").strip()
+    icon = (data.get("icon") or "star").strip()
+
+    try:
+        threshold = int(data.get("threshold"))
+        if threshold < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({"error": "Points must be a positive number"}), 400
+
+    if not title:
+        return jsonify({"error": "Title is required"}), 400
+
+    reward = CustomReward(
+        household_id=household.id,
+        created_by_user_id=current_user.id,
+        title=title,
+        description=desc,
+        points_threshold=threshold,
+        icon=icon,
+    )
+    db.session.add(reward)
+    db.session.commit()
+    return jsonify({"id": reward.id, "title": reward.title}), 201
+
+
+@main.route("/rewards/custom/<int:reward_id>", methods=["DELETE"])
+@login_required
+def delete_custom_reward(reward_id):
+    reward = db.session.query(CustomReward).filter_by(id=reward_id).first()
+    if not reward:
+        return jsonify({"error": "Not found"}), 404
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=reward.household_id,
+    ).first()
+    if not membership:
+        return jsonify({"error": "Unauthorised"}), 403
+
+    db.session.delete(reward)
+    db.session.commit()
+    return jsonify({"success": True}), 200
+
+
+@main.route("/rewards/custom/<int:reward_id>/claim", methods=["POST"])
+@login_required
+def claim_custom_reward(reward_id):
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+    if not household:
+        return jsonify({"success": False, "message": "No active household found."}), 400
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not membership:
+        return jsonify({"success": False, "message": "Not a member of this household."}), 403
+
+    reward = db.session.query(CustomReward).filter_by(id=reward_id, household_id=household.id).first()
+    if not reward:
+        return jsonify({"success": False, "message": "Reward not found."}), 404
+
+    if (membership.points or 0) < reward.points_threshold:
+        return jsonify({"success": False, "message": "This reward is not unlocked yet."}), 400
+
+    reward_key = f"custom-{reward_id}"
+    existing = db.session.query(RewardClaim).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+        reward_key=reward_key,
+    ).first()
+    if not existing:
+        db.session.add(RewardClaim(
+            user_id=current_user.id,
+            household_id=household.id,
+            reward_key=reward_key,
+        ))
+        membership.points = max(0, (membership.points or 0) - reward.points_threshold)
+        db.session.commit()
+
+    return jsonify({"success": True, "claimed": True})
 
 
 @main.route("/login", methods=["GET", "POST"])
@@ -890,6 +1010,41 @@ def regenerate_invite():
     db.session.commit()
 
     return redirect(url_for("main.manage_household"))
+
+
+
+@main.route("/email-reminders/toggle", methods=["POST"])
+@login_required
+def toggle_email_reminders():
+    """Allow the logged-in user to opt in or out of due-task email reminders."""
+    current_user.email_reminders_enabled = not current_user.email_reminders_enabled
+    db.session.commit()
+
+    status = "enabled" if current_user.email_reminders_enabled else "disabled"
+    flash(f"Email reminders {status}.", "success")
+    return redirect(url_for("main.home"))
+
+
+@main.route("/email-reminders/send-now", methods=["POST"])
+@login_required
+def send_email_reminder_now():
+    """Send a due-task reminder email immediately for demo/testing."""
+    if not current_user.email_reminders_enabled:
+        flash("Turn on email reminders before sending a reminder email.", "warning")
+        return redirect(url_for("main.home"))
+
+    due_soon_tasks = due_soon_tasks_for_user(current_user.id)
+
+    if not due_soon_tasks:
+        flash("No due-soon tasks found for your account.", "info")
+        return redirect(url_for("main.home"))
+
+    subject = f"Homely reminder: {len(due_soon_tasks)} task(s) due soon"
+    body = format_due_task_email(current_user, due_soon_tasks)
+    send_email(current_app, current_user.email, subject, body)
+
+    flash("Reminder email sent.", "success")
+    return redirect(url_for("main.home"))
 
 @main.route("/tasks/<int:task_id>/toggle", methods=["POST"])
 @login_required

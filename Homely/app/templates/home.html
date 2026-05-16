@@ -13,7 +13,7 @@ household_nav %} {% block page_styles %}
 {% if overdue_count > 0 %}
 <div class="overdue-banner" id="overdue-banner">
   <i data-lucide="alert-triangle"></i>
-  You have <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> — you are losing <strong>{{ total_points_lost }} points per day</strong>.
+  Your household is losing <strong>{{ total_points_lost }} points per day</strong> — <strong id="overdue-count-text">{{ overdue_count }} overdue task{{ 's' if overdue_count != 1 }}</strong> overdue.
 </div>
 {% endif %}
 {% if show_popup %}
@@ -60,6 +60,36 @@ household_nav %} {% block page_styles %}
   </ul>
 </div>
 {% endif %}
+
+
+<section class="email-reminder-card">
+  <div>
+    <h3>Email reminders</h3>
+    {% if current_user.email_reminders_enabled %}
+      <p>Email reminders are currently <strong>on</strong>. Homely can send reminders for tasks due soon.</p>
+    {% else %}
+      <p>Email reminders are currently <strong>off</strong>. Turn them on to receive reminders for tasks due soon.</p>
+    {% endif %}
+  </div>
+
+  <div class="email-reminder-actions">
+    <form method="post" action="{{ url_for('main.toggle_email_reminders') }}">
+      {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
+      <button type="submit" class="btn-secondary">
+        {% if current_user.email_reminders_enabled %}Turn off reminders{% else %}Turn on reminders{% endif %}
+      </button>
+    </form>
+
+    <form method="post" action="{{ url_for('main.send_email_reminder_now') }}">
+      {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
+      <button type="submit" class="btn-primary">Send reminder email now</button>
+    </form>
+  </div>
+</section>
 
 <div class="greeting">
   <div class="greeting-sub" id="time-greeting">Good morning</div>

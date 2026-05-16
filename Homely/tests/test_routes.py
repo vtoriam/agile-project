@@ -187,3 +187,50 @@ def test_reward_claim_persists_across_sessions(client, app):
     assert rewards_response.status_code == 200
     assert b'data-reward-key="skip-your-chore"' in rewards_response.data
     assert b"status-claimed" in rewards_response.data
+
+
+def test_email_reminder_toggle_updates_user_preference(client, app):
+    user = create_user(email="aisha@example.com", password="password123")
+    create_household_with_member(user)
+
+    assert not user.email_reminders_enabled
+
+    login(client, email="aisha@example.com", password="password123")
+    response = client.post("/email-reminders/toggle", follow_redirects=False)
+
+    assert response.status_code == 302
+
+    db.session.refresh(user)
+    assert user.email_reminders_enabled
+
+    response = client.post("/email-reminders/toggle", follow_redirects=False)
+
+    assert response.status_code == 302
+
+    db.session.refresh(user)
+    assert not user.email_reminders_enabled
+
+
+def test_delete_task_removes_task_from_database(client, app):
+    user = create_user()
+    household, _ = create_household_with_member(user)
+
+    task = Task(
+        household_id=household.id,
+        assigned_user_id=user.id,
+        title="Delete me",
+        category="cleaning",
+        points_value=10,
+        is_completed=False,
+    )
+    db.session.add(task)
+    db.session.commit()
+
+    task_id = task.id
+
+    login(client)
+    response = client.delete(f"/tasks/{task_id}")
+
+    assert response.status_code == 200
+    assert response.get_json()["success"] is True
+    assert db.session.get(Task, task_id) is None
