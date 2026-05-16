@@ -209,3 +209,28 @@ def test_email_reminder_toggle_updates_user_preference(client, app):
 
     db.session.refresh(user)
     assert not user.email_reminders_enabled
+
+
+def test_delete_task_removes_task_from_database(client, app):
+    user = create_user()
+    household, _ = create_household_with_member(user)
+
+    task = Task(
+        household_id=household.id,
+        assigned_user_id=user.id,
+        title="Delete me",
+        category="cleaning",
+        points_value=10,
+        is_completed=False,
+    )
+    db.session.add(task)
+    db.session.commit()
+
+    task_id = task.id
+
+    login(client)
+    response = client.delete(f"/tasks/{task_id}")
+
+    assert response.status_code == 200
+    assert response.get_json()["success"] is True
+    assert db.session.get(Task, task_id) is None
