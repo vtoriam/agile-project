@@ -323,6 +323,7 @@ def leaderboard():
     return render_template(
         "leaderboard.html",
         title="Leaderboard",
+        current_household=household,
         first=first, second=second, third=third,
         other_members=other_members,
         member_stats=member_stats,
