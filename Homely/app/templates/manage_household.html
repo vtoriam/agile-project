@@ -16,7 +16,9 @@ page_styles %}
     <div class="section-head">
       <div>
         <span class="eyebrow">Manage household settings</span>
-        <h1>See who is in the household.</h1>
+        <h1>
+          See who is in the {{ (current_household.name if current_household and current_household.name else '') }} household.
+        </h1>
         <p class="muted-copy">
           Manage household members, view join codes, and adjust settings.
         </p>
