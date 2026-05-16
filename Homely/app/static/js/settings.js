@@ -40,6 +40,64 @@ function switchHousehold() {
   }
 }
 
+let currentAddHouseholdAction = null;
+
+window.openAddHouseholdModal = function (btn) {
+  const actionUrl = btn.dataset.action;
+
+  document.getElementById("addHouseholdTitle").textContent =
+    btn.dataset.title;
+  document.getElementById("addHouseholdMessage").textContent =
+    btn.dataset.message;
+  document.getElementById("addHouseholdSub").textContent =
+    btn.dataset.sub;
+  currentAddHouseholdAction = actionUrl;
+
+  const modal = document.getElementById("addHouseholdModal");
+  const overlay = document.getElementById("addHouseholdOverlay");
+
+  modal.classList.add("open");
+  overlay.classList.add("open");
+
+  lucide.createIcons();
+}
+
+window.closeAddHouseholdModal = function () {
+  document.getElementById("addHouseholdModal").classList.remove("open");
+  document.getElementById("addHouseholdOverlay").classList.remove("open");
+  currentAddHouseholdAction = null;
+}
+
+// window.submitAddHouseholdAction = function () {
+//   if (!currentAddHouseholdAction) {
+//     alert("Error: No action specified");
+//     return false;
+//   }
+
+//   fetch(currentAddHouseholdAction, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/x-www-form-urlencoded",
+//       "X-CSRFToken": getCsrfToken(),
+//     },
+//   })
+//     .then((response) => {
+//       if (response.redirected) {
+//         window.location.href = response.url;
+//       } else if (response.ok) {
+//         window.location.href = "/home";
+//       } else {
+//         alert("Error: " + response.status);
+//       }
+//     })
+//     .catch((error) => {
+//       alert("Error: " + error.message);
+//     });
+
+//   closeAddHouseholdModal();
+//   return false;
+// };
+
 
 // Store the current action URL globally
 let currentDangerAction = null;

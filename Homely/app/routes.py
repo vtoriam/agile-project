@@ -607,6 +607,16 @@ def switch_household():
         db.session.commit()
     return redirect(url_for("main.home"))
 
+@main.route("/household/create", methods=["POST"])
+@login_required
+def create_household():
+    pass
+
+@main.route("/household/join", methods=["POST"])
+@login_required
+def join_household():
+    pass
+
 @main.route("/household/leave", methods=["POST"])
 @login_required
 def leave_household():
