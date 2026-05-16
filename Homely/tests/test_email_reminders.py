@@ -32,6 +32,8 @@ def test_send_due_task_email_reminders_dry_run_counts_users(app):
     app.config["EMAIL_REMINDERS_ENABLED"] = False
 
     user = create_user(email="aisha@example.com", password="password123", display_name="Aisha")
+    user.email_reminders_enabled = True
+    db.session.commit()
     household, _ = create_household_with_member(user)
 
     due_soon = Task(

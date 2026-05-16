@@ -82,7 +82,11 @@ def send_due_task_email_reminders(app):
         tasks_by_user = {}
 
         for task in due_tasks:
-            if task.assignee and task.assignee.email:
+            if (
+                task.assignee
+                and task.assignee.email
+                and task.assignee.email_reminders_enabled
+            ):
                 tasks_by_user.setdefault(task.assignee, []).append(task)
 
         sent_count = 0

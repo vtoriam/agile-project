@@ -46,6 +46,7 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(120), nullable=False)
     display_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    email_reminders_enabled = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     password_hash = db.Column(db.String(255), nullable=False)
     avatar = db.Column(db.String(50), default="user-round")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))

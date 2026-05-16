@@ -1,10 +1,12 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session, jsonify, current_app
+from flask import render_template, redirect, url_for, request, session, jsonify, current_app, flash, current_app
 from sqlalchemy import func
 
 from app import db
+from app.email_utils import send_email
+from app.scheduler import format_due_task_email
 from app.forms import (
     SignupForm,
     LoginForm,
@@ -991,6 +993,41 @@ def regenerate_invite():
     db.session.commit()
 
     return redirect(url_for("main.manage_household"))
+
+
+
+@main.route("/email-reminders/toggle", methods=["POST"])
+@login_required
+def toggle_email_reminders():
+    """Allow the logged-in user to opt in or out of due-task email reminders."""
+    current_user.email_reminders_enabled = not current_user.email_reminders_enabled
+    db.session.commit()
+
+    status = "enabled" if current_user.email_reminders_enabled else "disabled"
+    flash(f"Email reminders {status}.", "success")
+    return redirect(url_for("main.home"))
+
+
+@main.route("/email-reminders/send-now", methods=["POST"])
+@login_required
+def send_email_reminder_now():
+    """Send a due-task reminder email immediately for demo/testing."""
+    if not current_user.email_reminders_enabled:
+        flash("Turn on email reminders before sending a reminder email.", "warning")
+        return redirect(url_for("main.home"))
+
+    due_soon_tasks = due_soon_tasks_for_user(current_user.id)
+
+    if not due_soon_tasks:
+        flash("No due-soon tasks found for your account.", "info")
+        return redirect(url_for("main.home"))
+
+    subject = f"Homely reminder: {len(due_soon_tasks)} task(s) due soon"
+    body = format_due_task_email(current_user, due_soon_tasks)
+    send_email(current_app, current_user.email, subject, body)
+
+    flash("Reminder email sent.", "success")
+    return redirect(url_for("main.home"))
 
 @main.route("/tasks/<int:task_id>/toggle", methods=["POST"])
 @login_required
