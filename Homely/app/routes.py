@@ -548,6 +548,16 @@ def claim_reward(reward_key):
             reward_key=reward_key,
         )
     )
+
+    # Deduct points for non-rank rewards
+    if reward_key != "household-champion":
+        claiming_membership = db.session.query(Membership).filter_by(
+            user_id=current_user.id,
+            household_id=household.id,
+        ).first()
+        if claiming_membership:
+            claiming_membership.points = max(0, claiming_membership.points - reward["threshold"])
+
     db.session.commit()
 
     return jsonify({
@@ -645,6 +655,7 @@ def claim_custom_reward(reward_id):
             household_id=household.id,
             reward_key=reward_key,
         ))
+        membership.points = max(0, (membership.points or 0) - reward.points_threshold)
         db.session.commit()
 
     return jsonify({"success": True, "claimed": True})
