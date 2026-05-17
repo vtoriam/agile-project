@@ -588,6 +588,47 @@ svg[data-lucide] {
   justify-content: center;
 }
 
+#dangerModal {
+  width: min(360px, calc(100vw - 32px));
+  height: fit-content;
+}
+
+#dangerModal .modal-header {
+  padding: 14px 16px 6px;
+  justify-content: center;
+}
+
+#dangerModal .modal-title {
+  text-align: center;
+}
+
+#dangerModal .modal-body {
+  padding: 8px 16px 30px;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+#dangerModal .danger-modal-icon i,
+#dangerModal .danger-modal-icon svg {
+  width: 56px;
+  height: 56px;
+}
+
+#dangerModal .modal-footer {
+  padding: 10px 16px 14px;
+  margin-top: 0;
+}
+
+#dangerModal .modal-actions {
+  justify-content: center;
+}
+
+#dangerModal .modal-btn-cancel,
+#dangerModal .btn-danger-confirm {
+  flex: 1;
+}
+
 @keyframes modalIn {
   from {
     opacity: 0;
