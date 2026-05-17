@@ -934,7 +934,7 @@ def create_household():
         household_id=household.id,
         created_by_user_id=current_user.id,
         code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
-        expires_at=datetime.utcnow() + timedelta(days=7),
+        expires_at=datetime.utcnow() + timedelta(days=1),
         is_active=True,
     )
     db.session.add(join_code)
@@ -1070,7 +1070,7 @@ def regenerate_invite():
         household_id=household.id,
         created_by_user_id=current_user.id,
         code=code,
-        expires_at=utcnow_naive() + timedelta(days=7),
+        expires_at=utcnow_naive() + timedelta(days=1),
         is_active=True,
     )
     db.session.add(new_invite)
