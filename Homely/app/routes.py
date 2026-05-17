@@ -1306,3 +1306,89 @@ def handle_leave(data):
             emit('left', {'room': room})
     except Exception:
         pass
+
+from flask import current_app, flash, redirect, render_template, request, url_for
+
+from app.email_utils import send_email
+from app.password_reset import (
+    RESET_MAX_AGE_SECONDS,
+    generate_password_reset_token,
+    verify_password_reset_token,
+)
+
+
+@main.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    """Send a password reset email if the submitted account exists."""
+    message = None
+    error = None
+
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+
+        if not email:
+            error = "Please enter your email address."
+        else:
+            user = db.session.query(User).filter_by(email=email).first()
+
+            if user:
+                token = generate_password_reset_token(user)
+                reset_path = url_for("main.reset_password", token=token)
+                reset_url = request.host_url.rstrip("/") + reset_path
+
+                subject = "Reset your Homely password"
+                body = (
+                    f"Hi {user.display_name},\n\n"
+                    "A password reset was requested for your Homely account.\n\n"
+                    f"Use this link to reset your password:\n{reset_url}\n\n"
+                    f"This link expires in {RESET_MAX_AGE_SECONDS // 60} minutes.\n\n"
+                    "If you did not request this, you can ignore this email.\n"
+                )
+
+                send_email(current_app, user.email, subject, body)
+
+            message = "If an account exists for that email, a reset link has been sent."
+
+    return render_template(
+        "forgot_password.html",
+        title="Forgot Password",
+        message=message,
+        error=error,
+    )
+
+
+@main.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    """Allow a user to set a new password using a valid reset token."""
+    user = verify_password_reset_token(token)
+
+    if not user:
+        return render_template(
+            "reset_password.html",
+            title="Reset Password",
+            token=None,
+            error="This password reset link is invalid or has expired.",
+        ), 400
+
+    error = None
+
+    if request.method == "POST":
+        password = request.form.get("password") or ""
+        confirm_password = request.form.get("confirm_password") or ""
+
+        if len(password) < 8:
+            error = "Password must be at least 8 characters."
+        elif password != confirm_password:
+            error = "Passwords do not match."
+        else:
+            user.set_password(password)
+            db.session.commit()
+            flash("Your password has been updated. Please sign in.", "success")
+            return redirect(url_for("main.login"))
+
+    return render_template(
+        "reset_password.html",
+        title="Reset Password",
+        token=token,
+        error=error,
+    )

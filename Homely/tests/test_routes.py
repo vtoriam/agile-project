@@ -282,3 +282,55 @@ def test_delete_task_removes_task_from_database(client, app):
     assert response.status_code == 200
     assert response.get_json()["success"] is True
     assert db.session.get(Task, task_id) is None
+
+
+from app.password_reset import generate_password_reset_token
+
+
+def test_forgot_password_page_loads(client):
+    response = client.get("/forgot-password")
+
+    assert response.status_code == 200
+    assert b"Forgot password" in response.data
+
+
+def test_forgot_password_post_returns_neutral_message(client, app):
+    create_user(email="aisha@example.com", password="password123", display_name="Aisha")
+
+    response = client.post(
+        "/forgot-password",
+        data={"email": "aisha@example.com"},
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"If an account exists" in response.data
+
+
+def test_reset_password_updates_password(client, app):
+    user = create_user(email="aisha@example.com", password="password123", display_name="Aisha")
+
+    with app.app_context():
+        token = generate_password_reset_token(user)
+
+    response = client.post(
+        f"/reset-password/{token}",
+        data={
+            "password": "newpassword123",
+            "confirm_password": "newpassword123",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    db.session.refresh(user)
+    assert user.check_password("newpassword123")
+    assert not user.check_password("password123")
+
+
+def test_reset_password_rejects_invalid_token(client):
+    response = client.get("/reset-password/not-a-real-token")
+
+    assert response.status_code == 400
+    assert b"invalid or has expired" in response.data
