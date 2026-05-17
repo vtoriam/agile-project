@@ -59,7 +59,4 @@ class JoinHouseholdForm(FlaskForm):
 
 
 class SwitchHouseholdForm(FlaskForm):
-    class Meta:
-        csrf = False
-
     household_id = HiddenField(validators=[DataRequired()])

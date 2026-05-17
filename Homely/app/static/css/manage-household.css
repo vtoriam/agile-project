@@ -621,3 +621,23 @@ span {
   max-width: 1300px;
   margin: 0 auto;
 }
+
+.add-household-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(192, 96, 74, 0.08);
+  border: 1px solid rgba(192, 96, 74, 0.25);
+  color: var(--danger);
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.add-household-alert svg[data-lucide] {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
