@@ -387,6 +387,14 @@ def rewards():
         ).first()
         if current_membership:
             user_points = current_membership.points or 0
+            # compute the user's rank within the household (1 = top member)
+            ranked_members = (
+                db.session.query(Membership)
+                .filter_by(household_id=household.id)
+                .order_by(Membership.points.desc())
+                .all()
+            )
+            member_rank = next((i + 1 for i, m in enumerate(ranked_members) if m.user_id == current_user.id), None)
 
         household_points = (
             db.session.query(func.coalesce(func.sum(Membership.points), 0))
@@ -517,6 +525,7 @@ def rewards():
         user_points=user_points,
         current_membership=current_membership,
         household_rank=household_rank,
+        member_rank=member_rank if 'member_rank' in locals() else None,
         rewards=rewards,
         custom_rewards=custom_rewards,
         claimed_custom_ids=claimed_custom_ids,
