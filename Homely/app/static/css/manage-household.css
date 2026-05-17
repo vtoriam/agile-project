@@ -535,6 +535,7 @@ span {
 }
 
 #addHouseholdModal {
+  width: min(360px, calc(100vw - 32px));
   height: fit-content;
 }
 

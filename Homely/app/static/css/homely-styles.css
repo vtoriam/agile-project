@@ -530,13 +530,14 @@ svg[data-lucide] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 420px;
+  width: fit-content;
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: 20px;
   box-shadow: 0 16px 48px rgba(61, 52, 42, 0.16);
   scrollbar-gutter: stable;
   z-index: 1001;
+  height: fit-content;
   max-height: 80vh;
   overflow-y: auto;
   animation: modalIn 0.25s ease;
@@ -1790,45 +1791,6 @@ input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
   line-height: 1.6;
 }
 
-@media (max-width: 600px) {
-  .modal {
-    top: 50px;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    transform: none;
-    width: 100%;
-    max-width: 100%;
-    max-height: calc(100vh - 50px);
-    border-radius: 0;
-    border-bottom: none;
-  }
-
-  .modal.open {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .modal-body {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .modal-close {
-    display: none;
-  }
-
-  @keyframes modalIn {
-    from {
-      opacity: 0;
-      transform: translateY(40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
 
 /* ════════════════════════════
    OVERDUE BANNER
