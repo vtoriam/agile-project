@@ -790,22 +790,54 @@ def signup_create_household():
             if db.session.query(User).filter_by(email=signup_data["email"]).first():
                 error = "An account with that email already exists. Please sign in."
             else:
+                household = Household(name=household_name)
+                db.session.add(household)
+                db.session.flush()
+
                 user = User(
                     full_name=f"{signup_data['first_name']} {signup_data['last_name']}",
                     display_name=signup_data["display_name"],
                     email=signup_data["email"],
+                    current_household=household.id
                 )
                 user.set_password(signup_data["password"])
                 db.session.add(user)
                 db.session.flush()
 
-                household = Household(name=household_name)
-                db.session.add(household)
-                # Emit updated leaderboard stats to household room
-                try:
-                    emit_leaderboard_update(task.household_id)
-                except Exception:
-                    current_app.logger.exception('failed emitting leaderboard update from toggle_task')
+
+                join_code = HouseholdInvite(
+                    household_id=household.id,
+                    created_by_user_id=user.id,
+                    code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
+                    expires_at=utcnow_naive() + timedelta(days=1),
+                    is_active=True,
+                )
+                db.session.add(join_code)
+
+                membership = Membership(
+                    user_id=user.id,
+                    household_id=household.id,
+                    role="Admin",
+                    points=0,
+                )
+                db.session.add(membership)
+                user.current_household = household.id
+                db.session.commit()
+                session.pop("signup_data", None)
+                login_user(user)
+                return redirect(url_for("main.home"))
+        elif not form.household_name.data or not form.household_name.data.strip():
+            error = "Please enter a household name."
+        else:
+            error = "Please enter a household name."
+
+    return render_template(
+        "signup_create_household.html",
+        title="Create Household",
+        form=form,
+        form_data=form_data,
+        error=error,
+    )
 @main.route("/signup/household/join", methods=["GET", "POST"])
 def signup_join_household():
     signup_data = session.get("signup_data")
