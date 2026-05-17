@@ -534,11 +534,6 @@ span {
   color: var(--muted);
 }
 
-#addHouseholdModal {
-  width: min(360px, calc(100vw - 32px));
-  height: fit-content;
-}
-
 .add-household-alert {
   display: flex;
   align-items: center;
