@@ -15,6 +15,7 @@ from app.forms import (
     CreateHouseholdForm,
     JoinHouseholdForm,
     SwitchHouseholdForm,
+    ResetPasswordForm,
 )
 from app.utils import require_valid_form
 from app.blueprints import main
@@ -1402,25 +1403,28 @@ def reset_password(token):
             error="This password reset link is invalid or has expired.",
         ), 400
 
+    form = ResetPasswordForm()
+
+    if form.validate_on_submit():
+        # form has already validated password length and equality
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash("Your password has been updated. Please sign in.", "success")
+        return redirect(url_for("main.login"))
+
+    # If POST but not valid, aggregate errors for display
     error = None
-
-    if request.method == "POST":
-        password = request.form.get("password") or ""
-        confirm_password = request.form.get("confirm_password") or ""
-
-        if len(password) < 8:
-            error = "Password must be at least 8 characters."
-        elif password != confirm_password:
-            error = "Passwords do not match."
-        else:
-            user.set_password(password)
-            db.session.commit()
-            flash("Your password has been updated. Please sign in.", "success")
-            return redirect(url_for("main.login"))
+    if request.method == 'POST' and not form.validate():
+        # collect first error message
+        for fld, errs in form.errors.items():
+            if errs:
+                error = errs[0]
+                break
 
     return render_template(
         "reset_password.html",
         title="Reset Password",
         token=token,
+        form=form,
         error=error,
     )
