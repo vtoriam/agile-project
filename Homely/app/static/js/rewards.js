@@ -107,7 +107,7 @@ function launchConfetti(anchorElement) {
 
 function getActiveFilter() {
   const activeTab = document.querySelector(".filter-tab.active");
-  return activeTab ? (activeTab.dataset.filter || "all") : "all";
+  return activeTab ? activeTab.dataset.filter || "all" : "all";
 }
 
 function markRewardClaimed(item, button) {
@@ -164,7 +164,9 @@ async function claimReward(button) {
     markRewardClaimed(item, button);
 
     if (payload.newPoints !== undefined) {
-      const pointsEl = document.querySelector(".stat-card-points .stat-card-value");
+      const pointsEl = document.querySelector(
+        ".stat-card-points .stat-card-value",
+      );
       if (pointsEl) pointsEl.textContent = payload.newPoints.toLocaleString();
       // Refresh other rewards' unlocked/locked state based on new points
       try {
@@ -221,8 +223,10 @@ document.querySelectorAll(".reward-item").forEach(attachRewardControls);
 
 // Danger modal helpers (used to display styled warnings)
 window.openDangerModal = function (btn) {
-  document.getElementById("dangerModalTitle").textContent = btn.dataset.title || "Warning";
-  document.getElementById("dangerModalMessage").textContent = btn.dataset.message || "";
+  document.getElementById("dangerModalTitle").textContent =
+    btn.dataset.title || "Warning";
+  document.getElementById("dangerModalMessage").textContent =
+    btn.dataset.message || "";
   document.getElementById("dangerModalSub").textContent = btn.dataset.sub || "";
   const modal = document.getElementById("dangerModal");
   const overlay = document.getElementById("dangerOverlay");
@@ -243,53 +247,62 @@ function refreshRewardsForNewPoints(newPoints) {
   // Update global USER_POINTS constant-like variable
   window.USER_POINTS = Number(newPoints || 0);
   // update stat card
-  const pointsEl = document.querySelector('.stat-card-points .stat-card-value');
+  const pointsEl = document.querySelector(".stat-card-points .stat-card-value");
   if (pointsEl) pointsEl.textContent = Number(newPoints).toLocaleString();
 
-  document.querySelectorAll('.reward-item').forEach((item) => {
+  document.querySelectorAll(".reward-item").forEach((item) => {
     // skip claimed items
-    if (item.classList.contains('claimed')) return;
+    if (item.classList.contains("claimed")) return;
 
-    const cond = item.querySelector('.condition-badge');
+    const cond = item.querySelector(".condition-badge");
     if (!cond) return;
-    const txt = cond.textContent || '';
+    const txt = cond.textContent || "";
     // extract first number found in the condition text
-    const m = txt.replace(/,/g, '').match(/(\d+)/);
+    const m = txt.replace(/,/g, "").match(/(\d+)/);
     const threshold = m ? Number(m[0]) : null;
 
     if (threshold === null) return;
 
     if (Number(newPoints) >= threshold) {
       // mark unlocked
-      item.classList.remove('locked');
-      item.classList.add('unlocked');
-      const status = item.querySelector('.reward-status');
+      item.classList.remove("locked");
+      item.classList.add("unlocked");
+      const status = item.querySelector(".reward-status");
       if (status) {
-        status.innerHTML = '<div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div><button class="reward-claim-btn" type="button">Claim</button>';
-        const btn = status.querySelector('.reward-claim-btn');
-        if (btn) btn.addEventListener('click', () => claimReward(btn));
+        status.innerHTML =
+          '<div class="status-unlocked"><i data-lucide="check"></i> Unlocked</div><button class="reward-claim-btn" type="button">Claim</button>';
+        const btn = status.querySelector(".reward-claim-btn");
+        if (btn) btn.addEventListener("click", () => claimReward(btn));
       }
     } else {
       // still locked: update progress if present
-      item.classList.remove('unlocked');
-      item.classList.add('locked');
-      const status = item.querySelector('.reward-status');
+      item.classList.remove("unlocked");
+      item.classList.add("locked");
+      const status = item.querySelector(".reward-status");
       if (status) {
         const remaining = threshold - Number(newPoints);
         status.innerHTML = `<div class="status-locked"><i data-lucide="lock"></i> ${remaining.toLocaleString()} pts away</div>`;
       }
-      const progressFill = item.querySelector('.progress-fill');
+      const progressFill = item.querySelector(".progress-fill");
       if (progressFill) {
-        const pct = Math.min(100, Math.round((Number(newPoints) / threshold) * 100));
-        progressFill.style.width = pct + '%';
-        const label = item.querySelector('.progress-label');
-        if (label) label.textContent = `${Math.min(Number(newPoints), threshold).toLocaleString()} / ${threshold.toLocaleString()} pts`;
+        const pct = Math.min(
+          100,
+          Math.round((Number(newPoints) / threshold) * 100),
+        );
+        progressFill.style.width = pct + "%";
+        const label = item.querySelector(".progress-label");
+        if (label)
+          label.textContent = `${Math.min(Number(newPoints), threshold).toLocaleString()} / ${threshold.toLocaleString()} pts`;
       }
     }
   });
   updateClaimedCount();
   // Ensure lucide icons are (re)rendered for newly-updated status elements
-  try { lucide.createIcons(); } catch (e) { /* lucide may not be available in tests */ }
+  try {
+    lucide.createIcons();
+  } catch (e) {
+    /* lucide may not be available in tests */
+  }
 }
 
 function openRewardModal() {
@@ -424,7 +437,14 @@ async function submitReward() {
     const { id } = await res.json();
     const isUnlocked = USER_POINTS >= threshold;
     const newItem = document.createElement("div");
-    newItem.innerHTML = buildCustomRewardCard({ rewardId: id, title, desc, threshold, icon, isUnlocked });
+    newItem.innerHTML = buildCustomRewardCard({
+      rewardId: id,
+      title,
+      desc,
+      threshold,
+      icon,
+      isUnlocked,
+    });
 
     const rewardElement = newItem.firstElementChild;
     rewardsList.prepend(rewardElement);
