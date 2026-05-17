@@ -77,6 +77,8 @@ window.openAddHouseholdModal = function (btn) {
   modal.classList.add("open");
   overlay.classList.add("open");
 
+  input.focus();
+
   lucide.createIcons();
 }
 
