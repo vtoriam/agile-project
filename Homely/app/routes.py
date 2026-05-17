@@ -871,9 +871,7 @@ def manage_household():
         household_id=household.id
     ).first() if household else None
 
-    members = db.session.query(Membership).filter_by(
-        household_id=household.id
-    ).order_by(Membership.points.desc()).all() if household else []
+    members = household.memberships if household else []
 
     households = db.session.query(Household).join(Membership).filter(Membership.user_id == current_user.id).all()
 
@@ -897,13 +895,13 @@ def manage_household():
         members=members,
         current_membership=current_membership,
         invite=invite,
-        households=households,
+        households=households
     )
 
 @main.route("/household/switch", methods=["POST"])
 @login_required
 def switch_household():
-    form = SwitchHouseholdForm(meta={"csrf": False})
+    form = SwitchHouseholdForm()
     if not form.validate_on_submit():
         return redirect(url_for("main.manage_household"))
 
@@ -915,6 +913,72 @@ def switch_household():
     if membership:
         current_user.current_household = household_id
         db.session.commit()
+    return redirect(url_for("main.home"))
+
+@main.route("/household/create", methods=["POST"])
+@login_required
+def create_household():
+    form = CreateHouseholdForm()
+    if not form.validate_on_submit():
+        return redirect(url_for("main.manage_household"))
+
+    name = form.household_name.data.strip()
+    if not name:
+        return redirect(url_for("main.manage_household"))
+
+    household = Household(name=name)
+    db.session.add(household)
+    db.session.flush()
+
+    join_code = HouseholdInvite(
+        household_id=household.id,
+        created_by_user_id=current_user.id,
+        code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
+        expires_at=datetime.utcnow() + timedelta(days=7),
+        is_active=True,
+    )
+    db.session.add(join_code)
+
+    membership = Membership(
+        user_id=current_user.id,
+        household_id=household.id,
+        role="Admin",
+        points=0,
+    )
+    db.session.add(membership)
+    current_user.current_household = household.id
+    db.session.commit()
+    return redirect(url_for("main.home"))
+
+@main.route("/household/join", methods=["POST"])
+@login_required
+def join_household():
+    form = JoinHouseholdForm()
+    if not form.validate_on_submit():
+        return redirect(url_for("main.manage_household"))
+
+    join_code = form.join_code.data.strip().upper()
+    invite = db.session.query(HouseholdInvite).filter_by(
+        code=join_code
+    ).first()
+
+    if not invite or not invite.is_active:
+        error = "Invalid or expired invite code. Please check the code and try again, or ask an admin to regenerate it."
+        return jsonify({"error": error}), 400
+
+    household = db.session.query(Household).filter_by(id=invite.household_id).first()
+    if not household:
+        return redirect(url_for("main.manage_household"))
+
+    membership = Membership(
+        user_id=current_user.id,
+        household_id=household.id,
+        role="Member",
+        points=0,
+    )
+    db.session.add(membership)
+    current_user.current_household = household.id
+    db.session.commit()
     return redirect(url_for("main.home"))
 
 @main.route("/household/leave", methods=["POST"])

@@ -263,10 +263,33 @@ page_styles %}
 
         <!-- Yet to implement -->
         <section class="content-card">
-          <div class="section-kicker">Household settings</div>
-          <h2>Create new household</h2>
-          <button class="btn btn-outline-homely btn-sm">
-            <i data-lucide="plus"></i> New household
+          <div class="section-kicker">Households</div>
+          <h2>Add household</h2>
+          <button 
+            type="button"
+            class="btn btn-outline-homely btn-sm"
+            data-title="Create household"
+            data-message="Enter a name for your new household."
+            data-sub="This will be the name that other members see when they join your household."
+            data-label="Create household"
+            data-action="{{ url_for('main.create_household') }}"
+            data-input-type="create"
+            onclick="openAddHouseholdModal(this)"
+          >
+            <i data-lucide="house-plus"></i> Create
+          </button>
+          <button 
+            type="button"
+            class="btn btn-outline-homely btn-sm"
+            data-title="Join household"
+            data-message="Enter the join code for the household you want to join."
+            data-sub="You will need to ask an admin for the join code."
+            data-label="Join household"
+            data-action="{{ url_for('main.join_household') }}"
+            data-input-type="join"
+            onclick="openAddHouseholdModal(this)"
+          >
+            <i data-lucide="door-open"></i> Join
           </button>
         </section>
 
@@ -350,6 +373,43 @@ page_styles %}
     </div>
   </section>
 </main>
+
+<!-- Add Household Modal -->
+<div
+  class="modal-overlay"
+  id="addHouseholdOverlay"
+  onclick="closeAddHouseholdModal()"
+></div>
+<div class="modal" id="addHouseholdModal">
+  <div class="modal-header">
+    <div class="modal-title" id="addHouseholdTitle"></div>
+  </div>
+  <div class="modal-body">
+    <p id="addHouseholdMessage"></p>
+    <p class="muted-copy" id="addHouseholdSub" style="font-size: 13px; margin-top: 8px"></p>
+    <div class="form-group">
+      <label for="householdName"></label>
+      <input
+        type="text"
+        class="form-control"
+        id="householdName"
+        name="household_name"
+        placeholder=""
+        required
+      />
+    </div>
+    <button
+      type="button"
+      class="btn btn-homely"
+      id="addHouseholdSubmitBtn"
+      onclick="submitAddHouseholdAction()"
+    ></button>
+    <div id="addHouseholdError" class="add-household-alert" style="display:none">
+      <i data-lucide="alert-circle"></i>
+      <span id="addHouseholdErrorMessage"></span>
+    </div>
+  </div>
+</div>
 
 <!-- Confirm Danger Modal -->
 <div

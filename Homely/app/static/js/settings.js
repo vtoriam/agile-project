@@ -22,6 +22,7 @@ function switchHousehold() {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": getCsrfToken(),
       },
       body: `household_id=${householdId}`,
     })
@@ -40,6 +41,116 @@ function switchHousehold() {
   }
 }
 
+let currentAddHouseholdAction = null;
+let currentAddHouseholdInputType = null;
+
+window.openAddHouseholdModal = function (btn) {
+  const actionUrl = btn.dataset.action;
+  const inputType = btn.dataset.inputType; // "create" or "join"
+
+  document.getElementById("addHouseholdTitle").textContent =
+    btn.dataset.title;
+  document.getElementById("addHouseholdMessage").textContent =
+    btn.dataset.message;
+  document.getElementById("addHouseholdSub").textContent =
+    btn.dataset.sub;
+  document.getElementById("addHouseholdSubmitBtn").textContent =
+    btn.dataset.label;
+
+  currentAddHouseholdAction = actionUrl;
+  currentAddHouseholdInputType = inputType;
+
+  // Update placeholder based on input type
+  const input = document.getElementById("householdName");
+  if (inputType === "create") {
+    input.placeholder = "e.g., Smith Family";
+    input.name = "household_name";
+  } else if (inputType === "join") {
+    input.placeholder = "e.g., HM-A1B2";
+    input.name = "join_code";
+  }
+  input.value = "";
+
+  const modal = document.getElementById("addHouseholdModal");
+  const overlay = document.getElementById("addHouseholdOverlay");
+
+  modal.classList.add("open");
+  overlay.classList.add("open");
+
+  lucide.createIcons();
+}
+
+window.closeAddHouseholdModal = function () {
+  // Clear any error messages
+  const error_div = document.getElementById("addHouseholdError");
+  const error_message = document.getElementById("addHouseholdErrorMessage");
+  error_message.textContent = "";
+  error_div.style.display = "none";
+
+  document.getElementById("addHouseholdModal").classList.remove("open");
+  document.getElementById("addHouseholdOverlay").classList.remove("open");
+  currentAddHouseholdAction = null;
+  currentAddHouseholdInputType = null;
+}
+
+window.submitAddHouseholdAction = function () {
+  if (!currentAddHouseholdAction) {
+    alert("Error: No action specified");
+    return false;
+  }
+
+  const input = document.getElementById("householdName");
+  const inputValue = input.value.trim();
+
+  if (!inputValue) {
+    displayError("Input cannot be empty. Please enter a valid value.");
+    return false;
+  }
+
+  // Determine the form data key based on input type
+  const formDataKey = currentAddHouseholdInputType === "create" ? "household_name" : "join_code";
+  const body = new URLSearchParams();
+  body.append(formDataKey, inputValue);
+
+  fetch(currentAddHouseholdAction, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRFToken": getCsrfToken(),
+    },
+    body: body.toString(),
+  })
+    .then((response) => {
+      if (response.redirected) {
+        window.location.href = response.url;
+      } else if (!response.ok) {
+        // Error response - extract error message and display in modal
+        return response.json().then((data) => {
+          if (data.error) {
+            displayError(data.error);
+          } else {
+            alert("Error: " + response.status);
+          }
+        });
+      } else {
+        // Success - close modal and redirect to home
+        closeAddHouseholdModal();
+        window.location.href = "/home";
+      }
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    });
+
+  return false;
+};
+
+function displayError(message) {
+  const error_div = document.getElementById("addHouseholdError");
+  const error_message = document.getElementById("addHouseholdErrorMessage");
+  error_message.textContent = message;
+  error_div.style.display = "inline";
+}
 
 // Store the current action URL globally
 let currentDangerAction = null;
