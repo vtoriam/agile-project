@@ -60,3 +60,8 @@ class JoinHouseholdForm(FlaskForm):
 
 class SwitchHouseholdForm(FlaskForm):
     household_id = HiddenField(validators=[DataRequired()])
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
