@@ -162,6 +162,11 @@ async function claimReward(button) {
     }
 
     markRewardClaimed(item, button);
+
+    if (payload.newPoints !== undefined) {
+      const pointsEl = document.querySelector(".stat-card-points .stat-card-value");
+      if (pointsEl) pointsEl.textContent = payload.newPoints.toLocaleString();
+    }
   } catch (error) {
     button.disabled = false;
     button.textContent = originalLabel;
