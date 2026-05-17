@@ -146,6 +146,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
     assigned_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    points_awarded_to_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)

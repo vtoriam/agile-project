@@ -357,7 +357,6 @@ def edit_profile():
         
         # Count completed tasks
         completed_tasks_count = db.session.query(Task).filter_by(
-            assigned_user_id=current_user.id,
             household_id=member.household_id,
             is_completed=True
         ).count()
@@ -388,6 +387,14 @@ def rewards():
         ).first()
         if current_membership:
             user_points = current_membership.points or 0
+            # compute the user's rank within the household (1 = top member)
+            ranked_members = (
+                db.session.query(Membership)
+                .filter_by(household_id=household.id)
+                .order_by(Membership.points.desc())
+                .all()
+            )
+            member_rank = next((i + 1 for i, m in enumerate(ranked_members) if m.user_id == current_user.id), None)
 
         household_points = (
             db.session.query(func.coalesce(func.sum(Membership.points), 0))
@@ -518,6 +525,7 @@ def rewards():
         user_points=user_points,
         current_membership=current_membership,
         household_rank=household_rank,
+        member_rank=member_rank if 'member_rank' in locals() else None,
         rewards=rewards,
         custom_rewards=custom_rewards,
         claimed_custom_ids=claimed_custom_ids,
@@ -1130,17 +1138,27 @@ def toggle_task(task_id):
     task.is_completed = not task.is_completed
     task.completed_at = utcnow_naive() if task.is_completed else None
 
-    # Award or deduct points when toggling
-    if task.assignee:
-        assigned_membership = db.session.query(Membership).filter_by(
-            user_id=task.assigned_user_id,
-            household_id=task.household_id
-        ).first()
-        if assigned_membership:
-            if task.is_completed:
-                assigned_membership.points += task.points_value
-            else:
-                assigned_membership.points = max(0, assigned_membership.points - task.points_value)
+    message = None
+    stole_points = False
+
+    if task.is_completed:
+        task.points_awarded_to_user_id = current_user.id
+        membership.points += task.points_value
+
+        if task.assignee and task.assigned_user_id != current_user.id:
+            stole_points = True
+            message = f"You stole {task.points_value} points from {task.assignee.display_name}!"
+        else:
+            message = f"You earned {task.points_value} points!"
+    else:
+        recipient_user_id = task.points_awarded_to_user_id or task.assigned_user_id
+        if recipient_user_id:
+            recipient_membership = db.session.query(Membership).filter_by(
+                user_id=recipient_user_id,
+                household_id=task.household_id,
+            ).first()
+            if recipient_membership:
+                recipient_membership.points = max(0, recipient_membership.points - task.points_value)
 
     db.session.commit()
     # Emit updated leaderboard stats to connected clients
@@ -1181,7 +1199,13 @@ def toggle_task(task_id):
     except Exception:
         pass
 
-    return {"done": task.is_completed, "points": task.points_value}, 200
+    return {
+        "done": task.is_completed,
+        "points": task.points_value,
+        "message": message,
+        "pointsAwardedToUserId": task.points_awarded_to_user_id,
+        "stole": stole_points,
+    }, 200
 
 @main.route("/tasks/create", methods=["POST"])
 @login_required

@@ -85,13 +85,13 @@ function refreshIcons() {
   lucide.createIcons();
 }
 
-function showToast(points) {
+function showToast(message) {
   const existing = document.getElementById("pts-toast");
   if (existing) existing.remove();
   const toast = document.createElement("div");
   toast.id = "pts-toast";
   toast.className = "pts-toast";
-  toast.innerHTML = `<i data-lucide="zap"></i> +${points} pts earned!`;
+  toast.innerHTML = `<i data-lucide="zap"></i> ${message}`;
   document.body.appendChild(toast);
   lucide.createIcons();
   requestAnimationFrame(() =>
@@ -195,7 +195,10 @@ async function toggleTask(id) {
     const wasDone = t.done;
     t.done = Boolean(data.done);
     // If task transitioned to done, show earned points
-    if (!wasDone && t.done && t.points) showToast(t.points);
+    if (!wasDone && t.done) {
+      const message = data.message || `You earned ${t.points || 0} points!`;
+      showToast(message);
+    }
     renderTasks();
   } catch (error) {
     console.error("Error toggling task:", error);
@@ -286,8 +289,10 @@ function renderTasks() {
             ${t.due && !t.done && new Date(t.due) < new Date() ? `<span class="overdue-badge"><i data-lucide="alert-circle"></i> Overdue</span>` : ""}
           </div>
         </div>
-        <span class="task-cat-tag" style="background:${color}18; color:${color}; border-color:${color}40">${label}</span>
-        <button class="task-del" onclick="deleteTask(${t.id})"><i data-lucide="x"></i></button>`;
+        <div class="task-actions">
+          <span class="task-cat-tag" style="background:${color}18; color:${color}; border-color:${color}40">${label}</span>
+          <button class="task-del" onclick="deleteTask(${t.id})"><i data-lucide="x"></i></button>
+        </div>`;
       list.appendChild(el);
     });
   }

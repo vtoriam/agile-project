@@ -90,6 +90,54 @@ def test_toggle_task_marks_task_complete_and_adds_points(client, app):
     assert membership.points == 10
 
 
+def test_toggle_task_steals_points_from_assignee_when_completed_by_other_user(client, app):
+    assignee = create_user(email="aisha@example.com", password="password123", display_name="Aisha")
+    household, assignee_membership = create_household_with_member(assignee, points=0)
+
+    stealer = create_user(email="jordan@example.com", password="password123", display_name="Jordan")
+    stealer_membership = Membership(user_id=stealer.id, household_id=household.id, role="Member", points=0)
+    db.session.add(stealer_membership)
+    db.session.commit()
+
+    task = Task(
+        household_id=household.id,
+        assigned_user_id=assignee.id,
+        title="Take out bins",
+        category="trash",
+        points_value=10,
+        is_completed=False,
+    )
+    db.session.add(task)
+    db.session.commit()
+
+    login(client, email="jordan@example.com", password="password123")
+    response = client.post(f"/tasks/{task.id}/toggle")
+
+    assert response.status_code == 200
+    assert response.get_json()["message"] == "You stole 10 points from Aisha!"
+
+    db.session.refresh(task)
+    db.session.refresh(assignee_membership)
+    db.session.refresh(stealer_membership)
+
+    assert task.is_completed
+    assert task.points_awarded_to_user_id == stealer.id
+    assert assignee_membership.points == 0
+    assert stealer_membership.points == 10
+
+    response = client.post(f"/tasks/{task.id}/toggle")
+
+    assert response.status_code == 200
+
+    db.session.refresh(task)
+    db.session.refresh(assignee_membership)
+    db.session.refresh(stealer_membership)
+
+    assert not task.is_completed
+    assert stealer_membership.points == 0
+    assert assignee_membership.points == 0
+
+
 def test_task_reminders_returns_only_current_user_due_soon_tasks(client, app):
     user = create_user(email="aisha@example.com", password="password123", display_name="Aisha")
     household, _ = create_household_with_member(user)
