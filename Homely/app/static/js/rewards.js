@@ -105,9 +105,14 @@ function launchConfetti(anchorElement) {
   window.setTimeout(() => confetti.remove(), 1400);
 }
 
+function getActiveFilter() {
+  const activeTab = document.querySelector(".filter-tab.active");
+  return activeTab ? (activeTab.dataset.filter || "all") : "all";
+}
+
 function markRewardClaimed(item, button) {
   item.classList.add("claimed");
-  item.classList.remove("locked");
+  item.classList.remove("locked", "unlocked");
   item.dataset.claimed = "true";
 
   const status = item.querySelector(".reward-status");
@@ -123,6 +128,7 @@ function markRewardClaimed(item, button) {
   launchConfetti(item);
   lucide.createIcons();
   updateClaimedCount();
+  applyRewardFilter(getActiveFilter());
 }
 
 async function claimReward(button) {
