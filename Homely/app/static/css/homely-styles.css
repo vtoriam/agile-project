@@ -399,6 +399,14 @@ svg[data-lucide] {
   white-space: nowrap;
 }
 
+/* Container for right-aligned task actions (category badge + delete) */
+.task-actions {
+  margin-left: auto; /* push to right edge */
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .task-del {
   background: none;
   border: none;

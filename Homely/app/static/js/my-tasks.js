@@ -289,8 +289,10 @@ function renderTasks() {
             ${t.due && !t.done && new Date(t.due) < new Date() ? `<span class="overdue-badge"><i data-lucide="alert-circle"></i> Overdue</span>` : ""}
           </div>
         </div>
-        <span class="task-cat-tag" style="background:${color}18; color:${color}; border-color:${color}40">${label}</span>
-        <button class="task-del" onclick="deleteTask(${t.id})"><i data-lucide="x"></i></button>`;
+        <div class="task-actions">
+          <span class="task-cat-tag" style="background:${color}18; color:${color}; border-color:${color}40">${label}</span>
+          <button class="task-del" onclick="deleteTask(${t.id})"><i data-lucide="x"></i></button>
+        </div>`;
       list.appendChild(el);
     });
   }
