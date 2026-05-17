@@ -611,11 +611,13 @@ def claim_reward(reward_key):
     except Exception:
         current_app.logger.exception('failed emitting leaderboard update from claim_reward')
 
+    new_points = claiming_membership.points if (reward_key != "household-champion" and claiming_membership) else user_points
     return jsonify({
         "success": True,
         "claimed": True,
         "rewardKey": reward_key,
         "title": reward["title"],
+        "newPoints": new_points,
     })
 
 
@@ -709,7 +711,7 @@ def claim_custom_reward(reward_id):
         membership.points = max(0, (membership.points or 0) - reward.points_threshold)
         db.session.commit()
 
-    return jsonify({"success": True, "claimed": True})
+    return jsonify({"success": True, "claimed": True, "newPoints": membership.points})
 
 
 @main.route("/login", methods=["GET", "POST"])

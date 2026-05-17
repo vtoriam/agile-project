@@ -215,5 +215,9 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/rewards.js') }}"></script>
-    <script>lucide.createIcons();</script>
+    <script>
+      lucide.createIcons();
+      applyRewardFilter("all");
+      updateClaimedCount();
+    </script>
 {% endblock %}
