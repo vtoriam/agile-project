@@ -16,7 +16,9 @@ page_styles %}
     <div class="section-head">
       <div>
         <span class="eyebrow">Manage household settings</span>
-        <h1>See who is in the household.</h1>
+        <h1>
+          See who is in the {{ (current_household.name if current_household and current_household.name else '') }} household.
+        </h1>
         <p class="muted-copy">
           Manage household members, view join codes, and adjust settings.
         </p>
@@ -169,26 +171,94 @@ page_styles %}
         </table>
       </section>
 
+      <section class="content-card">
+        <div class="section-kicker">Email reminders</div>
+        <h2>Email reminders</h2>
+        <p class="muted-copy">
+          Opt in to receive email reminders for tasks due soon, and manually
+          send a reminder for demo/testing.
+        </p>
+
+        <div class="email-reminder-card" style="margin-top: 12px">
+          <div>
+            {% if current_user.email_reminders_enabled %}
+            <p>
+              Email reminders are currently <strong>on</strong>. Homely can send
+              reminders for tasks due soon.
+            </p>
+            {% else %}
+            <p>
+              Email reminders are currently <strong>off</strong>. Turn them on
+              to receive reminders for tasks due soon.
+            </p>
+            {% endif %}
+          </div>
+
+          <div class="email-reminder-actions">
+            <form
+              method="post"
+              action="{{ url_for('main.toggle_email_reminders') }}"
+            >
+              {% if csrf_token is defined %}
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              {% endif %}
+              <button type="submit" class="btn-secondary">
+                {% if current_user.email_reminders_enabled %}Turn off
+                reminders{% else %}Turn on reminders{% endif %}
+              </button>
+            </form>
+
+            <form
+              method="post"
+              action="{{ url_for('main.send_email_reminder_now') }}"
+            >
+              {% if csrf_token is defined %}
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              {% endif %}
+              <button type="submit" class="btn-primary">
+                Send reminder email now
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
       <div class="household-footer-grid">
         <section class="content-card logout-zone">
           <div class="section-kicker">households</div>
           <h2>Switch Household</h2>
           <div class="modal-actions">
             <div class="modal-field household-select">
-              <label for="householdSelect" value="Select a household..."></label>
+              <label
+                for="householdSelect"
+                value="Select a household..."
+              ></label>
               <select id="householdSelect">
-                <option value="" disabled selected>Select a household...</option>
-                {% for household in households if household.id != current_household.id %}
-                  <option value="{{ household.id }}">
-                    {{ household.name }}
-                  </option>
+                <option value="" disabled selected>
+                  Select a household...
+                </option>
+                {% for household in households if household.id !=
+                current_household.id %}
+                <option value="{{ household.id }}">{{ household.name }}</option>
                 {% endfor %}
               </select>
             </div>
-              <button type="button" class="btn btn-outline-homely btn-sm" onclick="switchHousehold()">
-                Switch
-              </button>
-          </div>  
+            <button
+              type="button"
+              class="btn btn-outline-homely btn-sm"
+              onclick="switchHousehold()"
+            >
+              Switch
+            </button>
+          </div>
         </section>
 
         <!-- Yet to implement -->
@@ -378,9 +448,6 @@ page_styles %}
     </div>
   </div>
 </div>
-
-{% endblock %}
-
-{% block scripts %}
-  <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}

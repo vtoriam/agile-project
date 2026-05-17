@@ -10,6 +10,9 @@ db = SQLAlchemy()
 migrate = Migrate()
 csrf = CSRFProtect()
 login = LoginManager()
+from flask_socketio import SocketIO
+
+socketio = SocketIO()
 
 
 def create_app(config_class=Config):
@@ -42,5 +45,8 @@ def create_app(config_class=Config):
     if not flask_app.config.get("TESTING"):
         from app.scheduler import start_scheduler
         start_scheduler(flask_app)
+
+    # Initialize Socket.IO
+    socketio.init_app(flask_app, cors_allowed_origins="*")
 
     return flask_app

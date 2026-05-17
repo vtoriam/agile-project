@@ -8,7 +8,7 @@ household_nav %} {% block page_styles %}
 <main class="main-content home-main">
 <div class="lb-header">
   <div class="lb-title">
-    House <span>Champions</span> <i data-lucide="trophy"></i>
+     <span>{{ (current_household.name if current_household and current_household.name else 'House') }} Champions</span> <i data-lucide="trophy"></i>
   </div>
   <div class="lb-sub">Points earned from completed tasks this month</div>
 </div>
@@ -197,5 +197,23 @@ household_nav %} {% block page_styles %}
 
 {% block scripts %}
 <script>window.memberStats = {{ member_stats | tojson }};</script>
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  const householdId = {{ household_id | tojson }};
+  if (householdId) {
+    socket.emit('join', { household_id: householdId });
+    socket.on('leaderboard:update', data => {
+      try {
+        if (!data || !data.household_id || data.household_id !== householdId) return;
+        if (window.updateLeaderboardFromStats) {
+          window.updateLeaderboardFromStats(data.member_stats || {});
+        } else {
+          location.reload();
+        }
+      } catch (e) { console.error(e); }
+    });
+  }
+</script>
 <script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
 {% endblock %}

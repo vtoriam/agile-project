@@ -1,10 +1,13 @@
 import random
 import string
 
-from flask import render_template, redirect, url_for, request, session, jsonify, current_app
+from flask import render_template, redirect, url_for, request, session, jsonify, current_app, flash, current_app
 from sqlalchemy import func
 
 from app import db
+from app import socketio
+from app.email_utils import send_email
+from app.scheduler import format_due_task_email
 from app.forms import (
     SignupForm,
     LoginForm,
@@ -15,12 +18,57 @@ from app.forms import (
 )
 from app.utils import require_valid_form
 from app.blueprints import main
-from app.models import User, Household, Membership, Task, HouseholdInvite
+from app.models import User, Household, Membership, RewardClaim, Task, HouseholdInvite, CustomReward
 from flask_login import login_user, logout_user, current_user, login_required
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from flask_socketio import emit, join_room, leave_room
 
 
 REMINDER_WINDOW_HOURS = 24
+
+
+def utcnow_naive():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def emit_leaderboard_update(household_id):
+    try:
+        household = db.session.query(Household).filter_by(id=household_id).first()
+        if not household:
+            return
+        member_stats = {}
+        members = db.session.query(Membership).filter_by(household_id=household.id).all()
+        members.sort(key=lambda m: m.points, reverse=True)
+        rank_icons = ['crown', 'medal', 'award']
+        rank_colors = ['#c49a2a', '#9e9087', '#b07248']
+        for i, m in enumerate(members):
+            done_tasks = db.session.query(Task).filter_by(
+                household_id=household.id,
+                assigned_user_id=m.user_id,
+                is_completed=True,
+            ).all()
+            completed = len(done_tasks)
+            on_time = sum(
+                1 for t in done_tasks
+                if t.completed_at and t.due_date and t.completed_at <= t.due_date
+            )
+            late = sum(
+                1 for t in done_tasks
+                if t.completed_at and t.due_date and t.completed_at > t.due_date
+            )
+            member_stats[m.user.display_name] = {
+                'rank':      i + 1,
+                'points':    m.points,
+                'completed': completed,
+                'on_time':   on_time,
+                'late':      late,
+                'avatar':    rank_icons[i] if i < 3 else 'user',
+                'rankColor': rank_colors[i] if i < 3 else '#888888',
+            }
+        room = f"household_{household_id}"
+        socketio.emit('leaderboard:update', {'member_stats': member_stats, 'household_id': household_id}, room=room)
+    except Exception:
+        current_app.logger.exception('emit_leaderboard_update failed')
 
 
 def serialize_task_reminder(task):
@@ -42,7 +90,7 @@ def due_soon_tasks_for_user(user_id, hours=REMINDER_WINDOW_HOURS):
     if not membership:
         return []
 
-    now = datetime.utcnow()
+    now = utcnow_naive()
     window_end = now + timedelta(hours=hours)
 
     return (
@@ -81,7 +129,7 @@ def home():
         if membership else []
     )
 
-    now = datetime.utcnow()
+    now = utcnow_naive()
 
     # Find overdue tasks in the current household so the refresh state matches the frontend.
     overdue_tasks = (
@@ -166,7 +214,7 @@ def dismiss_overdue_popup():
         user_id=current_user.id
     ).first()
     if membership:
-        membership.last_overdue_popup = datetime.utcnow()
+        membership.last_overdue_popup = utcnow_naive()
         db.session.commit()
     return "", 204
 
@@ -196,7 +244,7 @@ def my_tasks():
         assigned_user_id=current_user.id
     ).all() if membership else []
 
-    now = datetime.utcnow()
+    now = utcnow_naive()
 
     # Find overdue tasks assigned to current user
     overdue_tasks = (
@@ -275,9 +323,11 @@ def leaderboard():
     return render_template(
         "leaderboard.html",
         title="Leaderboard",
+        current_household=household,
         first=first, second=second, third=third,
         other_members=other_members,
         member_stats=member_stats,
+        household_id=household.id if household else None,
     )
 
 
@@ -364,13 +414,304 @@ def rewards():
             )
         )
 
+    claimed_reward_keys = set()
+    if household:
+        claimed_reward_keys = {
+            claim.reward_key
+            for claim in db.session.query(RewardClaim.reward_key)
+            .filter(
+                RewardClaim.user_id == current_user.id,
+                RewardClaim.household_id == household.id,
+            )
+            .all()
+        }
+
+    reward_catalog = [
+        {
+            "key": "skip-your-chore",
+            "title": "Skip Your Chore for the Week",
+            "description": "Take a well-earned break and skip one assigned chore this week.",
+            "icon": "sofa",
+            "threshold": 1000,
+        },
+        {
+            "key": "choose-takeaway",
+            "title": "Choose Tonight's Takeaway",
+            "description": "You get the final say on what the household orders for dinner tonight.",
+            "icon": "pizza",
+            "threshold": 1500,
+        },
+        {
+            "key": "tv-remote",
+            "title": "TV Remote for the Evening",
+            "description": "Full control of the TV for one evening, no debates, no compromises.",
+            "icon": "tv",
+            "threshold": 2000,
+        },
+        {
+            "key": "first-shower",
+            "title": "First Shower Rights for a Week",
+            "description": "Priority bathroom access every morning for a full week.",
+            "icon": "bath",
+            "threshold": 3000,
+        },
+        {
+            "key": "household-champion",
+            "title": "Household Champion",
+            "description": "Hold the #1 spot on the household leaderboard.",
+            "icon": "crown",
+            "threshold": 1,
+        },
+    ]
+
+    rewards = []
+    for reward in reward_catalog:
+        threshold = reward["threshold"]
+        is_rank_reward = reward["key"] == "household-champion"
+
+        if not is_rank_reward:
+            unlocked = user_points >= threshold
+            remaining_points = max(threshold - user_points, 0)
+            progress_pct = 100 if threshold <= 0 else min(100, round((user_points / threshold) * 100))
+            progress_points = min(user_points, threshold)
+            status_text = "Unlocked" if unlocked else f"{remaining_points:,} pts away"
+            condition_label = f"{threshold:,} pts"
+            condition_icon = "zap"
+            progress_label = f"{progress_points:,} / {threshold:,} pts"
+        else:
+            unlocked = household_rank == threshold
+            status_text = "Unlocked" if unlocked else f"#{threshold} spot required"
+            condition_label = f"#{threshold} household rank"
+            condition_icon = "medal"
+            progress_pct = None
+            progress_label = None
+
+        rewards.append(
+            {
+                **reward,
+                "unlocked": unlocked,
+                "claimed": reward["key"] in claimed_reward_keys,
+                "status_text": status_text,
+                "condition_label": condition_label,
+                "condition_icon": condition_icon,
+                "progress_pct": progress_pct,
+                "progress_label": progress_label,
+                "claim_url": url_for("main.claim_reward", reward_key=reward["key"]),
+            }
+        )
+
+    custom_rewards = (
+        db.session.query(CustomReward)
+        .filter_by(household_id=household.id)
+        .order_by(CustomReward.created_at.desc())
+        .all()
+        if household else []
+    )
+
+    claimed_custom_ids = {
+        int(key[7:]) for key in claimed_reward_keys if key.startswith("custom-")
+    }
+
     return render_template(
         "rewards.html",
         title="Rewards",
         user_points=user_points,
         current_membership=current_membership,
         household_rank=household_rank,
+        rewards=rewards,
+        custom_rewards=custom_rewards,
+        claimed_custom_ids=claimed_custom_ids,
+        claimed_count=len(claimed_reward_keys),
     )
+
+
+@main.route("/rewards/claim/<reward_key>", methods=["POST"])
+@login_required
+def claim_reward(reward_key):
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+    if not household:
+        return jsonify({"success": False, "message": "No active household found."}), 400
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not membership:
+        return jsonify({"success": False, "message": "You are not a member of this household."}), 403
+
+    user_points = membership.points or 0
+    household_points = (
+        db.session.query(func.coalesce(func.sum(Membership.points), 0))
+        .filter(Membership.household_id == household.id)
+        .scalar()
+        or 0
+    )
+
+    ranked_households = (
+        db.session.query(
+            Household.id.label("household_id"),
+            func.coalesce(func.sum(Membership.points), 0).label("total_points"),
+        )
+        .outerjoin(Membership, Membership.household_id == Household.id)
+        .group_by(Household.id)
+        .all()
+    )
+    household_rank = 1 + sum(1 for item in ranked_households if item.total_points > household_points)
+
+    reward_lookup = {
+        "skip-your-chore": {"threshold": 1000, "title": "Skip Your Chore for the Week"},
+        "choose-takeaway": {"threshold": 1500, "title": "Choose Tonight's Takeaway"},
+        "tv-remote": {"threshold": 2000, "title": "TV Remote for the Evening"},
+        "first-shower": {"threshold": 3000, "title": "First Shower Rights for a Week"},
+        "household-champion": {"threshold": 1, "title": "Household Champion"},
+    }
+
+    reward = reward_lookup.get(reward_key)
+    if not reward:
+        return jsonify({"success": False, "message": "Unknown reward."}), 404
+
+    unlocked = household_rank == reward["threshold"] if reward_key == "household-champion" else user_points >= reward["threshold"]
+    if not unlocked:
+        return jsonify({"success": False, "message": "This reward is not unlocked yet."}), 400
+
+    existing_claim = db.session.query(RewardClaim).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+        reward_key=reward_key,
+    ).first()
+    if existing_claim:
+        return jsonify({
+            "success": True,
+            "claimed": True,
+            "rewardKey": reward_key,
+            "title": reward["title"],
+        })
+
+    db.session.add(
+        RewardClaim(
+            user_id=current_user.id,
+            household_id=household.id,
+            reward_key=reward_key,
+        )
+    )
+
+    # Deduct points for non-rank rewards
+    if reward_key != "household-champion":
+        claiming_membership = db.session.query(Membership).filter_by(
+            user_id=current_user.id,
+            household_id=household.id,
+        ).first()
+        if claiming_membership:
+            claiming_membership.points = max(0, claiming_membership.points - reward["threshold"])
+
+    db.session.commit()
+
+    try:
+        emit_leaderboard_update(household.id)
+    except Exception:
+        current_app.logger.exception('failed emitting leaderboard update from claim_reward')
+
+    new_points = claiming_membership.points if (reward_key != "household-champion" and claiming_membership) else user_points
+    return jsonify({
+        "success": True,
+        "claimed": True,
+        "rewardKey": reward_key,
+        "title": reward["title"],
+        "newPoints": new_points,
+    })
+
+
+@main.route("/rewards/custom/create", methods=["POST"])
+@login_required
+def create_custom_reward():
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+    if not household:
+        return jsonify({"error": "No household found"}), 403
+
+    data = request.get_json()
+    title = (data.get("title") or "").strip()
+    desc = (data.get("desc") or "").strip()
+    icon = (data.get("icon") or "star").strip()
+
+    try:
+        threshold = int(data.get("threshold"))
+        if threshold < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({"error": "Points must be a positive number"}), 400
+
+    if not title:
+        return jsonify({"error": "Title is required"}), 400
+
+    reward = CustomReward(
+        household_id=household.id,
+        created_by_user_id=current_user.id,
+        title=title,
+        description=desc,
+        points_threshold=threshold,
+        icon=icon,
+    )
+    db.session.add(reward)
+    db.session.commit()
+    return jsonify({"id": reward.id, "title": reward.title}), 201
+
+
+@main.route("/rewards/custom/<int:reward_id>", methods=["DELETE"])
+@login_required
+def delete_custom_reward(reward_id):
+    reward = db.session.query(CustomReward).filter_by(id=reward_id).first()
+    if not reward:
+        return jsonify({"error": "Not found"}), 404
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=reward.household_id,
+    ).first()
+    if not membership:
+        return jsonify({"error": "Unauthorised"}), 403
+
+    db.session.delete(reward)
+    db.session.commit()
+    return jsonify({"success": True}), 200
+
+
+@main.route("/rewards/custom/<int:reward_id>/claim", methods=["POST"])
+@login_required
+def claim_custom_reward(reward_id):
+    household = db.session.query(Household).filter_by(id=current_user.current_household).first()
+    if not household:
+        return jsonify({"success": False, "message": "No active household found."}), 400
+
+    membership = db.session.query(Membership).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+    ).first()
+    if not membership:
+        return jsonify({"success": False, "message": "Not a member of this household."}), 403
+
+    reward = db.session.query(CustomReward).filter_by(id=reward_id, household_id=household.id).first()
+    if not reward:
+        return jsonify({"success": False, "message": "Reward not found."}), 404
+
+    if (membership.points or 0) < reward.points_threshold:
+        return jsonify({"success": False, "message": "This reward is not unlocked yet."}), 400
+
+    reward_key = f"custom-{reward_id}"
+    existing = db.session.query(RewardClaim).filter_by(
+        user_id=current_user.id,
+        household_id=household.id,
+        reward_key=reward_key,
+    ).first()
+    if not existing:
+        db.session.add(RewardClaim(
+            user_id=current_user.id,
+            household_id=household.id,
+            reward_key=reward_key,
+        ))
+        membership.points = max(0, (membership.points or 0) - reward.points_threshold)
+        db.session.commit()
+
+    return jsonify({"success": True, "claimed": True, "newPoints": membership.points})
 
 
 @main.route("/login", methods=["GET", "POST"])
@@ -452,42 +793,11 @@ def signup_create_household():
 
                 household = Household(name=household_name)
                 db.session.add(household)
-                db.session.flush()
-
-                user.current_household = household.id
-                first_invite = HouseholdInvite(
-                    household_id=household.id,
-                    created_by_user_id=user.id,
-                    code="HM-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)),
-                    expires_at=datetime.utcnow() + timedelta(days=7),
-                    is_active=True,
-                )
-                db.session.add(first_invite)
-
-                db.session.add(Membership(
-                    user_id=user.id,
-                    household_id=household.id,
-                    role="Admin",
-                    points=0,
-                ))
-                db.session.commit()
-                session.pop("signup_data", None)
-                login_user(user)
-                return redirect(url_for("main.home"))
-        elif not form.household_name.data or not form.household_name.data.strip():
-            error = "Please enter a household name."
-        else:
-            error = "Please enter a household name."
-
-    return render_template(
-        "signup_create_household.html",
-        title="Create Household",
-        form=form,
-        form_data=form_data,
-        error=error,
-    )
-
-
+                # Emit updated leaderboard stats to household room
+                try:
+                    emit_leaderboard_update(task.household_id)
+                except Exception:
+                    current_app.logger.exception('failed emitting leaderboard update from toggle_task')
 @main.route("/signup/household/join", methods=["GET", "POST"])
 def signup_join_household():
     signup_data = session.get("signup_data")
@@ -760,12 +1070,47 @@ def regenerate_invite():
         household_id=household.id,
         created_by_user_id=current_user.id,
         code=code,
-        expires_at=datetime.utcnow() + timedelta(days=7),
+        expires_at=utcnow_naive() + timedelta(days=7),
         is_active=True,
     )
     db.session.add(new_invite)
     db.session.commit()
 
+    return redirect(url_for("main.manage_household"))
+
+
+
+@main.route("/email-reminders/toggle", methods=["POST"])
+@login_required
+def toggle_email_reminders():
+    """Allow the logged-in user to opt in or out of due-task email reminders."""
+    current_user.email_reminders_enabled = not current_user.email_reminders_enabled
+    db.session.commit()
+
+    status = "enabled" if current_user.email_reminders_enabled else "disabled"
+    flash(f"Email reminders {status}.", "success")
+    return redirect(url_for("main.manage_household"))
+
+
+@main.route("/email-reminders/send-now", methods=["POST"])
+@login_required
+def send_email_reminder_now():
+    """Send a due-task reminder email immediately for demo/testing."""
+    if not current_user.email_reminders_enabled:
+        flash("Turn on email reminders before sending a reminder email.", "warning")
+        return redirect(url_for("main.manage_household"))
+
+    due_soon_tasks = due_soon_tasks_for_user(current_user.id)
+
+    if not due_soon_tasks:
+        flash("No due-soon tasks found for your account.", "info")
+        return redirect(url_for("main.manage_household"))
+
+    subject = f"Homely reminder: {len(due_soon_tasks)} task(s) due soon"
+    body = format_due_task_email(current_user, due_soon_tasks)
+    send_email(current_app, current_user.email, subject, body)
+
+    flash("Reminder email sent.", "success")
     return redirect(url_for("main.manage_household"))
 
 @main.route("/tasks/<int:task_id>/toggle", methods=["POST"])
@@ -783,7 +1128,7 @@ def toggle_task(task_id):
         return {"error": "Unauthorised"}, 403
 
     task.is_completed = not task.is_completed
-    task.completed_at = datetime.utcnow() if task.is_completed else None
+    task.completed_at = utcnow_naive() if task.is_completed else None
 
     # Award or deduct points when toggling
     if task.assignee:
@@ -798,6 +1143,44 @@ def toggle_task(task_id):
                 assigned_membership.points = max(0, assigned_membership.points - task.points_value)
 
     db.session.commit()
+    # Emit updated leaderboard stats to connected clients
+    try:
+        household = db.session.query(Household).filter_by(id=task.household_id).first()
+        member_stats = {}
+        if household:
+            members = db.session.query(Membership).filter_by(household_id=household.id).all()
+            members.sort(key=lambda m: m.points, reverse=True)
+            rank_icons = ['crown', 'medal', 'award']
+            rank_colors = ['#c49a2a', '#9e9087', '#b07248']
+            for i, m in enumerate(members):
+                done_tasks = db.session.query(Task).filter_by(
+                    household_id=household.id,
+                    assigned_user_id=m.user_id,
+                    is_completed=True,
+                ).all()
+                completed = len(done_tasks)
+                on_time = sum(
+                    1 for t in done_tasks
+                    if t.completed_at and t.due_date and t.completed_at <= t.due_date
+                )
+                late = sum(
+                    1 for t in done_tasks
+                    if t.completed_at and t.due_date and t.completed_at > t.due_date
+                )
+                member_stats[m.user.display_name] = {
+                    'rank':      i + 1,
+                    'points':    m.points,
+                    'completed': completed,
+                    'on_time':   on_time,
+                    'late':      late,
+                    'avatar':    rank_icons[i] if i < 3 else 'user',
+                    'rankColor': rank_colors[i] if i < 3 else '#888888',
+                }
+        room = f"household_{task.household_id}"
+        socketio.emit('leaderboard:update', {'member_stats': member_stats, 'household_id': task.household_id}, room=room)
+    except Exception:
+        pass
+
     return {"done": task.is_completed, "points": task.points_value}, 200
 
 @main.route("/tasks/create", methods=["POST"])
@@ -837,6 +1220,11 @@ def create_task():
     db.session.add(task)
     db.session.commit()
 
+    try:
+        emit_leaderboard_update(task.household_id)
+    except Exception:
+        current_app.logger.exception('failed emitting leaderboard update from create_task')
+
     return {
         "id": task.id,
         "text": task.title,
@@ -862,6 +1250,35 @@ def delete_task(task_id):
     if not membership:
         return {"error": "Unauthorised"}, 403
 
+    hid = task.household_id
     db.session.delete(task)
     db.session.commit()
+    try:
+        emit_leaderboard_update(hid)
+    except Exception:
+        current_app.logger.exception('failed emitting leaderboard update from delete_task')
     return {"success": True}, 200
+
+
+# Socket.IO event handlers
+@socketio.on('join')
+def handle_join(data):
+    try:
+        hid = data.get('household_id')
+        if hid:
+            room = f"household_{hid}"
+            join_room(room)
+            emit('joined', {'room': room})
+    except Exception:
+        pass
+
+@socketio.on('leave')
+def handle_leave(data):
+    try:
+        hid = data.get('household_id')
+        if hid:
+            room = f"household_{hid}"
+            leave_room(room)
+            emit('left', {'room': room})
+    except Exception:
+        pass

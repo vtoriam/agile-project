@@ -4,6 +4,10 @@ from app import db, login
 from flask_login import UserMixin
 
 
+def utcnow_naive():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 class Household(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -27,6 +31,12 @@ class Household(db.Model):
         cascade="all, delete-orphan"
     )
 
+    custom_rewards = db.relationship(
+        "CustomReward",
+        back_populates="household",
+        cascade="all, delete-orphan"
+    )
+
     def __repr__(self):
         return f"<Household {self.name}>"
 
@@ -36,6 +46,7 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(120), nullable=False)
     display_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    email_reminders_enabled = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     password_hash = db.Column(db.String(255), nullable=False)
     avatar = db.Column(db.String(50), default="user-round")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -89,6 +100,27 @@ class Membership(db.Model):
     def __repr__(self):
         return f"<Membership user={self.user_id} household={self.household_id}>"
 
+
+class RewardClaim(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
+    reward_key = db.Column(db.String(80), nullable=False)
+    claimed_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    user = db.relationship("User")
+    household = db.relationship("Household")
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "household_id", "reward_key", name="uq_reward_claim_user_household_key"),
+    )
+
+    def __repr__(self):
+        return (
+            f"<RewardClaim user={self.user_id} household={self.household_id} "
+            f"reward_key={self.reward_key}>"
+        )
+
 class HouseholdInvite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
@@ -106,7 +138,7 @@ class HouseholdInvite(db.Model):
     )
 
     def is_valid(self):
-        return self.is_active and datetime.utcnow() < self.expires_at
+        return self.is_active and utcnow_naive() < self.expires_at
     def __repr__(self):
         return f"<HouseholdInvite {self.code}>"
 
@@ -130,6 +162,23 @@ class Task(db.Model):
 
     def __repr__(self):
         return f"<Task {self.title}>"
+
+class CustomReward(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    household_id = db.Column(db.Integer, db.ForeignKey("household.id"), nullable=False)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    title = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    points_threshold = db.Column(db.Integer, default=100, nullable=False)
+    icon = db.Column(db.String(50), default="star")
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    household = db.relationship("Household", back_populates="custom_rewards")
+    created_by = db.relationship("User", foreign_keys=[created_by_user_id])
+
+    def __repr__(self):
+        return f"<CustomReward {self.title}>"
+
 
 @login.user_loader
 def load_user(user_id):
@@ -161,7 +210,7 @@ def create_sample_data():
     db.session.add_all([membership1, membership2, membership3])
     db.session.commit()
 
-    now = datetime.now(timezone.utc)
+    now = utcnow_naive()
     d = lambda days: now - timedelta(days=days)
 
     # Sample tasks: mix of on-time completions and late completions
@@ -198,7 +247,7 @@ def create_sample_data():
         household_id=household.id,
         created_by_user_id=user1.id,
         code="HM-SAMPLE",
-        expires_at=datetime.utcnow() + timedelta(days=7),
+        expires_at=utcnow_naive() + timedelta(days=7),
     )
     db.session.add(invite)
     db.session.commit()
