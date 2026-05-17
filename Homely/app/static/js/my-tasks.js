@@ -85,13 +85,13 @@ function refreshIcons() {
   lucide.createIcons();
 }
 
-function showToast(points) {
+function showToast(message) {
   const existing = document.getElementById("pts-toast");
   if (existing) existing.remove();
   const toast = document.createElement("div");
   toast.id = "pts-toast";
   toast.className = "pts-toast";
-  toast.innerHTML = `<i data-lucide="zap"></i> +${points} pts earned!`;
+  toast.innerHTML = `<i data-lucide="zap"></i> ${message}`;
   document.body.appendChild(toast);
   lucide.createIcons();
   requestAnimationFrame(() =>
@@ -195,7 +195,10 @@ async function toggleTask(id) {
     const wasDone = t.done;
     t.done = Boolean(data.done);
     // If task transitioned to done, show earned points
-    if (!wasDone && t.done && t.points) showToast(t.points);
+    if (!wasDone && t.done) {
+      const message = data.message || `You earned ${t.points || 0} points!`;
+      showToast(message);
+    }
     renderTasks();
   } catch (error) {
     console.error("Error toggling task:", error);
